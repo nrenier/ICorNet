@@ -688,28 +688,7 @@ const SUK = ({ user, showToast }) => {
         <div className="space-y-6">
             {/* Header */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center space-x-3 mb-2">
-                    <img 
-                        src="/images/logo_icornet.png" 
-                        alt="ICorNet Logo" 
-                        className="h-8 w-16 object-contain"
-                        onError={(e) => {
-                            console.log('Image failed to load, showing fallback icon');
-                            e.target.style.display = 'none';
-                            e.target.nextElementSibling.style.display = 'flex';
-                        }}
-                        onLoad={(e) => {
-                            console.log('Image loaded successfully');
-                            e.target.style.display = 'block';
-                            e.target.nextElementSibling.style.display = 'none';
-                        }}
-                    />
-                    <div 
-                        className="h-8 w-16 bg-blue-600 rounded-lg items-center justify-center"
-                        style={{display: 'none'}}
-                    >
-                        <i data-feather="database" className="h-5 w-5 text-white"></i>
-                    </div>
+                <div className="mb-2">
                     <h1 className="text-2xl font-bold text-gray-900">SUK Analysis</h1>
                 </div>
                 <p className="text-gray-600 mt-1">

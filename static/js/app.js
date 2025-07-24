@@ -33,11 +33,11 @@ const Sidebar = ({ currentPage, onNavigate, user, onLogout }) => {
     return (
         <div className="bg-white shadow-lg h-screen w-64 fixed left-0 top-0 z-40">
             <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center space-x-3 mb-2">
+                <div className="flex justify-center mb-2">
                     <img 
                         src="/images/logo_icornet.png" 
                         alt="ICorNet Logo" 
-                        className="h-8 w-16 object-contain"
+                        className="h-12 w-full object-contain max-w-[200px]"
                         onError={(e) => {
                             console.log('Image failed to load, showing fallback icon');
                             e.target.style.display = 'none';
@@ -50,14 +50,13 @@ const Sidebar = ({ currentPage, onNavigate, user, onLogout }) => {
                         }}
                     />
                     <div 
-                        className="h-8 w-16 bg-blue-600 rounded-lg items-center justify-center"
+                        className="h-12 w-full bg-blue-600 rounded-lg items-center justify-center max-w-[200px]"
                         style={{display: 'none'}}
                     >
-                        <i data-feather="database" className="h-5 w-5 text-white"></i>
+                        <i data-feather="database" className="h-8 w-8 text-white"></i>
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-800">ICorNet</h1>
                 </div>
-                <p className="text-sm text-gray-600">Intelligent Corporate Network</p>
+                <p className="text-sm text-gray-600 text-center">Intelligent Corporate Network</p>
             </div>
             
             <nav className="mt-6">

@@ -1,12 +1,14 @@
+import os
 from flask import Flask, jsonify, request, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
+from werkzeug.middleware.proxy_fix import ProxyFix
+from sqlalchemy.orm import DeclarativeBase
 from datetime import datetime
 import logging
 
-from config import Config
+# Import models and db from models module
 from models import db, User, Report
 from services.neo4j_service import Neo4jService
 from services.n8n_service import N8nService
@@ -19,11 +21,22 @@ from routes.reports import reports_bp
 
 def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='')
-    app.config.from_object(Config)
+    
+    # Configure app
+    app.secret_key = os.environ.get("SESSION_SECRET", "your-secret-key-here")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_recycle": 300,
+        "pool_pre_ping": True,
+    }
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    
+    # Add proxy fix for Replit
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
     
     # Initialize extensions
     db.init_app(app)
-    CORS(app, supports_credentials=True, origins=["http://localhost:3000", "http://localhost:5000", "http://127.0.0.1:5000", "*"])
+    CORS(app, supports_credentials=True, origins=["*"])
     
     # Configure logging
     logging.basicConfig(level=logging.INFO)
@@ -43,10 +56,10 @@ def create_app():
     
     auth_service = AuthService()
     
-    # Make services available to routes
-    app.neo4j_service = neo4j_service
-    app.n8n_service = n8n_service
-    app.auth_service = auth_service
+    # Make services available to routes via app config
+    app.config['neo4j_service'] = neo4j_service
+    app.config['n8n_service'] = n8n_service
+    app.config['auth_service'] = auth_service
     
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/api')
@@ -76,14 +89,14 @@ def create_admin_user():
     """Create default admin user if it doesn't exist"""
     admin_user = User.query.filter_by(username='admin').first()
     if not admin_user:
-        admin_user = User(
-            username='admin',
-            email='admin@icornet.com',
-            password_hash=generate_password_hash('admin123'),
-            first_name='Admin',
-            last_name='User',
-            role='admin'
-        )
+        admin_user = User()
+        admin_user.username = 'admin'
+        admin_user.email = 'admin@icornet.com'
+        admin_user.password_hash = generate_password_hash('admin123')
+        admin_user.first_name = 'Admin'
+        admin_user.last_name = 'User'
+        admin_user.role = 'admin'
+        
         db.session.add(admin_user)
         db.session.commit()
         print("Admin user created: admin/admin123")

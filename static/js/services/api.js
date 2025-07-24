@@ -124,7 +124,7 @@ const apiService = {
     },
 
     viewReport: async (reportId) => {
-        const response = await fetch(`/reports/view/${reportId}`, {
+        const response = await fetch(`/api/reports/view/${reportId}`, {
             method: 'GET',
             credentials: 'include'
         });

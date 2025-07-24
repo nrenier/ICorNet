@@ -155,10 +155,13 @@ def download_report(report_id):
         if not os.path.exists(report.file_path):
             return jsonify({'error': 'Report file not found'}), 404
 
-        return send_file(report.file_path,
+        from flask import Response
+        response = send_file(report.file_path,
                          as_attachment=True,
                          download_name=report.file_name,
                          mimetype='application/pdf')
+        response.headers['Content-Disposition'] = f'attachment; filename="{report.file_name}"'
+        return response
 
     except Exception as e:
         logging.error(f"Download report error: {str(e)}")

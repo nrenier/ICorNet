@@ -692,7 +692,7 @@ const SUK = ({ user, showToast }) => {
                     <img 
                         src="/images/logo_icornet.png" 
                         alt="ICorNet Logo" 
-                        className="h-8 w-8 object-contain"
+                        className="h-8 w-16 object-contain"
                         onError={(e) => {
                             console.log('Image failed to load, showing fallback icon');
                             e.target.style.display = 'none';
@@ -705,7 +705,7 @@ const SUK = ({ user, showToast }) => {
                         }}
                     />
                     <div 
-                        className="h-8 w-8 bg-blue-600 rounded-lg items-center justify-center"
+                        className="h-8 w-16 bg-blue-600 rounded-lg items-center justify-center"
                         style={{display: 'none'}}
                     >
                         <i data-feather="database" className="h-5 w-5 text-white"></i>

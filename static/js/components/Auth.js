@@ -53,17 +53,21 @@ const Auth = ({ onLogin, onRegister }) => {
         <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
-                    <div className="mx-auto h-16 w-16 mb-4">
+                    <div className="mx-auto h-16 w-32 mb-4">
                         <img 
                             src="/images/logo_icornet.png" 
                             alt="ICorNet Logo" 
-                            className="h-16 w-16 object-contain mx-auto"
+                            className="h-16 w-32 object-contain mx-auto"
                             onError={(e) => {
                                 e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'flex';
+                                e.target.nextElementSibling.style.display = 'flex';
+                            }}
+                            onLoad={(e) => {
+                                e.target.style.display = 'block';
+                                e.target.nextElementSibling.style.display = 'none';
                             }}
                         />
-                        <div className="mx-auto h-16 w-16 bg-blue-600 rounded-full items-center justify-center hidden">
+                        <div className="mx-auto h-16 w-32 bg-blue-600 rounded-lg items-center justify-center" style={{display: 'none'}}>
                             <i data-feather="database" className="h-8 w-8 text-white"></i>
                         </div>
                     </div>

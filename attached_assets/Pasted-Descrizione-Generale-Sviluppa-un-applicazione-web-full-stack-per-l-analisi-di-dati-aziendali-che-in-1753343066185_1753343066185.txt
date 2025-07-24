@@ -1,0 +1,326 @@
+Descrizione Generale
+Sviluppa un'applicazione web full-stack per l'analisi di dati aziendali che integra Neo4j per il database grafico e n8n per l'automazione dei workflow. L'applicazione deve gestire l'autenticazione locale, visualizzare dashboard con dati aziendali e generare report PDF tramite workflow automatizzati.
+
+Architettura Tecnica
+Frontend Requirements
+Framework: React con JavaScript (NO TypeScript)
+Librerie UI: shadcn/ui + Tailwind CSS per styling moderno e responsive
+Routing: React Router o Wouter per navigazione client-side
+State Management: TanStack Query per gestione stato server
+Build Tool: Vite per sviluppo e build ottimizzato
+Backend Requirements
+Linguaggio: Python
+Framework: Flask o FastAPI per API REST
+ORM: SQLAlchemy per gestione database PostgreSQL
+Autenticazione: Flask-Login o FastAPI Authentication con sessioni
+Driver Neo4j: neo4j-driver per Python
+Integrazione n8n: Requests per chiamate HTTP alle API n8n
+Database e Deployment
+Database Principale: PostgreSQL (containerizzato con l'app)
+Database Grafico: Neo4j (istanza esterna esistente)
+Workflow Engine: n8n (istanza esterna esistente)
+Deployment: Docker Compose con container separati
+Networking: Docker networks per comunicazione tra servizi
+Funzionalità Core
+1. Sistema di Autenticazione
+Registrazione e login utenti con PostgreSQL
+Due ruoli: Admin e User (ruolo default: User)
+Creazione automatica utente admin al primo avvio
+Gestione sessioni sicure
+Protezione delle route backend e frontend
+2. Dashboard Home
+La pagina principale deve mostrare:
+
+Contatore Aziende: Numero totale di nodi nel database Neo4j
+Aggregazione Settori: Dati raggruppati per codici settore ATECO dalle proprietà dei nodi
+Grafici e Visualizzazioni: Chart.js o Recharts per rappresentazione dati
+Layout Responsive: Sidebar di navigazione e grid layout moderno
+3. Pagina SUK (Selezione Utente e Konversione)
+Dropdown Aziende: Lista di tutte le aziende dal campo nome_azienda dei nodi Neo4j
+Selezione Dinamica: Ricerca e filtro in tempo reale
+Trigger Workflow: Chiamata API a n8n per avviare generazione report
+Download PDF: Sistema di download diretto del file generato
+Tracking Status: Monitoraggio stato elaborazione workflow
+Schema Database
+PostgreSQL (Autenticazione e Sessioni)
+-- Tabella utenti
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    role VARCHAR(20) DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Tabella report generati
+CREATE TABLE reports (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    company_name VARCHAR(255) NOT NULL,
+    workflow_id VARCHAR(100),
+    status VARCHAR(50) DEFAULT 'pending',
+    file_name VARCHAR(255),
+    file_path VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Tabella sessioni (se necessario)
+CREATE TABLE sessions (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    data TEXT,
+    expires_at TIMESTAMP
+);
+Neo4j (Query di Esempio)
+// Query per contare aziende
+MATCH (n:SUK) RETURN count(n) as company_count
+// Query per ottenere dati aggregati per settore
+MATCH (n:SUK) 
+WHERE n.settore IS NOT NULL
+RETURN n.settore as settore, count(n) as count, collect(n.nome_azienda) as companies
+// Query per lista aziende
+MATCH (n:SUK) 
+WHERE n.nome_azienda IS NOT NULL
+RETURN n.nome_azienda as nome_azienda, n.settore as settore, n.descrizione as descrizione
+ORDER BY n.nome_azienda
+Struttura Docker Compose
+version: '3.8'
+services:
+  # Frontend (React)
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://backend:5000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+  # Backend (Python)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NEO4J_URI=${NEO4J_URI}
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - N8N_BASE_URL=${N8N_BASE_URL}
+      - N8N_API_KEY=${N8N_API_KEY}
+      - N8N_WORKFLOW_ID=${N8N_WORKFLOW_ID}
+      - SECRET_KEY=your_secret_key
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+  # Database PostgreSQL
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=analytics_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+volumes:
+  postgres_data:
+networks:
+  app-network:
+    driver: bridge
+
+	
+	
+API Endpoints Backend
+Autenticazione
+POST /api/register - Registrazione nuovo utente
+POST /api/login - Login utente
+POST /api/logout - Logout utente
+GET /api/user - Dati utente corrente
+Dashboard
+GET /api/dashboard/stats - Statistiche generali (contatori, aggregazioni)
+GET /api/dashboard/companies - Lista aziende da Neo4j
+GET /api/dashboard/sectors - Dati settori aggregati
+Report Generation
+GET /api/companies - Lista completa aziende per dropdown
+POST /api/reports/generate - Avvia generazione report via n8n
+GET /api/reports/status/:id - Stato elaborazione report
+GET /api/reports/download/:id - Download file PDF
+GET /api/reports/history - Storico report utente
+Integrazione Servizi Esterni
+Connessione Neo4j
+from neo4j import GraphDatabase
+class Neo4jService:
+    def __init__(self, uri, username, password):
+        self.driver = GraphDatabase.driver(uri, auth=(username, password))
+    
+    def get_company_count(self):
+        with self.driver.session() as session:
+            result = session.run("MATCH (n:SUK) RETURN count(n) as count")
+            return result.single()["count"]
+    
+    def get_companies_list(self):
+        with self.driver.session() as session:
+            result = session.run("""
+                MATCH (n:SUK) 
+                WHERE n.nome_azienda IS NOT NULL
+                RETURN n.nome_azienda as nome_azienda, n.settore as settore
+                ORDER BY n.nome_azienda
+            """)
+            return [record.data() for record in result]
+Integrazione n8n
+import requests
+class N8nService:
+    def __init__(self, base_url, api_key, workflow_id):
+        self.base_url = base_url
+        self.api_key = api_key
+        self.workflow_id = workflow_id
+    
+    def trigger_workflow(self, company_name, user_id):
+        """Avvia workflow n8n per generazione report"""
+        url = f"{self.base_url}/api/v1/workflows/{self.workflow_id}/execute"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "company_name": company_name,
+            "user_id": user_id,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        response = requests.post(url, json=payload, headers=headers)
+        return response.json()
+Struttura Cartelle
+project/
+├── docker-compose.yml
+├── README.md
+├── .env.example
+├── frontend/
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/          # shadcn components
+│   │   │   ├── Dashboard/
+│   │   │   ├── Auth/
+│   │   │   └── SUK/
+│   │   ├── pages/
+│   │   │   ├── Home.jsx
+│   │   │   ├── SUK.jsx
+│   │   │   └── Auth.jsx
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   └── App.jsx
+│   └── public/
+├── backend/
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   │   ├── neo4j_service.py
+│   │   │   ├── n8n_service.py
+│   │   │   └── auth_service.py
+│   │   └── utils/
+│   ├── config.py
+│   ├── init.sql
+│   └── run.py
+└── docs/
+    ├── API.md
+    └── DEPLOYMENT.md
+Features Specifiche
+Dashboard Home
+Header con Stats Cards:
+
+Totale aziende nel sistema
+Numero settori rappresentati
+Report generati oggi
+Ultimo aggiornamento dati
+Grafici Interattivi:
+
+Distribuzione aziende per settore (Pie Chart)
+Trend report generati (Line Chart)
+Top 10 settori più rappresentati (Bar Chart)
+Tabelle Dati:
+
+Ultime aziende aggiunte
+Report recenti con status
+Attività utenti (solo admin)
+Pagina SUK
+Interfaccia di Selezione:
+
+Searchable dropdown con tutte le aziende
+Filtri per settore ATECO
+Preview dati azienda selezionata
+Generazione Report:
+
+Pulsante "Genera Report PDF"
+Progress indicator durante elaborazione
+Notifiche toast per status updates
+Gestione Download:
+
+Lista report generati dall'utente
+Pulsanti download diretti
+Indicatori stato (pending, completed, failed)
+Configurazione Ambiente
+File .env.example
+# Database
+DATABASE_URL=postgresql://user:password@postgres:5432/analytics_db
+# Neo4j (servizio esterno)
+NEO4J_URI=bolt://host.docker.internal:7687
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=your_neo4j_password
+# n8n (servizio esterno)
+N8N_BASE_URL=http://host.docker.internal:5678
+N8N_API_KEY=your_n8n_api_key
+N8N_WORKFLOW_ID=your_workflow_id
+# App Configuration
+SECRET_KEY=your_secret_key_for_sessions
+DEBUG=true
+LOG_LEVEL=INFO
+# Frontend
+REACT_APP_API_URL=http://localhost:5000
+Istruzioni di Deploy
+Preparazione:
+
+Clona repository
+Copia .env.example in .env e configura variabili
+Assicurati che Neo4j e n8n siano in esecuzione
+Build e Avvio:
+
+docker-compose up --build
+Inizializzazione:
+
+L'app creerà automaticamente l'utente admin
+Verificare connessione a Neo4j e n8n
+Testare funzionalità base
+Accesso:
+
+Frontend: http://localhost:3000
+Backend API: http://localhost:5000
+Admin credentials: admin/admin123
+Note per Implementazione
+Tutti i componenti frontend devono essere in JavaScript puro (no TypeScript)
+Gestire gracefully la disconnessione da servizi esterni
+Implementare logging completo per debugging
+Validazione input su frontend e backend
+Error handling robusto per chiamate API
+Sistema di retry per chiamate n8n
+Cache intelligente per dati Neo4j
+Backup automatico database PostgreSQL

@@ -23,7 +23,7 @@ def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='')
     
     # Configure app
-    app.secret_key = os.environ.get("SESSION_SECRET", "your-secret-key-here")
+    app.secret_key = os.environ.get("SESSION_SECRET")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         "pool_recycle": 300,
@@ -36,7 +36,23 @@ def create_app():
     
     # Initialize extensions
     db.init_app(app)
-    CORS(app, supports_credentials=True, origins=["*"])
+    # Configure CORS for Replit environment - more secure than wildcard
+    allowed_origins = [
+        "https://*.replit.app",
+        "https://*.repl.co", 
+        "http://localhost:3000",
+        "http://localhost:5000"
+    ]
+    if os.environ.get("REPL_SLUG"):
+        # Add Replit-specific domains
+        repl_slug = os.environ.get("REPL_SLUG")
+        repl_owner = os.environ.get("REPL_OWNER", "")
+        allowed_origins.extend([
+            f"https://{repl_slug}--{repl_owner}.repl.co",
+            f"https://{repl_slug}.{repl_owner}.repl.co"
+        ])
+    
+    CORS(app, supports_credentials=True, origins=allowed_origins)
     
     # Configure logging
     logging.basicConfig(level=logging.INFO)

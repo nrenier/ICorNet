@@ -47,7 +47,12 @@ def generate_report():
                         b'%PDF'):
                     # Save the PDF file
                     os.makedirs('reports', exist_ok=True)
-                    file_name = f"{company_name}_report_{new_report.id}.pdf"
+                    # Clean company name: replace spaces with underscores and remove special characters
+                    clean_company_name = company_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
+                    # Use current date in YYYYMMDD format
+                    from datetime import datetime
+                    current_date = datetime.now().strftime('%Y%m%d')
+                    file_name = f"{clean_company_name}_{current_date}.pdf"
                     file_path = os.path.join('reports', file_name)
 
                     with open(file_path, 'wb') as f:
@@ -104,8 +109,12 @@ def get_report_status(report_id):
                 if workflow_status.get('success'):
                     report.status = 'completed'
                     # Mock file path - in real implementation, this would come from n8n
-                    report.file_name = f"{report.company_name}_report_{report.id}.pdf"
-                    report.file_path = f"/reports/{report.file_name}"
+                    clean_company_name = report.company_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
+                    # Use current date in YYYYMMDD format
+                    from datetime import datetime
+                    current_date = datetime.now().strftime('%Y%m%d')
+                    report.file_name = f"{clean_company_name}_{current_date}.pdf"
+                    report.file_path = os.path.join('reports', report.file_name)
                 else:
                     report.status = 'failed'
 

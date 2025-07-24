@@ -27,18 +27,38 @@ def generate_report():
         db.session.add(new_report)
         db.session.commit()
         
-        # Trigger n8n workflow
-        n8n_service = current_app.config['n8n_service']
-        workflow_result = n8n_service.trigger_workflow(company_name, user_id)
+        # Call n8n webhook directly
+        import requests
+        webhook_url = "http://host.docker.internal:5678/webhook-test/baf08e2e-8b5b-414e-bde2-109cec9b60ab"
+        webhook_payload = {
+            "nome_azienda": company_name
+        }
         
-        # Update report with workflow ID
-        new_report.workflow_id = workflow_result.get('execution_id', 'unknown')
+        try:
+            webhook_response = requests.post(
+                webhook_url, 
+                json=webhook_payload, 
+                timeout=30,
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            if webhook_response.status_code == 200:
+                new_report.workflow_id = f"webhook_{new_report.id}"
+                new_report.status = 'processing'
+            else:
+                logging.error(f"Webhook call failed: {webhook_response.status_code}")
+                new_report.status = 'failed'
+                
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Webhook request failed: {str(e)}")
+            new_report.status = 'failed'
+        
         db.session.commit()
         
         return jsonify({
             'message': 'Report generation started',
             'report_id': new_report.id,
-            'status': 'pending'
+            'status': new_report.status
         }), 200
         
     except Exception as e:

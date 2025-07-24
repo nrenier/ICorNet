@@ -363,21 +363,21 @@ const SUK = ({ user, showToast }) => {
         try {
             // Create a new window for printing
             const printWindow = window.open('', '_blank');
-            
+
             // Generate HTML content for the PDF
             const htmlContent = generatePDFContent(selectedCompany);
-            
+
             printWindow.document.write(htmlContent);
             printWindow.document.close();
-            
+
             // Wait for the content to load, then print
             printWindow.onload = () => {
                 printWindow.print();
                 printWindow.close();
             };
-            
+
             showToast('PDF export initiated', 'success');
-            
+
         } catch (error) {
             console.error('Error exporting PDF:', error);
             showToast('Failed to export PDF', 'error');
@@ -386,7 +386,7 @@ const SUK = ({ user, showToast }) => {
 
     const generatePDFContent = (company) => {
         const currentDate = new Date().toLocaleDateString('it-IT');
-        
+
         return `
         <!DOCTYPE html>
         <html>
@@ -765,23 +765,23 @@ const SUK = ({ user, showToast }) => {
                                     Generating...
                                 </div>
                             ) : (
-                                <div className="flex items-center justify-center">
+                                <span className="flex items-center justify-center">
                                     <i data-feather="file-text" className="w-4 h-4 mr-2"></i>
                                     Generate Report
-                                </div>
+                                </span>
                             )}
                         </button>
-                        
+
                         <button
                             onClick={exportToPDF}
                             disabled={!selectedCompany}
                             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Export company information to PDF"
                         >
-                            <div className="flex items-center justify-center">
+                            <span className="flex items-center justify-center">
                                 <i data-feather="download" className="w-4 h-4 mr-2"></i>
                                 Export PDF
-                            </div>
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -812,7 +812,7 @@ const SUK = ({ user, showToast }) => {
                                     <div>
                                         <strong>Sito Web:</strong> 
                                         <a href={selectedCompany.sito_web} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 ml-1">
-                                            {selectedCompany.sito_web}
+                                                                           {selectedCompany.sito_web}
                                         </a>
                                     </div>
                                 )}

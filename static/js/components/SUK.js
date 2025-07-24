@@ -354,6 +354,325 @@ const SUK = ({ user, showToast }) => {
         setSelectedRelationship(null);
     };
 
+    const exportToPDF = () => {
+        if (!selectedCompany) {
+            showToast('Please select a company first', 'error');
+            return;
+        }
+
+        try {
+            // Create a new window for printing
+            const printWindow = window.open('', '_blank');
+            
+            // Generate HTML content for the PDF
+            const htmlContent = generatePDFContent(selectedCompany);
+            
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            
+            // Wait for the content to load, then print
+            printWindow.onload = () => {
+                printWindow.print();
+                printWindow.close();
+            };
+            
+            showToast('PDF export initiated', 'success');
+            
+        } catch (error) {
+            console.error('Error exporting PDF:', error);
+            showToast('Failed to export PDF', 'error');
+        }
+    };
+
+    const generatePDFContent = (company) => {
+        const currentDate = new Date().toLocaleDateString('it-IT');
+        
+        return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Scheda Azienda - ${company.nome_azienda}</title>
+            <style>
+                @media print {
+                    body { margin: 0; }
+                    .no-print { display: none; }
+                }
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    max-width: 800px;
+                    margin: 20px auto;
+                    padding: 20px;
+                }
+                .header {
+                    text-align: center;
+                    border-bottom: 2px solid #2563eb;
+                    padding-bottom: 20px;
+                    margin-bottom: 30px;
+                }
+                .header h1 {
+                    color: #2563eb;
+                    margin: 0;
+                    font-size: 28px;
+                }
+                .header .subtitle {
+                    color: #666;
+                    font-size: 14px;
+                    margin-top: 5px;
+                }
+                .section {
+                    margin-bottom: 25px;
+                    page-break-inside: avoid;
+                }
+                .section-title {
+                    background: #f8fafc;
+                    color: #1e40af;
+                    padding: 10px 15px;
+                    margin: 0 0 15px 0;
+                    font-size: 16px;
+                    font-weight: bold;
+                    border-left: 4px solid #2563eb;
+                }
+                .info-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 15px;
+                    margin-bottom: 15px;
+                }
+                .info-item {
+                    padding: 8px 0;
+                }
+                .info-label {
+                    font-weight: bold;
+                    color: #374151;
+                }
+                .info-value {
+                    color: #4b5563;
+                    margin-top: 2px;
+                }
+                .description-box {
+                    background: #f9fafb;
+                    border: 1px solid #e5e7eb;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin-top: 10px;
+                }
+                .tag-list {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 5px;
+                    margin-top: 5px;
+                }
+                .tag {
+                    background: #e0e7ff;
+                    color: #3730a3;
+                    padding: 3px 8px;
+                    border-radius: 12px;
+                    font-size: 12px;
+                }
+                .list-item {
+                    margin: 5px 0;
+                    padding-left: 15px;
+                }
+                .list-item:before {
+                    content: "• ";
+                    color: #2563eb;
+                    font-weight: bold;
+                    margin-right: 5px;
+                }
+                @page {
+                    margin: 1in;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Scheda Azienda</h1>
+                <h2 style="color: #2563eb; margin: 10px 0;">${company.nome_azienda}</h2>
+                <div class="subtitle">Generato il ${currentDate} | ICorNet Analysis Platform</div>
+            </div>
+
+            ${company.nome_azienda || company.partita_iva || company.indirizzo || company.sito_web || company.data_inizio_attivita || company.TRL || company.descrizione ? `
+            <div class="section">
+                <h3 class="section-title">Informazioni Generali</h3>
+                <div class="info-grid">
+                    ${company.nome_azienda ? `
+                    <div class="info-item">
+                        <div class="info-label">Nome Azienda</div>
+                        <div class="info-value">${company.nome_azienda}</div>
+                    </div>` : ''}
+                    ${company.partita_iva ? `
+                    <div class="info-item">
+                        <div class="info-label">Partita IVA</div>
+                        <div class="info-value">${company.partita_iva}</div>
+                    </div>` : ''}
+                    ${company.indirizzo ? `
+                    <div class="info-item">
+                        <div class="info-label">Indirizzo</div>
+                        <div class="info-value">${company.indirizzo}</div>
+                    </div>` : ''}
+                    ${company.sito_web ? `
+                    <div class="info-item">
+                        <div class="info-label">Sito Web</div>
+                        <div class="info-value">${company.sito_web}</div>
+                    </div>` : ''}
+                    ${company.data_inizio_attivita ? `
+                    <div class="info-item">
+                        <div class="info-label">Data Inizio Attività</div>
+                        <div class="info-value">${company.data_inizio_attivita}</div>
+                    </div>` : ''}
+                    ${company.TRL ? `
+                    <div class="info-item">
+                        <div class="info-label">TRL</div>
+                        <div class="info-value">${company.TRL}</div>
+                    </div>` : ''}
+                </div>
+                ${company.descrizione ? `
+                <div class="description-box">
+                    <div class="info-label">Descrizione</div>
+                    <div style="margin-top: 8px;">${company.descrizione}</div>
+                </div>` : ''}
+            </div>` : ''}
+
+            ${company.settore || company.tipologia_attivita || company.verticali || company.tipo_mercato ? `
+            <div class="section">
+                <h3 class="section-title">Settori e Attività</h3>
+                ${company.settore ? `
+                <div class="info-item">
+                    <div class="info-label">Settori</div>
+                    <div class="tag-list">
+                        ${Array.isArray(company.settore) 
+                            ? company.settore.map(s => `<span class="tag">${s}</span>`).join('')
+                            : `<span class="tag">${company.settore}</span>`
+                        }
+                    </div>
+                </div>` : ''}
+                ${company.tipologia_attivita ? `
+                <div class="info-item">
+                    <div class="info-label">Tipologia Attività</div>
+                    ${Array.isArray(company.tipologia_attivita) 
+                        ? company.tipologia_attivita.map(a => `<div class="list-item">${a}</div>`).join('')
+                        : `<div class="info-value">${company.tipologia_attivita}</div>`
+                    }
+                </div>` : ''}
+                ${company.verticali ? `
+                <div class="info-item">
+                    <div class="info-label">Verticali</div>
+                    <div class="tag-list">
+                        ${Array.isArray(company.verticali) 
+                            ? company.verticali.map(v => `<span class="tag">${v}</span>`).join('')
+                            : `<span class="tag">${company.verticali}</span>`
+                        }
+                    </div>
+                </div>` : ''}
+                ${company.tipo_mercato ? `
+                <div class="info-item">
+                    <div class="info-label">Tipo Mercato</div>
+                    <div class="tag-list">
+                        ${Array.isArray(company.tipo_mercato) 
+                            ? company.tipo_mercato.map(m => `<span class="tag">${m}</span>`).join('')
+                            : `<span class="tag">${company.tipo_mercato}</span>`
+                        }
+                    </div>
+                </div>` : ''}
+            </div>` : ''}
+
+            ${company.prodotto_soluzione || company.descrizione_soluzione || company.classificazione_prodotti || company.use_cases ? `
+            <div class="section">
+                <h3 class="section-title">Prodotti e Soluzioni</h3>
+                ${company.prodotto_soluzione ? `
+                <div class="info-item">
+                    <div class="info-label">Prodotto/Soluzione</div>
+                    <div class="info-value">${company.prodotto_soluzione}</div>
+                </div>` : ''}
+                ${company.descrizione_soluzione ? `
+                <div class="description-box">
+                    <div class="info-label">Descrizione Soluzione</div>
+                    <div style="margin-top: 8px;">${company.descrizione_soluzione}</div>
+                </div>` : ''}
+                ${company.classificazione_prodotti && company.classificazione_prodotti.length > 0 ? `
+                <div class="info-item">
+                    <div class="info-label">Classificazione Prodotti</div>
+                    ${company.classificazione_prodotti.map(p => `<div class="list-item">${p}</div>`).join('')}
+                </div>` : ''}
+                ${company.use_cases ? `
+                <div class="description-box">
+                    <div class="info-label">Use Cases</div>
+                    <div style="margin-top: 8px; font-size: 12px;">${company.use_cases}</div>
+                </div>` : ''}
+            </div>` : ''}
+
+            ${company.tecnologie_usate ? `
+            <div class="section">
+                <h3 class="section-title">Tecnologie</h3>
+                <div class="description-box">
+                    <div class="info-label">Tecnologie Usate</div>
+                    <div style="margin-top: 8px;">${company.tecnologie_usate}</div>
+                </div>
+            </div>` : ''}
+
+            ${company.potenziali_clienti || company.potenziali_partner || company.investitori || company.aziende_controllate ? `
+            <div class="section">
+                <h3 class="section-title">Partnership e Clienti</h3>
+                ${company.potenziali_clienti && company.potenziali_clienti.length > 0 ? `
+                <div class="info-item">
+                    <div class="info-label">Potenziali Clienti</div>
+                    ${company.potenziali_clienti.map(c => `<div class="list-item">${c}</div>`).join('')}
+                </div>` : ''}
+                ${company.potenziali_partner && company.potenziali_partner.length > 0 ? `
+                <div class="info-item">
+                    <div class="info-label">Potenziali Partner</div>
+                    ${company.potenziali_partner.map(p => `<div class="list-item">${p}</div>`).join('')}
+                </div>` : ''}
+                ${company.investitori && company.investitori.length > 0 ? `
+                <div class="info-item">
+                    <div class="info-label">Investitori</div>
+                    ${company.investitori.map(i => `<div class="list-item">${i}</div>`).join('')}
+                </div>` : ''}
+                ${company.aziende_controllate && company.aziende_controllate.length > 0 ? `
+                <div class="info-item">
+                    <div class="info-label">Aziende Controllate</div>
+                    ${company.aziende_controllate.map(a => `<div class="list-item">${a}</div>`).join('')}
+                </div>` : ''}
+            </div>` : ''}
+
+            ${company.revenues_200K || company.revenues_50K_50M || company.brevetti ? `
+            <div class="section">
+                <h3 class="section-title">Informazioni Finanziarie e Proprietà</h3>
+                <div class="info-grid">
+                    ${company.revenues_200K ? `
+                    <div class="info-item">
+                        <div class="info-label">Ricavi > 200K</div>
+                        <div class="info-value">${company.revenues_200K}</div>
+                    </div>` : ''}
+                    ${company.revenues_50K_50M ? `
+                    <div class="info-item">
+                        <div class="info-label">Ricavi 50K-50M</div>
+                        <div class="info-value">${company.revenues_50K_50M}</div>
+                    </div>` : ''}
+                    ${company.brevetti ? `
+                    <div class="info-item">
+                        <div class="info-label">Brevetti</div>
+                        <div class="info-value">${company.brevetti}</div>
+                    </div>` : ''}
+                </div>
+            </div>` : ''}
+
+            ${company.notizie_correlate && company.notizie_correlate.length > 0 ? `
+            <div class="section">
+                <h3 class="section-title">Notizie Correlate</h3>
+                ${company.notizie_correlate.map(n => `<div class="list-item">${n}</div>`).join('')}
+            </div>` : ''}
+
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px;">
+                <p>Documento generato da ICorNet Analysis Platform - ${currentDate}</p>
+            </div>
+        </body>
+        </html>`;
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -431,12 +750,12 @@ const SUK = ({ user, showToast }) => {
                         )}
                     </div>
 
-                    {/* Generate Report Button */}
-                    <div className="flex items-end">
+                    {/* Action Buttons */}
+                    <div className="flex items-end space-x-3">
                         <button
                             onClick={generateReport}
                             disabled={!selectedCompany || generatingReport}
-                            className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {generatingReport ? (
                                 <div className="flex items-center justify-center">
@@ -449,6 +768,18 @@ const SUK = ({ user, showToast }) => {
                                     Generate Report
                                 </div>
                             )}
+                        </button>
+                        
+                        <button
+                            onClick={exportToPDF}
+                            disabled={!selectedCompany}
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Export company information to PDF"
+                        >
+                            <div className="flex items-center justify-center">
+                                <i data-feather="download" className="w-4 h-4 mr-2"></i>
+                                Export PDF
+                            </div>
                         </button>
                     </div>
                 </div>

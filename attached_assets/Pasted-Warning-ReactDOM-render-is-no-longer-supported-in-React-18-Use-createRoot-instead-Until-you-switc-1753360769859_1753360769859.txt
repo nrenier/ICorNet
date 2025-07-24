@@ -1,0 +1,101 @@
+Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot
+overrideMethod @ hook.js:608
+printWarning @ react-dom.development.js:73
+error @ react-dom.development.js:47
+render @ react-dom.development.js:29726
+(anonime) @ app.js:222
+pEe @ transformScriptTags.ts:104
+n @ transformScriptTags.ts:176
+a @ transformScriptTags.ts:208
+d.src.i.onreadystatechange @ transformScriptTags.ts:126
+XMLHttpRequest.send
+s @ transformScriptTags.ts:133
+gEe @ transformScriptTags.ts:183
+(anonime) @ transformScriptTags.ts:258
+CEe @ index.ts:244
+kEe @ index.ts:228Comprendi l'errore
+react-dom.development.js:22888 Uncaught TypeError: _company$settore.toLowerCase is not a function
+    at <anonymous>:67:301
+    at Array.filter (<anonymous>)
+    at <anonymous>:65:32
+    at commitHookEffectListMount (react-dom.development.js:23199:28)
+    at commitPassiveMountOnFiber (react-dom.development.js:24975:15)
+    at commitPassiveMountEffects_complete (react-dom.development.js:24940:11)
+    at commitPassiveMountEffects_begin (react-dom.development.js:24927:9)
+    at commitPassiveMountEffects (react-dom.development.js:24915:5)
+    at flushPassiveEffectsImpl (react-dom.development.js:27088:5)
+    at flushPassiveEffects (react-dom.development.js:27033:16)
+    at react-dom.development.js:26818:11
+    at workLoop (react.development.js:2653:36)
+    at flushWork (react.development.js:2626:16)
+    at MessagePort.performWorkUntilDeadline (react.development.js:2920:23)
+(anonime) @ SUK.js:24
+(anonime) @ SUK.js:22
+commitHookEffectListMount @ react-dom.development.js:23199
+commitPassiveMountOnFiber @ react-dom.development.js:24975
+commitPassiveMountEffects_complete @ react-dom.development.js:24940
+commitPassiveMountEffects_begin @ react-dom.development.js:24927
+commitPassiveMountEffects @ react-dom.development.js:24915
+flushPassiveEffectsImpl @ react-dom.development.js:27088
+flushPassiveEffects @ react-dom.development.js:27033
+(anonime) @ react-dom.development.js:26818
+workLoop @ react.development.js:2653
+flushWork @ react.development.js:2626
+performWorkUntilDeadline @ react.development.js:2920Comprendi l'errore
+react-dom.development.js:18714 The above error occurred in the <SUK> component:
+
+    at SUK (<anonymous>:23:19)
+    at main
+    at div
+    at div
+    at App (<anonymous>:107:19)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+overrideMethod @ hook.js:608
+logCapturedError @ react-dom.development.js:18714
+update.callback @ react-dom.development.js:18747
+callCallback @ react-dom.development.js:15046
+commitUpdateQueue @ react-dom.development.js:15067
+commitLayoutEffectOnFiber @ react-dom.development.js:23440
+commitLayoutMountEffects_complete @ react-dom.development.js:24737
+commitLayoutEffects_begin @ react-dom.development.js:24723
+commitLayoutEffects @ react-dom.development.js:24661
+commitRootImpl @ react-dom.development.js:26872
+commitRoot @ react-dom.development.js:26731
+performSyncWorkOnRoot @ react-dom.development.js:26166
+flushSyncCallbacks @ react-dom.development.js:12052
+flushPassiveEffectsImpl @ react-dom.development.js:27109
+flushPassiveEffects @ react-dom.development.js:27033
+(anonime) @ react-dom.development.js:26818
+workLoop @ react.development.js:2653
+flushWork @ react.development.js:2626
+performWorkUntilDeadline @ react.development.js:2920Comprendi l'errore
+react-dom.development.js:12066 Uncaught TypeError: _company$settore.toLowerCase is not a function
+    at <anonymous>:67:301
+    at Array.filter (<anonymous>)
+    at <anonymous>:65:32
+    at commitHookEffectListMount (react-dom.development.js:23199:28)
+    at commitPassiveMountOnFiber (react-dom.development.js:24975:15)
+    at commitPassiveMountEffects_complete (react-dom.development.js:24940:11)
+    at commitPassiveMountEffects_begin (react-dom.development.js:24927:9)
+    at commitPassiveMountEffects (react-dom.development.js:24915:5)
+    at flushPassiveEffectsImpl (react-dom.development.js:27088:5)
+    at flushPassiveEffects (react-dom.development.js:27033:16)
+    at react-dom.development.js:26818:11
+    at workLoop (react.development.js:2653:36)
+    at flushWork (react.development.js:2626:16)
+    at MessagePort.performWorkUntilDeadline (react.development.js:2920:23)
+(anonime) @ SUK.js:24
+(anonime) @ SUK.js:22
+commitHookEffectListMount @ react-dom.development.js:23199
+commitPassiveMountOnFiber @ react-dom.development.js:24975
+commitPassiveMountEffects_complete @ react-dom.development.js:24940
+commitPassiveMountEffects_begin @ react-dom.development.js:24927
+commitPassiveMountEffects @ react-dom.development.js:24915
+flushPassiveEffectsImpl @ react-dom.development.js:27088
+flushPassiveEffects @ react-dom.development.js:27033
+(anonime) @ react-dom.development.js:26818
+workLoop @ react.development.js:2653
+flushWork @ react.development.js:2626
+performWorkUntilDeadline @ react.development.js:2920Comprendi l'errore

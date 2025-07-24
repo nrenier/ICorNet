@@ -1,0 +1,49 @@
+app.js:189 Uncaught ReferenceError: SUK is not defined
+    at renderCurrentPage (<anonymous>:295:49)
+    at App (<anonymous>:317:6)
+    at renderWithHooks (react-dom.development.js:15496:20)
+    at updateFunctionComponent (react-dom.development.js:19627:22)
+    at beginWork (react-dom.development.js:21650:18)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:4151:16)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4200:18)
+    at invokeGuardedCallback (react-dom.development.js:4264:33)
+    at beginWork$1 (react-dom.development.js:27500:9)
+    at performUnitOfWork (react-dom.development.js:26606:14)
+    at workLoopSync (react-dom.development.js:26515:7)
+    at renderRootSync (react-dom.development.js:26483:9)
+    at performSyncWorkOnRoot (react-dom.development.js:26134:22)
+    at flushSyncCallbacks (react-dom.development.js:12052:24)
+    at flushSyncCallbacksOnlyInLegacyMode (react-dom.development.js:12031:7)
+    at batchedUpdates$1 (react-dom.development.js:26197:9)
+    at batchedUpdates (react-dom.development.js:3978:14)
+    at dispatchEventForPluginEventSystem (react-dom.development.js:9297:5)
+    at dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay (react-dom.development.js:6475:7)
+    at dispatchEvent (react-dom.development.js:6467:7)
+    at dispatchDiscreteEvent (react-dom.development.js:6440:7)
+react-dom.development.js:18714 The above error occurred in the <App> component:
+
+    at App (<anonymous>:107:19)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+react-dom.development.js:12066 Uncaught ReferenceError: SUK is not defined
+    at renderCurrentPage (<anonymous>:295:49)
+    at App (<anonymous>:317:6)
+    at renderWithHooks (react-dom.development.js:15496:20)
+    at updateFunctionComponent (react-dom.development.js:19627:22)
+    at beginWork (react-dom.development.js:21650:18)
+    at beginWork$1 (react-dom.development.js:27475:16)
+    at performUnitOfWork (react-dom.development.js:26606:14)
+    at workLoopSync (react-dom.development.js:26515:7)
+    at renderRootSync (react-dom.development.js:26483:9)
+    at performSyncWorkOnRoot (react-dom.development.js:26134:22)
+    at flushSyncCallbacks (react-dom.development.js:12052:24)
+    at flushSyncCallbacksOnlyInLegacyMode (react-dom.development.js:12031:7)
+    at batchedUpdates$1 (react-dom.development.js:26197:9)
+    at batchedUpdates (react-dom.development.js:3978:14)
+    at dispatchEventForPluginEventSystem (react-dom.development.js:9297:5)
+    at dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay (react-dom.development.js:6475:7)
+    at dispatchEvent (react-dom.development.js:6467:7)
+    at dispatchDiscreteEvent (react-dom.development.js:6440:7)
+﻿
+

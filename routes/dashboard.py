@@ -97,3 +97,22 @@ def get_recent_reports():
     except Exception as e:
         logging.error(f"Get recent reports error: {str(e)}")
         return jsonify({'error': 'Failed to fetch recent reports'}), 500
+
+@dashboard_bp.route('/sector-companies', methods=['GET'])
+@login_required
+def get_sector_companies():
+    try:
+        from flask import request
+        sector = request.args.get('sector')
+        
+        if not sector:
+            return jsonify({'error': 'Sector parameter is required'}), 400
+        
+        neo4j_service = current_app.config['neo4j_service']
+        companies = neo4j_service.get_companies_by_sector(sector)
+        
+        return jsonify({'companies': companies}), 200
+        
+    except Exception as e:
+        logging.error(f"Get sector companies error: {str(e)}")
+        return jsonify({'error': 'Failed to fetch sector companies'}), 500

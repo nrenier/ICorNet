@@ -19,7 +19,7 @@ const apiService = {
 
         try {
             const response = await fetch(url, config);
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: 'Request failed' }));
                 throw new Error(errorData.error || `HTTP ${response.status}`);
@@ -107,6 +107,27 @@ const apiService = {
         return await this.request('/health', { 
             baseURL: '' // Use root API path
         });
+    },
+
+    // Get companies for a specific sector
+    getSectorCompanies: async (sector) => {
+        try {
+            const response = await fetch(`/api/dashboard/sector-companies?sector=${encodeURIComponent(sector)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch sector companies');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('API request failed:', error);
+            throw error;
+        }
     }
 };
 

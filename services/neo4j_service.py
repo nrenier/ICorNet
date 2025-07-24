@@ -213,3 +213,35 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Error getting company relationships: {str(e)}")
             return {'nodes': [], 'edges': []}
+    
+    def get_companies_by_sector(self, sector):
+        """Get all companies for a specific sector"""
+        if not self.driver:
+            logging.warning("Neo4j driver not available, returning mock data")
+            return [
+                {
+                    "nome_azienda": "Mock Company 1",
+                    "settore": [sector],
+                    "descrizione": "Mock description for testing",
+                    "sito_web": "https://example.com"
+                },
+                {
+                    "nome_azienda": "Mock Company 2", 
+                    "settore": [sector],
+                    "descrizione": "Another mock description",
+                    "sito_web": "https://example2.com"
+                }
+            ]
+        
+        try:
+            with self.driver.session() as session:
+                result = session.run("""
+                    MATCH (n:SUK) 
+                    WHERE n.settore IS NOT NULL AND $sector IN n.settore
+                    RETURN properties(n) as company_properties
+                    ORDER BY n.nome_azienda
+                """, sector=sector)
+                return [record["company_properties"] for record in result]
+        except Exception as e:
+            logging.error(f"Error getting companies by sector: {str(e)}")
+            return []

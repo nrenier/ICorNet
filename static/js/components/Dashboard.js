@@ -5,6 +5,9 @@ const Dashboard = ({ user, showToast }) => {
     const [recentReports, setRecentReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [charts, setCharts] = useState({});
+    const [showSectorModal, setShowSectorModal] = useState(false);
+    const [selectedSector, setSelectedSector] = useState(null);
+    const [sectorCompanies, setSectorCompanies] = useState([]);
 
     useEffect(() => {
         loadDashboardData();
@@ -13,20 +16,20 @@ const Dashboard = ({ user, showToast }) => {
     const loadDashboardData = async () => {
         try {
             setLoading(true);
-            
+
             // Load dashboard stats
             const statsResponse = await apiService.getDashboardStats();
             setStats(statsResponse);
-            
+
             // Load recent reports
             const reportsResponse = await apiService.getRecentReports();
             setRecentReports(reportsResponse.recent_reports || []);
-            
+
             // Create charts after data loads
             setTimeout(() => {
                 createCharts(statsResponse);
             }, 100);
-            
+
         } catch (error) {
             console.error('Error loading dashboard data:', error);
             showToast('Failed to load dashboard data', 'error');
@@ -62,6 +65,14 @@ const Dashboard = ({ user, showToast }) => {
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        onClick: (evt, elements) => {
+                            if (elements.length > 0) {
+                                const chartElement = elements[0];
+                                const sectorIndex = chartElement.index;
+                                const sectorData = dashboardStats.sector_distribution[sectorIndex];
+                                showSectorModal(sectorData);
+                            }
+                        },
                         plugins: {
                             legend: {
                                 position: 'bottom',
@@ -133,16 +144,25 @@ const Dashboard = ({ user, showToast }) => {
         }
     };
 
-    // Cleanup charts on unmount
-    useEffect(() => {
-        return () => {
-            Object.values(charts).forEach(chart => {
-                if (chart && chart.destroy) {
-                    chart.destroy();
-                }
-            });
-        };
-    }, []);
+    const showSectorModal = async (sectorData) => {
+        try {
+            setSelectedSector(sectorData);
+            setShowSectorModal(true);
+
+            // Load detailed companies for this sector
+            const response = await apiService.getSectorCompanies(sectorData.settore);
+            setSectorCompanies(response.companies || []);
+        } catch (error) {
+            console.error('Error loading sector companies:', error);
+            showToast('Failed to load sector companies', 'error');
+        }
+    };
+
+    const closeSectorModal = () => {
+        setShowSectorModal(false);
+        setSelectedSector(null);
+        setSectorCompanies([]);
+    };
 
     if (loading) {
         return (
@@ -314,6 +334,47 @@ const Dashboard = ({ user, showToast }) => {
                     </table>
                 </div>
             </div>
+             {/* Sector Modal */}
+             {showSectorModal && (
+                <div className="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        {/* Background overlay, when the modal screen is open. */}
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+                        {/* This element is to trick the browser into centering the modal contents. */}
+                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                        {/* Modal panel */}
+                        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div className="sm:flex sm:items-start">
+                                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                        <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                            {selectedSector?.settore} Companies
+                                        </h3>
+                                        <div className="mt-2">
+                                            <ul>
+                                                {sectorCompanies.map(company => (
+                                                    <li key={company.id} className="py-2 border-b border-gray-200">
+                                                        <p className="text-sm text-gray-500">
+                                                            {company.nome_azienda} ({company.settore})
+                                                        </p>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onClick={closeSectorModal}>
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,0 +1,43 @@
+hook.js:608 Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot
+overrideMethod @ hook.js:608Comprendi l'errore
+react-dom.development.js:22888 Uncaught TypeError: company.settore.toLowerCase is not a function
+    at <anonymous>:67:230
+    at Array.filter (<anonymous>)
+    at <anonymous>:65:32
+    at commitHookEffectListMount (react-dom.development.js:23199:28)
+    at commitPassiveMountOnFiber (react-dom.development.js:24975:15)
+    at commitPassiveMountEffects_complete (react-dom.development.js:24940:11)
+    at commitPassiveMountEffects_begin (react-dom.development.js:24927:9)
+    at commitPassiveMountEffects (react-dom.development.js:24915:5)
+    at flushPassiveEffectsImpl (react-dom.development.js:27088:5)
+    at flushPassiveEffects (react-dom.development.js:27033:16)
+    at react-dom.development.js:26818:11
+    at workLoop (react.development.js:2653:36)
+    at flushWork (react.development.js:2626:16)
+    at MessagePort.performWorkUntilDeadline (react.development.js:2920:23)Comprendi l'errore
+hook.js:608 The above error occurred in the <SUK> component:
+
+    at SUK (<anonymous>:23:19)
+    at main
+    at div
+    at div
+    at App (<anonymous>:107:19)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+overrideMethod @ hook.js:608Comprendi l'errore
+react-dom.development.js:12066 Uncaught TypeError: company.settore.toLowerCase is not a function
+    at <anonymous>:67:230
+    at Array.filter (<anonymous>)
+    at <anonymous>:65:32
+    at commitHookEffectListMount (react-dom.development.js:23199:28)
+    at commitPassiveMountOnFiber (react-dom.development.js:24975:15)
+    at commitPassiveMountEffects_complete (react-dom.development.js:24940:11)
+    at commitPassiveMountEffects_begin (react-dom.development.js:24927:9)
+    at commitPassiveMountEffects (react-dom.development.js:24915:5)
+    at flushPassiveEffectsImpl (react-dom.development.js:27088:5)
+    at flushPassiveEffects (react-dom.development.js:27033:16)
+    at react-dom.development.js:26818:11
+    at workLoop (react.development.js:2653:36)
+    at flushWork (react.development.js:2626:16)
+    at MessagePort.performWorkUntilDeadline (react.development.js:2920:23)

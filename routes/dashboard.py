@@ -119,4 +119,3 @@ def get_sector_companies():
     except Exception as e:
         logging.error(f"Get sector companies error: {str(e)}")
         return jsonify({'error': 'Failed to fetch sector companies'}), 500
-```

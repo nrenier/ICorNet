@@ -180,6 +180,14 @@ const apiService = {
             console.error('API request failed:', error);
             throw error;
         }
+    },
+
+    // Bulk delete reports
+    async bulkDeleteReports(reportIds) {
+        return await this.request('/reports/bulk-delete', {
+            method: 'DELETE',
+            body: { report_ids: reportIds },
+        });
     }
 };
 

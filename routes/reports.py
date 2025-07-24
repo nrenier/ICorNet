@@ -236,3 +236,51 @@ def get_company_relationships(company_name):
     except Exception as e:
         logging.error(f"Get company relationships error: {str(e)}")
         return jsonify({'error': 'Failed to fetch company relationships'}), 500
+
+
+@reports_bp.route('/bulk-delete', methods=['DELETE'])
+@login_required
+def bulk_delete_reports():
+    try:
+        data = request.get_json()
+        
+        if not data or not data.get('report_ids'):
+            return jsonify({'error': 'Report IDs are required'}), 400
+            
+        report_ids = data['report_ids']
+        user_id = session['user_id']
+        
+        # Verify all reports belong to the current user
+        reports = Report.query.filter(
+            Report.id.in_(report_ids),
+            Report.user_id == user_id
+        ).all()
+        
+        if len(reports) != len(report_ids):
+            return jsonify({'error': 'Some reports not found or access denied'}), 404
+        
+        deleted_count = 0
+        
+        for report in reports:
+            # Delete physical file if exists
+            if report.file_path and os.path.exists(report.file_path):
+                try:
+                    os.remove(report.file_path)
+                except Exception as e:
+                    logging.warning(f"Failed to delete file {report.file_path}: {str(e)}")
+            
+            # Delete from database
+            db.session.delete(report)
+            deleted_count += 1
+        
+        db.session.commit()
+        
+        return jsonify({
+            'message': f'Successfully deleted {deleted_count} reports',
+            'deleted_count': deleted_count
+        }), 200
+        
+    except Exception as e:
+        logging.error(f"Bulk delete reports error: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to delete reports'}), 500

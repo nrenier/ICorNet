@@ -212,6 +212,9 @@ const SUK = ({ user, showToast }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showRelationshipModal, setShowRelationshipModal] = useState(false);
     const [selectedRelationship, setSelectedRelationship] = useState(null);
+    const [selectedReports, setSelectedReports] = useState([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingReports, setDeletingReports] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -362,6 +365,58 @@ const SUK = ({ user, showToast }) => {
     const closeRelationshipModal = () => {
         setShowRelationshipModal(false);
         setSelectedRelationship(null);
+    };
+
+    const toggleReportSelection = (reportId) => {
+        setSelectedReports(prev => 
+            prev.includes(reportId)
+                ? prev.filter(id => id !== reportId)
+                : [...prev, reportId]
+        );
+    };
+
+    const toggleSelectAllReports = () => {
+        if (selectedReports.length === reportHistory.length) {
+            setSelectedReports([]);
+        } else {
+            setSelectedReports(reportHistory.map(report => report.id));
+        }
+    };
+
+    const openDeleteModal = () => {
+        if (selectedReports.length === 0) {
+            showToast('Please select reports to delete', 'error');
+            return;
+        }
+        setShowDeleteModal(true);
+    };
+
+    const closeDeleteModal = () => {
+        setShowDeleteModal(false);
+    };
+
+    const confirmBulkDelete = async () => {
+        try {
+            setDeletingReports(true);
+            
+            await apiService.bulkDeleteReports(selectedReports);
+            
+            // Remove deleted reports from local state
+            setReportHistory(prev => 
+                prev.filter(report => !selectedReports.includes(report.id))
+            );
+            
+            setSelectedReports([]);
+            setShowDeleteModal(false);
+            
+            showToast(`Successfully deleted ${selectedReports.length} report(s)`, 'success');
+            
+        } catch (error) {
+            console.error('Error deleting reports:', error);
+            showToast('Failed to delete reports', 'error');
+        } finally {
+            setDeletingReports(false);
+        }
     };
 
     const exportToPDF = () => {
@@ -1058,20 +1113,49 @@ const SUK = ({ user, showToast }) => {
             {/* Report History */}
             <div className="bg-white rounded-lg shadow-sm">
                 <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-gray-900">Report History</h2>
-                    <button
-                        onClick={loadReportHistory}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                        <i data-feather="refresh-cw" className="w-4 h-4 inline mr-1"></i>
-                        Refresh
-                    </button>
+                    <div className="flex items-center space-x-4">
+                        <h2 className="text-lg font-semibold text-gray-900">Report History</h2>
+                        {selectedReports.length > 0 && (
+                            <span className="text-sm text-gray-600">
+                                {selectedReports.length} selected
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex items-center space-x-3">
+                        {selectedReports.length > 0 && (
+                            <button
+                                onClick={openDeleteModal}
+                                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm font-medium flex items-center"
+                            >
+                                <i data-feather="trash-2" className="w-4 h-4 mr-1"></i>
+                                Delete Selected ({selectedReports.length})
+                            </button>
+                        )}
+                        <button
+                            onClick={loadReportHistory}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                            <i data-feather="refresh-cw" className="w-4 h-4 inline mr-1"></i>
+                            Refresh
+                        </button>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={reportHistory.length > 0 && selectedReports.length === reportHistory.length}
+                                            onChange={toggleSelectAllReports}
+                                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <span className="ml-2">Select</span>
+                                    </div>
+                                </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Company
                                 </th>
@@ -1089,7 +1173,15 @@ const SUK = ({ user, showToast }) => {
                         <tbody className="bg-white divide-y divide-gray-200">
                             {reportHistory.length > 0 ? (
                                 reportHistory.map((report) => (
-                                    <tr key={report.id} className="hover:bg-gray-50">
+                                    <tr key={report.id} className={`hover:bg-gray-50 ${selectedReports.includes(report.id) ? 'bg-blue-50' : ''}`}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedReports.includes(report.id)}
+                                                onChange={() => toggleReportSelection(report.id)}
+                                                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                            />
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {report.company_name}
                                         </td>
@@ -1149,7 +1241,7 @@ const SUK = ({ user, showToast }) => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-8 text-center text-sm text-gray-500">
+                                    <td colSpan="5" className="px-6 py-8 text-center text-sm text-gray-500">
                                         <div className="flex flex-col items-center">
                                             <i data-feather="file-text" className="w-8 h-8 text-gray-300 mb-2"></i>
                                             <p>No reports generated yet</p>
@@ -1162,6 +1254,70 @@ const SUK = ({ user, showToast }) => {
                     </table>
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+                        {/* Header */}
+                        <div className="bg-red-600 text-white p-6 rounded-t-xl">
+                            <div className="flex items-center">
+                                <i data-feather="trash-2" className="w-6 h-6 mr-3"></i>
+                                <h3 className="text-xl font-bold">Conferma Eliminazione</h3>
+                            </div>
+                        </div>
+
+                        <div className="p-6">
+                            <p className="text-gray-700 mb-4">
+                                Sei sicuro di voler eliminare <strong>{selectedReports.length}</strong> report{selectedReports.length > 1 ? 's' : ''}?
+                            </p>
+                            <p className="text-sm text-gray-500 mb-6">
+                                Questa azione non può essere annullata. I file PDF associati verranno eliminati definitivamente.
+                            </p>
+
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                                <div className="flex items-start">
+                                    <i data-feather="alert-triangle" className="w-5 h-5 text-yellow-600 mr-2 mt-0.5"></i>
+                                    <div>
+                                        <h4 className="text-sm font-medium text-yellow-800">Attenzione</h4>
+                                        <p className="text-sm text-yellow-700 mt-1">
+                                            I report selezionati e i relativi file verranno eliminati permanentemente.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="bg-gray-50 px-6 py-4 rounded-b-xl flex justify-end space-x-3">
+                            <button
+                                onClick={closeDeleteModal}
+                                disabled={deletingReports}
+                                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium disabled:opacity-50"
+                            >
+                                Annulla
+                            </button>
+                            <button
+                                onClick={confirmBulkDelete}
+                                disabled={deletingReports}
+                                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 flex items-center"
+                            >
+                                {deletingReports ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                        Eliminando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <i data-feather="trash-2" className="w-4 h-4 mr-2"></i>
+                                        Elimina {selectedReports.length} Report{selectedReports.length > 1 ? 's' : ''}
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Relationship Details Modal */}
             {showRelationshipModal && selectedRelationship && (

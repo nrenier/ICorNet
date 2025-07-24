@@ -70,7 +70,7 @@ const Dashboard = ({ user, showToast }) => {
                                 const chartElement = elements[0];
                                 const sectorIndex = chartElement.index;
                                 const sectorData = dashboardStats.sector_distribution[sectorIndex];
-                                showSectorModal(sectorData);
+                                handleSectorClick(sectorData);
                             }
                         },
                         plugins: {
@@ -144,7 +144,7 @@ const Dashboard = ({ user, showToast }) => {
         }
     };
 
-    const showSectorModal = async (sectorData) => {
+    const handleSectorClick = async (sectorData) => {
         try {
             setSelectedSector(sectorData);
             setShowSectorModal(true);

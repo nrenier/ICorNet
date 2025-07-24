@@ -394,9 +394,21 @@ const SUK = ({ user, showToast }) => {
                                 <h3 className="text-lg font-semibold text-orange-900 mb-4">Tecnologie</h3>
                                 <div className="text-sm text-orange-800">
                                     <strong>Tecnologie Usate:</strong>
-                                    <pre className="mt-1 text-xs leading-relaxed whitespace-pre-wrap bg-white p-3 rounded border">
-                                        {selectedCompany.tecnologie_usate}
-                                    </pre>
+                                    <div className="mt-3 bg-white p-4 rounded border">
+                                        {selectedCompany.tecnologie_usate.split(/[\.,;]/).map((tech, index) => {
+                                            const cleanTech = tech.trim();
+                                            if (cleanTech.length > 3) {
+                                                return (
+                                                    <div key={index} className="mb-2 pb-2 border-b border-orange-100 last:border-b-0 last:mb-0 last:pb-0">
+                                                        <span className="text-orange-900 leading-relaxed">
+                                                            {cleanTech}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         )}

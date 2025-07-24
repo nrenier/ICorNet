@@ -49,12 +49,10 @@ class Neo4jService:
                 result = session.run("""
                     MATCH (n:SUK) 
                     WHERE n.nome_azienda IS NOT NULL
-                    RETURN n.nome_azienda as nome_azienda, 
-                           n.settore as settore, 
-                           n.descrizione as descrizione
+                    RETURN properties(n) as company_properties
                     ORDER BY n.nome_azienda
                 """)
-                return [record.data() for record in result]
+                return [record["company_properties"] for record in result]
         except Exception as e:
             logging.error(f"Error getting companies list: {str(e)}")
             return []
@@ -97,12 +95,12 @@ class Neo4jService:
                 result = session.run("""
                     MATCH (n:SUK) 
                     WHERE n.nome_azienda = $company_name
-                    RETURN n as company
+                    RETURN properties(n) as company_properties
                 """, company_name=company_name)
                 
                 record = result.single()
                 if record:
-                    return dict(record["company"])
+                    return record["company_properties"]
                 return None
         except Exception as e:
             logging.error(f"Error getting company details: {str(e)}")
@@ -119,13 +117,11 @@ class Neo4jService:
                 result = session.run("""
                     MATCH (n:SUK) 
                     WHERE n.nome_azienda CONTAINS $search_term
-                    RETURN n.nome_azienda as nome_azienda, 
-                           n.settore as settore, 
-                           n.descrizione as descrizione
+                    RETURN properties(n) as company_properties
                     ORDER BY n.nome_azienda
                     LIMIT 20
                 """, search_term=search_term)
-                return [record.data() for record in result]
+                return [record["company_properties"] for record in result]
         except Exception as e:
             logging.error(f"Error searching companies: {str(e)}")
             return []

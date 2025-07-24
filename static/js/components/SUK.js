@@ -19,10 +19,22 @@ const SUK = ({ user, showToast }) => {
         if (searchTerm.trim() === '') {
             setFilteredCompanies(companies.slice(0, 20)); // Show first 20 companies
         } else {
-            const filtered = companies.filter(company =>
-                company.nome_azienda?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (company.settore && typeof company.settore === 'string' && company.settore.toLowerCase().includes(searchTerm.toLowerCase()))
-            ).slice(0, 20);
+            const filtered = companies.filter(company => {
+                const nameMatch = company.nome_azienda?.toLowerCase().includes(searchTerm.toLowerCase());
+                
+                let settoreMatch = false;
+                if (company.settore) {
+                    if (Array.isArray(company.settore)) {
+                        settoreMatch = company.settore.some(s => 
+                            typeof s === 'string' && s.toLowerCase().includes(searchTerm.toLowerCase())
+                        );
+                    } else if (typeof company.settore === 'string') {
+                        settoreMatch = company.settore.toLowerCase().includes(searchTerm.toLowerCase());
+                    }
+                }
+                
+                return nameMatch || settoreMatch;
+            }).slice(0, 20);
             setFilteredCompanies(filtered);
         }
     }, [searchTerm, companies]);
@@ -277,50 +289,66 @@ const SUK = ({ user, showToast }) => {
                         <div className="bg-green-50 rounded-lg p-6">
                             <h3 className="text-lg font-semibold text-green-900 mb-4">Settori e Attività</h3>
                             <div className="space-y-4 text-sm text-green-800">
-                                {selectedCompany.settore && selectedCompany.settore.length > 0 && (
+                                {selectedCompany.settore && (
                                     <div>
                                         <strong>Settori:</strong>
-                                        <div className="flex flex-wrap gap-2 mt-1">
-                                            {selectedCompany.settore.map((settore, index) => (
-                                                <span key={index} className="bg-green-200 px-2 py-1 rounded text-xs">
-                                                    {settore}
-                                                </span>
-                                            ))}
-                                        </div>
+                                        {Array.isArray(selectedCompany.settore) ? (
+                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                {selectedCompany.settore.map((settore, index) => (
+                                                    <span key={index} className="bg-green-200 px-2 py-1 rounded text-xs">
+                                                        {settore}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="ml-2">{selectedCompany.settore}</span>
+                                        )}
                                     </div>
                                 )}
-                                {selectedCompany.tipologia_attivita && selectedCompany.tipologia_attivita.length > 0 && (
+                                {selectedCompany.tipologia_attivita && (
                                     <div>
                                         <strong>Tipologia Attività:</strong>
-                                        <ul className="list-disc list-inside mt-1 space-y-1">
-                                            {selectedCompany.tipologia_attivita.map((attivita, index) => (
-                                                <li key={index}>{attivita}</li>
-                                            ))}
-                                        </ul>
+                                        {Array.isArray(selectedCompany.tipologia_attivita) ? (
+                                            <ul className="list-disc list-inside mt-1 space-y-1">
+                                                {selectedCompany.tipologia_attivita.map((attivita, index) => (
+                                                    <li key={index}>{attivita}</li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <span className="ml-2">{selectedCompany.tipologia_attivita}</span>
+                                        )}
                                     </div>
                                 )}
-                                {selectedCompany.verticali && selectedCompany.verticali.length > 0 && (
+                                {selectedCompany.verticali && (
                                     <div>
                                         <strong>Verticali:</strong>
-                                        <div className="flex flex-wrap gap-2 mt-1">
-                                            {selectedCompany.verticali.map((verticale, index) => (
-                                                <span key={index} className="bg-green-200 px-2 py-1 rounded text-xs">
-                                                    {verticale}
-                                                </span>
-                                            ))}
-                                        </div>
+                                        {Array.isArray(selectedCompany.verticali) ? (
+                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                {selectedCompany.verticali.map((verticale, index) => (
+                                                    <span key={index} className="bg-green-200 px-2 py-1 rounded text-xs">
+                                                        {verticale}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="ml-2">{selectedCompany.verticali}</span>
+                                        )}
                                     </div>
                                 )}
-                                {selectedCompany.tipo_mercato && selectedCompany.tipo_mercato.length > 0 && (
+                                {selectedCompany.tipo_mercato && (
                                     <div>
                                         <strong>Tipo Mercato:</strong>
-                                        <div className="flex flex-wrap gap-2 mt-1">
-                                            {selectedCompany.tipo_mercato.map((mercato, index) => (
-                                                <span key={index} className="bg-green-200 px-2 py-1 rounded text-xs">
-                                                    {mercato}
-                                                </span>
-                                            ))}
-                                        </div>
+                                        {Array.isArray(selectedCompany.tipo_mercato) ? (
+                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                {selectedCompany.tipo_mercato.map((mercato, index) => (
+                                                    <span key={index} className="bg-green-200 px-2 py-1 rounded text-xs">
+                                                        {mercato}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="ml-2">{selectedCompany.tipo_mercato}</span>
+                                        )}
                                     </div>
                                 )}
                             </div>

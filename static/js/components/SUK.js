@@ -206,8 +206,6 @@ const SUK = ({ user, showToast }) => {
     const [filteredCompanies, setFilteredCompanies] = useState([]);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedSector, setSelectedSector] = useState('');
-    const [sectors, setSectors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [reportHistory, setReportHistory] = useState([]);
     const [generatingReport, setGeneratingReport] = useState(false);
@@ -220,28 +218,11 @@ const SUK = ({ user, showToast }) => {
     }, []);
 
     useEffect(() => {
-        // Filter companies based on search term and selected sector
-        let filtered = companies;
-
-        // Apply sector filter first if selected
-        if (selectedSector) {
-            filtered = filtered.filter(company => {
-                if (company.settore) {
-                    if (Array.isArray(company.settore)) {
-                        return company.settore.some(s => 
-                            typeof s === 'string' && s.toLowerCase() === selectedSector.toLowerCase()
-                        );
-                    } else if (typeof company.settore === 'string') {
-                        return company.settore.toLowerCase() === selectedSector.toLowerCase();
-                    }
-                }
-                return false;
-            });
-        }
-
-        // Apply search term filter
-        if (searchTerm.trim() !== '') {
-            filtered = filtered.filter(company => {
+        // Filter companies based on search term
+        if (searchTerm.trim() === '') {
+            setFilteredCompanies(companies.slice(0, 20)); // Show first 20 companies
+        } else {
+            const filtered = companies.filter(company => {
                 const nameMatch = company.nome_azienda?.toLowerCase().includes(searchTerm.toLowerCase());
 
                 let settoreMatch = false;
@@ -256,11 +237,10 @@ const SUK = ({ user, showToast }) => {
                 }
 
                 return nameMatch || settoreMatch;
-            });
+            }).slice(0, 20);
+            setFilteredCompanies(filtered);
         }
-
-        setFilteredCompanies(filtered.slice(0, 20)); // Show first 20 companies
-    }, [searchTerm, selectedSector, companies]);
+    }, [searchTerm, companies]);
 
     const loadData = async () => {
         try {
@@ -269,10 +249,6 @@ const SUK = ({ user, showToast }) => {
             // Load companies from Neo4j
             const companiesResponse = await apiService.getCompaniesForReports();
             setCompanies(companiesResponse.companies || []);
-
-            // Load sectors for filter dropdown
-            const sectorsResponse = await apiService.getSectors();
-            setSectors(sectorsResponse.sectors || []);
 
             // Load user's report history
             const historyResponse = await apiService.getReportHistory();
@@ -387,21 +363,21 @@ const SUK = ({ user, showToast }) => {
         try {
             // Create a new window for printing
             const printWindow = window.open('', '_blank');
-
+            
             // Generate HTML content for the PDF
             const htmlContent = generatePDFContent(selectedCompany);
-
+            
             printWindow.document.write(htmlContent);
             printWindow.document.close();
-
+            
             // Wait for the content to load, then print
             printWindow.onload = () => {
                 printWindow.print();
                 printWindow.close();
             };
-
+            
             showToast('PDF export initiated', 'success');
-
+            
         } catch (error) {
             console.error('Error exporting PDF:', error);
             showToast('Failed to export PDF', 'error');
@@ -410,7 +386,7 @@ const SUK = ({ user, showToast }) => {
 
     const generatePDFContent = (company) => {
         const currentDate = new Date().toLocaleDateString('it-IT');
-
+        
         return `
         <!DOCTYPE html>
         <html>
@@ -720,111 +696,58 @@ const SUK = ({ user, showToast }) => {
 
             {/* Company Selection */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">Company Selection</h2>
-                    {(selectedSector || searchTerm) && (
-                        <div className="text-sm text-gray-600">
-                            {filteredCompanies.length} companies found
-                            {filteredCompanies.length >= 20 && " (showing first 20)"}
-                        </div>
-                    )}
-                </div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Company Selection</h2>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Search and Select */}
                     <div className="lg:col-span-2">
-                        <div className="space-y-4">
-                            {/* Sector Filter */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Filter by Sector (Optional)
-                                </label>
-                                <select
-                                    value={selectedSector}
-                                    onChange={(e) => setSelectedSector(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">All Sectors</option>
-                                    {sectors.map((sector, index) => (
-                                        <option key={index} value={sector.settore}>
-                                            {sector.settore} ({sector.count} companies)
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Search and Select Company
+                        </label>
 
-                            {/* Search Input */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Search Companies
-                                </label>
-                                <div className="relative">
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={searchTerm}
-                                            onChange={handleSearchChange}
-                                            onFocus={() => setIsDropdownOpen(true)}
-                                            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Type to search companies..."
-                                        />
-                                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                            <i data-feather="search" className="w-5 h-5 text-gray-400"></i>
-                                        </div>
-                                    </div>
+                        <div className="relative">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                    onFocus={() => setIsDropdownOpen(true)}
+                                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Type to search companies..."
+                                />
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <i data-feather="search" className="w-5 h-5 text-gray-400"></i>
+                                </div>
+                            </div>
 
                             {/* Dropdown */}
-                                    {isDropdownOpen && filteredCompanies.length > 0 && (
-                                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                            {filteredCompanies.map((company, index) => (
-                                                <button
-                                                    key={index}
-                                                    onClick={() => handleCompanySelect(company)}
-                                                    className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-                                                >
-                                                    <div className="font-medium text-gray-900">
-                                                        {company.nome_azienda}
-                                                    </div>
-                                                    {company.settore && (
-                                                        <div className="text-sm text-gray-500">
-                                                            Sector: {Array.isArray(company.settore) 
-                                                                ? company.settore.join(', ') 
-                                                                : company.settore}
-                                                        </div>
-                                                    )}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                        </div>
-
-                        </div>
-
-                                {searchTerm && !selectedCompany && filteredCompanies.length === 0 && (
-                                    <p className="mt-2 text-sm text-gray-500">
-                                        No companies found matching your search.
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Clear Filters Button */}
-                            {(selectedSector || searchTerm) && (
-                                <div>
-                                    <button
-                                        onClick={() => {
-                                            setSelectedSector('');
-                                            setSearchTerm('');
-                                            setSelectedCompany(null);
-                                            setIsDropdownOpen(false);
-                                        }}
-                                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                                    >
-                                        <i data-feather="x-circle" className="w-4 h-4 inline mr-1"></i>
-                                        Clear Filters
-                                    </button>
+                            {isDropdownOpen && filteredCompanies.length > 0 && (
+                                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                    {filteredCompanies.map((company, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => handleCompanySelect(company)}
+                                            className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                                        >
+                                            <div className="font-medium text-gray-900">
+                                                {company.nome_azienda}
+                                            </div>
+                                            {company.settore && (
+                                                <div className="text-sm text-gray-500">
+                                                    Sector: {company.settore}
+                                                </div>
+                                            )}
+                                        </button>
+                                    ))}
                                 </div>
                             )}
                         </div>
+
+                        {searchTerm && !selectedCompany && filteredCompanies.length === 0 && (
+                            <p className="mt-2 text-sm text-gray-500">
+                                No companies found matching your search.
+                            </p>
+                        )}
                     </div>
 
                     {/* Action Buttons */}
@@ -846,7 +769,7 @@ const SUK = ({ user, showToast }) => {
                                 </div>
                             )}
                         </button>
-
+                        
                         <button
                             onClick={exportToPDF}
                             disabled={!selectedCompany}
@@ -1081,7 +1004,7 @@ const SUK = ({ user, showToast }) => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-800">
                                 {selectedCompany.revenues_200K && (
                                     <div>
-                                        <strong>Ricavi &gt; 200K:</strong> {selectedCompany.revenues_200K}
+                                        <strong>Ricavi > 200K:</strong> {selectedCompany.revenues_200K}
                                     </div>
                                 )}
                                 {selectedCompany.revenues_50K_50M && (
@@ -1220,7 +1143,7 @@ const SUK = ({ user, showToast }) => {
             {/* Relationship Details Modal */}
             {showRelationshipModal && selectedRelationship && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h[90vh] overflow-y-auto">
                         {/* Header */}
                         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-xl">
                             <div className="flex justify-between items-center">
@@ -1352,4 +1275,5 @@ const SUK = ({ user, showToast }) => {
     );
 };
 
-export default SUK;
+// Make SUK component globally available
+window.SUK = SUK;

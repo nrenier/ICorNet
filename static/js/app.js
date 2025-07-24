@@ -112,6 +112,24 @@ const App = () => {
         checkAuth();
     }, []);
 
+    // Initialize feather icons when app loads
+    useEffect(() => {
+        const initIcons = () => {
+            if (typeof window.initFeatherIcons === 'function') {
+                window.initFeatherIcons();
+            }
+        };
+        
+        initIcons();
+        // Also re-initialize periodically to catch any missed icons
+        const interval = setInterval(initIcons, 1000);
+        
+        // Clean up interval after 10 seconds
+        setTimeout(() => clearInterval(interval), 10000);
+        
+        return () => clearInterval(interval);
+    }, [user, currentPage]);
+
     const checkAuth = async () => {
         try {
             const userData = await apiService.getCurrentUser();
@@ -162,8 +180,14 @@ const App = () => {
         setCurrentPage(page);
         // Update feather icons after navigation
         setTimeout(() => {
-            if (typeof feather !== 'undefined') {
-                feather.replace();
+            if (typeof window.initFeatherIcons === 'function') {
+                window.initFeatherIcons();
+            } else if (typeof feather !== 'undefined') {
+                try {
+                    feather.replace();
+                } catch (e) {
+                    console.warn('Feather icons update failed:', e);
+                }
             }
         }, 100);
     };

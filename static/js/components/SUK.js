@@ -224,19 +224,237 @@ const SUK = ({ user, showToast }) => {
                     </div>
                 </div>
 
-                {/* Selected Company Preview */}
+                {/* Detailed Company Information */}
                 {selectedCompany && (
-                    <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                        <h3 className="text-sm font-medium text-blue-900 mb-2">Selected Company</h3>
-                        <div className="text-sm text-blue-800">
-                            <p><strong>Name:</strong> {selectedCompany.nome_azienda}</p>
-                            {selectedCompany.settore && (
-                                <p><strong>Sector:</strong> {selectedCompany.settore}</p>
-                            )}
+                    <div className="mt-6 space-y-6">
+                        {/* Informazioni Generali */}
+                        <div className="bg-blue-50 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-blue-900 mb-4">Informazioni Generali</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
+                                {selectedCompany.nome_azienda && (
+                                    <div>
+                                        <strong>Nome Azienda:</strong> {selectedCompany.nome_azienda}
+                                    </div>
+                                )}
+                                {selectedCompany.partita_iva && (
+                                    <div>
+                                        <strong>Partita IVA:</strong> {selectedCompany.partita_iva}
+                                    </div>
+                                )}
+                                {selectedCompany.indirizzo && (
+                                    <div>
+                                        <strong>Indirizzo:</strong> {selectedCompany.indirizzo}
+                                    </div>
+                                )}
+                                {selectedCompany.sito_web && (
+                                    <div>
+                                        <strong>Sito Web:</strong> 
+                                        <a href={selectedCompany.sito_web} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 ml-1">
+                                            {selectedCompany.sito_web}
+                                        </a>
+                                    </div>
+                                )}
+                                {selectedCompany.data_inizio_attivita && (
+                                    <div>
+                                        <strong>Data Inizio Attività:</strong> {selectedCompany.data_inizio_attivita}
+                                    </div>
+                                )}
+                                {selectedCompany.TRL && (
+                                    <div>
+                                        <strong>TRL:</strong> {selectedCompany.TRL}
+                                    </div>
+                                )}
+                            </div>
                             {selectedCompany.descrizione && (
-                                <p><strong>Description:</strong> {selectedCompany.descrizione}</p>
+                                <div className="mt-4">
+                                    <strong>Descrizione:</strong>
+                                    <p className="mt-1 text-blue-700">{selectedCompany.descrizione}</p>
+                                </div>
                             )}
                         </div>
+
+                        {/* Settori e Attività */}
+                        <div className="bg-green-50 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-green-900 mb-4">Settori e Attività</h3>
+                            <div className="space-y-4 text-sm text-green-800">
+                                {selectedCompany.settore && selectedCompany.settore.length > 0 && (
+                                    <div>
+                                        <strong>Settori:</strong>
+                                        <div className="flex flex-wrap gap-2 mt-1">
+                                            {selectedCompany.settore.map((settore, index) => (
+                                                <span key={index} className="bg-green-200 px-2 py-1 rounded text-xs">
+                                                    {settore}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {selectedCompany.tipologia_attivita && selectedCompany.tipologia_attivita.length > 0 && (
+                                    <div>
+                                        <strong>Tipologia Attività:</strong>
+                                        <ul className="list-disc list-inside mt-1 space-y-1">
+                                            {selectedCompany.tipologia_attivita.map((attivita, index) => (
+                                                <li key={index}>{attivita}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {selectedCompany.verticali && selectedCompany.verticali.length > 0 && (
+                                    <div>
+                                        <strong>Verticali:</strong>
+                                        <div className="flex flex-wrap gap-2 mt-1">
+                                            {selectedCompany.verticali.map((verticale, index) => (
+                                                <span key={index} className="bg-green-200 px-2 py-1 rounded text-xs">
+                                                    {verticale}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {selectedCompany.tipo_mercato && selectedCompany.tipo_mercato.length > 0 && (
+                                    <div>
+                                        <strong>Tipo Mercato:</strong>
+                                        <div className="flex flex-wrap gap-2 mt-1">
+                                            {selectedCompany.tipo_mercato.map((mercato, index) => (
+                                                <span key={index} className="bg-green-200 px-2 py-1 rounded text-xs">
+                                                    {mercato}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Prodotti e Soluzioni */}
+                        <div className="bg-purple-50 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-purple-900 mb-4">Prodotti e Soluzioni</h3>
+                            <div className="space-y-4 text-sm text-purple-800">
+                                {selectedCompany.prodotto_soluzione && (
+                                    <div>
+                                        <strong>Prodotto/Soluzione:</strong> {selectedCompany.prodotto_soluzione}
+                                    </div>
+                                )}
+                                {selectedCompany.descrizione_soluzione && (
+                                    <div>
+                                        <strong>Descrizione Soluzione:</strong>
+                                        <p className="mt-1">{selectedCompany.descrizione_soluzione}</p>
+                                    </div>
+                                )}
+                                {selectedCompany.classificazione_prodotti && selectedCompany.classificazione_prodotti.length > 0 && (
+                                    <div>
+                                        <strong>Classificazione Prodotti:</strong>
+                                        <ul className="list-disc list-inside mt-1 space-y-1">
+                                            {selectedCompany.classificazione_prodotti.map((prodotto, index) => (
+                                                <li key={index}>{prodotto}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {selectedCompany.use_cases && (
+                                    <div>
+                                        <strong>Use Cases:</strong>
+                                        <p className="mt-1 text-xs leading-relaxed">{selectedCompany.use_cases}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Tecnologie */}
+                        {selectedCompany.tecnologie_usate && (
+                            <div className="bg-orange-50 rounded-lg p-6">
+                                <h3 className="text-lg font-semibold text-orange-900 mb-4">Tecnologie</h3>
+                                <div className="text-sm text-orange-800">
+                                    <strong>Tecnologie Usate:</strong>
+                                    <pre className="mt-1 text-xs leading-relaxed whitespace-pre-wrap bg-white p-3 rounded border">
+                                        {selectedCompany.tecnologie_usate}
+                                    </pre>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Partnership e Clienti */}
+                        <div className="bg-indigo-50 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-indigo-900 mb-4">Partnership e Clienti</h3>
+                            <div className="space-y-4 text-sm text-indigo-800">
+                                {selectedCompany.potenziali_clienti && selectedCompany.potenziali_clienti.length > 0 && (
+                                    <div>
+                                        <strong>Potenziali Clienti:</strong>
+                                        <ul className="list-disc list-inside mt-1 space-y-1">
+                                            {selectedCompany.potenziali_clienti.map((cliente, index) => (
+                                                <li key={index}>{cliente}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {selectedCompany.potenziali_partner && selectedCompany.potenziali_partner.length > 0 && (
+                                    <div>
+                                        <strong>Potenziali Partner:</strong>
+                                        <ul className="list-disc list-inside mt-1 space-y-1">
+                                            {selectedCompany.potenziali_partner.map((partner, index) => (
+                                                <li key={index}>{partner}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {selectedCompany.investitori && selectedCompany.investitori.length > 0 && (
+                                    <div>
+                                        <strong>Investitori:</strong>
+                                        <ul className="list-disc list-inside mt-1 space-y-1">
+                                            {selectedCompany.investitori.map((investitore, index) => (
+                                                <li key={index}>{investitore}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {selectedCompany.aziende_controllate && selectedCompany.aziende_controllate.length > 0 && (
+                                    <div>
+                                        <strong>Aziende Controllate:</strong>
+                                        <ul className="list-disc list-inside mt-1 space-y-1">
+                                            {selectedCompany.aziende_controllate.map((azienda, index) => (
+                                                <li key={index}>{azienda}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Informazioni Finanziarie */}
+                        <div className="bg-yellow-50 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-yellow-900 mb-4">Informazioni Finanziarie e Proprietà</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-800">
+                                {selectedCompany.revenues_200K && (
+                                    <div>
+                                        <strong>Ricavi > 200K:</strong> {selectedCompany.revenues_200K}
+                                    </div>
+                                )}
+                                {selectedCompany.revenues_50K_50M && (
+                                    <div>
+                                        <strong>Ricavi 50K-50M:</strong> {selectedCompany.revenues_50K_50M}
+                                    </div>
+                                )}
+                                {selectedCompany.brevetti && (
+                                    <div>
+                                        <strong>Brevetti:</strong> {selectedCompany.brevetti}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Notizie */}
+                        {selectedCompany.notizie_correlate && selectedCompany.notizie_correlate.length > 0 && (
+                            <div className="bg-gray-50 rounded-lg p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Notizie Correlate</h3>
+                                <div className="space-y-2 text-sm text-gray-800">
+                                    {selectedCompany.notizie_correlate.map((notizia, index) => (
+                                        <div key={index} className="border-l-4 border-gray-300 pl-3">
+                                            {notizia}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

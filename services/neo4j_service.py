@@ -214,6 +214,26 @@ class Neo4jService:
             logging.error(f"Error getting company relationships: {str(e)}")
             return {'nodes': [], 'edges': []}
 
+    def get_total_sector_count(self):
+        """Get total count of unique sectors in Neo4j"""
+        if not self.driver:
+            logging.warning("Neo4j driver not available, returning mock data")
+            return 15
+
+        try:
+            with self.driver.session() as session:
+                result = session.run("""
+                    MATCH (n:SUK) 
+                    WHERE n.settore IS NOT NULL
+                    UNWIND n.settore AS settore_item
+                    RETURN count(DISTINCT settore_item) as total_sectors
+                """)
+                record = result.single()
+                return record["total_sectors"] if record else 0
+        except Exception as e:
+            logging.error(f"Error getting total sector count: {str(e)}")
+            return 0
+
     def get_companies_by_sector(self, sector):
         """Get all companies for a specific sector"""
         if not self.driver:

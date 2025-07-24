@@ -811,47 +811,128 @@ const SUK = ({ user, showToast }) => {
 
             {/* Relationship Details Modal */}
             {showRelationshipModal && selectedRelationship && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-gray-900">Dettagli Relazione</h3>
-                            <button
-                                onClick={closeRelationshipModal}
-                                className="text-gray-400 hover:text-gray-600"
-                            >
-                                <i data-feather="x" className="w-5 h-5"></i>
-                            </button>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-xl">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-xl font-bold">Dettagli Relazione</h3>
+                                    <p className="text-blue-100 text-sm mt-1">Analisi delle connessioni aziendali</p>
+                                </div>
+                                <button
+                                    onClick={closeRelationshipModal}
+                                    className="text-white hover:text-gray-200 transition-colors"
+                                >
+                                    <i data-feather="x" className="w-6 h-6"></i>
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <div>
-                                <strong className="text-gray-700">Da:</strong>
-                                <span className="ml-2 text-gray-900">{selectedRelationship.source}</span>
-                            </div>
-                            <div>
-                                <strong className="text-gray-700">A:</strong>
-                                <span className="ml-2 text-gray-900">{selectedRelationship.target}</span>
+                        <div className="p-6 space-y-6">
+                            {/* Companies Connection */}
+                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex flex-col items-center">
+                                        <div className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold text-center min-w-[120px]">
+                                            {selectedRelationship.source}
+                                        </div>
+                                        <span className="text-xs text-gray-500 mt-1">Azienda Origine</span>
+                                    </div>
+                                    
+                                    <div className="flex flex-col items-center mx-4">
+                                        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                                            {selectedRelationship.properties?.type || 'Relazione'}
+                                        </div>
+                                        <i data-feather="arrow-right" className="w-6 h-6 text-gray-400 mt-2"></i>
+                                    </div>
+                                    
+                                    <div className="flex flex-col items-center">
+                                        <div className="bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold text-center min-w-[120px]">
+                                            {selectedRelationship.target}
+                                        </div>
+                                        <span className="text-xs text-gray-500 mt-1">Azienda Destinazione</span>
+                                    </div>
+                                </div>
                             </div>
 
-                            {selectedRelationship.properties && (
+                            {/* Relationship Type */}
+                            {selectedRelationship.properties?.type && (
+                                <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                    <div className="flex items-center">
+                                        <i data-feather="tag" className="w-5 h-5 text-green-600 mr-2"></i>
+                                        <h4 className="text-lg font-semibold text-green-800">Tipologia Relazione</h4>
+                                    </div>
+                                    <p className="text-green-700 mt-2 font-medium capitalize">
+                                        {selectedRelationship.properties.type}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Relationship Properties */}
+                            {selectedRelationship.properties && Object.keys(selectedRelationship.properties).length > 0 && (
                                 <div>
-                                    <strong className="text-gray-700">Proprietà della Relazione:</strong>
-                                    <div className="mt-2 bg-gray-50 rounded p-3">
-                                        {Object.entries(selectedRelationship.properties).map(([key, value]) => (
-                                            <div key={key} className="flex justify-between py-1 border-b border-gray-200 last:border-b-0">
-                                                <span className="text-sm font-medium text-gray-600">{key}:</span>
-                                                <span className="text-sm text-gray-900">{String(value)}</span>
-                                            </div>
-                                        ))}
+                                    <div className="flex items-center mb-4">
+                                        <i data-feather="info" className="w-5 h-5 text-blue-600 mr-2"></i>
+                                        <h4 className="text-lg font-semibold text-gray-900">Dettagli Aggiuntivi</h4>
+                                    </div>
+                                    
+                                    <div className="grid gap-4">
+                                        {Object.entries(selectedRelationship.properties).map(([key, value]) => {
+                                            if (key === 'type') return null; // Già mostrato sopra
+                                            
+                                            return (
+                                                <div key={key} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="flex-1">
+                                                            <h5 className="font-medium text-gray-900 capitalize mb-1">
+                                                                {key.replace(/_/g, ' ')}
+                                                            </h5>
+                                                            <div className="text-gray-700 text-sm leading-relaxed">
+                                                                {key === 'weight' ? (
+                                                                    <div className="flex items-center">
+                                                                        <div className="flex space-x-1 mr-2">
+                                                                            {[...Array(5)].map((_, i) => (
+                                                                                <i 
+                                                                                    key={i}
+                                                                                    data-feather="star" 
+                                                                                    className={`w-4 h-4 ${i < parseInt(value) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                                                                                ></i>
+                                                                            ))}
+                                                                        </div>
+                                                                        <span className="font-medium">{value}/5</span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span>{String(value)}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {key === 'weight' && (
+                                                            <div className="ml-4">
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                                    parseInt(value) >= 4 ? 'bg-green-100 text-green-800' :
+                                                                    parseInt(value) >= 3 ? 'bg-yellow-100 text-yellow-800' :
+                                                                    'bg-red-100 text-red-800'
+                                                                }`}>
+                                                                    {parseInt(value) >= 4 ? 'Forte' : parseInt(value) >= 3 ? 'Media' : 'Debole'}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        <div className="mt-6 flex justify-end">
+                        {/* Footer */}
+                        <div className="bg-gray-50 px-6 py-4 rounded-b-xl flex justify-end space-x-3">
                             <button
                                 onClick={closeRelationshipModal}
-                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
                             >
                                 Chiudi
                             </button>

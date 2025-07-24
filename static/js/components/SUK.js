@@ -387,21 +387,21 @@ const SUK = ({ user, showToast }) => {
         try {
             // Create a new window for printing
             const printWindow = window.open('', '_blank');
-            
+
             // Generate HTML content for the PDF
             const htmlContent = generatePDFContent(selectedCompany);
-            
+
             printWindow.document.write(htmlContent);
             printWindow.document.close();
-            
+
             // Wait for the content to load, then print
             printWindow.onload = () => {
                 printWindow.print();
                 printWindow.close();
             };
-            
+
             showToast('PDF export initiated', 'success');
-            
+
         } catch (error) {
             console.error('Error exporting PDF:', error);
             showToast('Failed to export PDF', 'error');
@@ -410,7 +410,7 @@ const SUK = ({ user, showToast }) => {
 
     const generatePDFContent = (company) => {
         const currentDate = new Date().toLocaleDateString('it-IT');
-        
+
         return `
         <!DOCTYPE html>
         <html>
@@ -846,7 +846,7 @@ const SUK = ({ user, showToast }) => {
                                 </div>
                             )}
                         </button>
-                        
+
                         <button
                             onClick={exportToPDF}
                             disabled={!selectedCompany}
@@ -1352,5 +1352,5 @@ const SUK = ({ user, showToast }) => {
     );
 };
 
-// Make SUK component globally available
-window.SUK = SUK;
+// Export SUK component
+export default SUK;

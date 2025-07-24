@@ -1120,8 +1120,9 @@ const SUK = ({ user, showToast }) => {
                 )}
             </div>
 
-            {/* Report History */}
-            <div className="bg-white rounded-lg shadow-sm">
+            
+        {/* Report History */}
+        <div className="bg-white rounded-lg shadow-sm">
                 <div className="p-6 border-b border-gray-200 flex justify-between items-center">
                     <h2 className="text-lg font-semibold text-gray-900">Report History</h2>
                     <button

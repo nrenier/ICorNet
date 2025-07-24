@@ -185,9 +185,22 @@ const Dashboard = ({ user, showToast }) => {
                         alt="ICorNet Logo" 
                         className="h-8 w-8 object-contain"
                         onError={(e) => {
+                            console.log('Image failed to load, showing fallback icon');
                             e.target.style.display = 'none';
+                            e.target.nextElementSibling.style.display = 'flex';
+                        }}
+                        onLoad={(e) => {
+                            console.log('Image loaded successfully');
+                            e.target.style.display = 'block';
+                            e.target.nextElementSibling.style.display = 'none';
                         }}
                     />
+                    <div 
+                        className="h-8 w-8 bg-blue-600 rounded-lg items-center justify-center"
+                        style={{display: 'none'}}
+                    >
+                        <i data-feather="database" className="h-5 w-5 text-white"></i>
+                    </div>
                     <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
                 </div>
                 <p className="text-gray-600 mt-1">

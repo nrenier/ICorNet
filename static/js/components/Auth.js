@@ -53,11 +53,11 @@ const Auth = ({ onLogin, onRegister }) => {
         <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
-                    <div className="mx-auto h-16 w-32 mb-4">
+                    <div className="mx-auto h-24 w-64 mb-8">
                         <img 
                             src="/images/logo_icornet.png" 
                             alt="ICorNet Logo" 
-                            className="h-16 w-32 object-contain mx-auto"
+                            className="h-24 w-64 object-contain mx-auto"
                             onError={(e) => {
                                 e.target.style.display = 'none';
                                 e.target.nextElementSibling.style.display = 'flex';
@@ -67,19 +67,10 @@ const Auth = ({ onLogin, onRegister }) => {
                                 e.target.nextElementSibling.style.display = 'none';
                             }}
                         />
-                        <div className="mx-auto h-16 w-32 bg-blue-600 rounded-lg items-center justify-center" style={{display: 'none'}}>
-                            <i data-feather="database" className="h-8 w-8 text-white"></i>
+                        <div className="mx-auto h-24 w-64 bg-blue-600 rounded-lg items-center justify-center" style={{display: 'none'}}>
+                            <i data-feather="database" className="h-12 w-12 text-white"></i>
                         </div>
                     </div>
-                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-                        ICorNet
-                    </h2>
-                    <p className="mt-2 text-sm text-gray-600">
-                        Intelligent Corporate Network
-                    </p>
-                    <p className="mt-2 text-sm text-gray-600">
-                        {isLogin ? 'Sign in to your account' : 'Create your account'}
-                    </p>
                 </div>
 
                 <div className="bg-white rounded-lg shadow-md p-8">

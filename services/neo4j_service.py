@@ -162,7 +162,8 @@ class Neo4jService:
                     RETURN n.nome_azienda as source_name, 
                            m.nome_azienda as target_name,
                            properties(r) as relationship_properties,
-                           r.weight as weight
+                           r.weight as weight,
+                           type(r) as type
                 """, company_name=company_name)
                 
                 relationships = []
@@ -173,11 +174,18 @@ class Neo4jService:
                     target = record["target_name"]
                     weight = record["weight"]
                     rel_props = record["relationship_properties"]
+                    rel_type = record["type"]
+                    
+                    # Aggiungi il tipo alle proprietà della relazione
+                    if rel_props is None:
+                        rel_props = {}
+                    rel_props['type'] = rel_type
                     
                     relationships.append({
                         'source': source,
                         'target': target,
                         'weight': weight,
+                        'type': rel_type,
                         'properties': rel_props
                     })
                     

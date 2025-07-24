@@ -812,7 +812,7 @@ const SUK = ({ user, showToast }) => {
             {/* Relationship Details Modal */}
             {showRelationshipModal && selectedRelationship && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h[90vh] overflow-y-auto">
                         {/* Header */}
                         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-xl">
                             <div className="flex justify-between items-center">
@@ -839,14 +839,14 @@ const SUK = ({ user, showToast }) => {
                                         </div>
                                         <span className="text-xs text-gray-500 mt-1">Azienda Origine</span>
                                     </div>
-                                    
+
                                     <div className="flex flex-col items-center mx-4">
                                         <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-1 rounded-full text-xs font-medium">
                                             {selectedRelationship.properties?.type || 'Relazione'}
                                         </div>
                                         <i data-feather="arrow-right" className="w-6 h-6 text-gray-400 mt-2"></i>
                                     </div>
-                                    
+
                                     <div className="flex flex-col items-center">
                                         <div className="bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold text-center min-w-[120px]">
                                             {selectedRelationship.target}
@@ -876,11 +876,11 @@ const SUK = ({ user, showToast }) => {
                                         <i data-feather="info" className="w-5 h-5 text-blue-600 mr-2"></i>
                                         <h4 className="text-lg font-semibold text-gray-900">Dettagli Aggiuntivi</h4>
                                     </div>
-                                    
+
                                     <div className="grid gap-4">
                                         {Object.entries(selectedRelationship.properties).map(([key, value]) => {
                                             if (key === 'type') return null; // Già mostrato sopra
-                                            
+
                                             return (
                                                 <div key={key} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                                                     <div className="flex items-start justify-between">
@@ -907,7 +907,7 @@ const SUK = ({ user, showToast }) => {
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        
+
                                                         {key === 'weight' && (
                                                             <div className="ml-4">
                                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${

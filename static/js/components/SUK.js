@@ -314,11 +314,21 @@ const SUK = ({ user, showToast }) => {
 
     const downloadReport = async (reportId) => {
         try {
-            const response = await apiService.downloadReport(reportId);
-            showToast('Download initiated', 'success');
+            await apiService.downloadReport(reportId);
+            showToast('Download completed', 'success');
         } catch (error) {
             console.error('Error downloading report:', error);
             showToast('Failed to download report', 'error');
+        }
+    };
+
+    const viewReport = async (reportId) => {
+        try {
+            await apiService.viewReport(reportId);
+            showToast('Opening report in new tab', 'success');
+        } catch (error) {
+            console.error('Error viewing report:', error);
+            showToast('Failed to view report', 'error');
         }
     };
 
@@ -1113,13 +1123,24 @@ const SUK = ({ user, showToast }) => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {report.status === 'completed' ? (
-                                                <button
-                                                    onClick={() => downloadReport(report.id)}
-                                                    className="text-blue-600 hover:text-blue-800 font-medium"
-                                                >
-                                                    <i data-feather="download" className="w-4 h-4 inline mr-1"></i>
-                                                    Download
-                                                </button>
+                                                <div className="flex space-x-2">
+                                                    <button
+                                                        onClick={() => viewReport(report.id)}
+                                                        className="text-green-600 hover:text-green-800 font-medium"
+                                                        title="View PDF"
+                                                    >
+                                                        <i data-feather="eye" className="w-4 h-4 inline mr-1"></i>
+                                                        View
+                                                    </button>
+                                                    <button
+                                                        onClick={() => downloadReport(report.id)}
+                                                        className="text-blue-600 hover:text-blue-800 font-medium"
+                                                        title="Download PDF"
+                                                    >
+                                                        <i data-feather="download" className="w-4 h-4 inline mr-1"></i>
+                                                        Download
+                                                    </button>
+                                                </div>
                                             ) : (
                                                 <span className="text-gray-400">-</span>
                                             )}

@@ -38,13 +38,30 @@ def generate_report():
             webhook_response = requests.post(
                 webhook_url, 
                 json=webhook_payload, 
-                timeout=30,
+                timeout=60,
                 headers={'Content-Type': 'application/json'}
             )
             
             if webhook_response.status_code == 200:
-                new_report.workflow_id = f"webhook_{new_report.id}"
-                new_report.status = 'processing'
+                # Check if response is binary PDF
+                content_type = webhook_response.headers.get('content-type', '')
+                if 'application/pdf' in content_type or webhook_response.content.startswith(b'%PDF'):
+                    # Save the PDF file
+                    os.makedirs('reports', exist_ok=True)
+                    file_name = f"{company_name}_report_{new_report.id}.pdf"
+                    file_path = os.path.join('reports', file_name)
+                    
+                    with open(file_path, 'wb') as f:
+                        f.write(webhook_response.content)
+                    
+                    new_report.workflow_id = f"webhook_{new_report.id}"
+                    new_report.status = 'completed'
+                    new_report.file_name = file_name
+                    new_report.file_path = file_path
+                else:
+                    # Handle JSON response (processing status)
+                    new_report.workflow_id = f"webhook_{new_report.id}"
+                    new_report.status = 'processing'
             else:
                 logging.error(f"Webhook call failed: {webhook_response.status_code}")
                 new_report.status = 'failed'
@@ -117,17 +134,46 @@ def download_report(report_id):
         if report.status != 'completed' or not report.file_path:
             return jsonify({'error': 'Report not ready for download'}), 400
         
-        # In a real implementation, this would serve the actual file
-        # For now, return a mock response
-        return jsonify({
-            'message': 'Download would start here',
-            'file_name': report.file_name,
-            'file_path': report.file_path
-        }), 200
+        # Check if file exists
+        if not os.path.exists(report.file_path):
+            return jsonify({'error': 'Report file not found'}), 404
+        
+        return send_file(
+            report.file_path,
+            as_attachment=True,
+            download_name=report.file_name,
+            mimetype='application/pdf'
+        )
         
     except Exception as e:
         logging.error(f"Download report error: {str(e)}")
         return jsonify({'error': 'Failed to download report'}), 500
+
+@reports_bp.route('/view/<int:report_id>', methods=['GET'])
+@login_required
+def view_report(report_id):
+    try:
+        user_id = session['user_id']
+        
+        report = Report.query.filter_by(id=report_id, user_id=user_id).first()
+        if not report:
+            return jsonify({'error': 'Report not found'}), 404
+        
+        if report.status != 'completed' or not report.file_path:
+            return jsonify({'error': 'Report not ready for viewing'}), 400
+        
+        # Check if file exists
+        if not os.path.exists(report.file_path):
+            return jsonify({'error': 'Report file not found'}), 404
+        
+        return send_file(
+            report.file_path,
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        logging.error(f"View report error: {str(e)}")
+        return jsonify({'error': 'Failed to view report'}), 500
 
 @reports_bp.route('/history', methods=['GET'])
 @login_required

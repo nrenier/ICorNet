@@ -86,8 +86,49 @@ const apiService = {
         return await this.request(`/reports/status/${reportId}`);
     },
 
-    async downloadReport(reportId) {
-        return await this.request(`/reports/download/${reportId}`);
+    downloadReport: async (reportId) => {
+        const response = await fetch(`/reports/download/${reportId}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to download report');
+        }
+
+        // Create a blob from the response and trigger download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `report_${reportId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        return { success: true };
+    },
+
+    viewReport: async (reportId) => {
+        const response = await fetch(`/reports/view/${reportId}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to view report');
+        }
+
+        // Create a blob URL and open in new tab
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+
+        return { success: true };
     },
 
     async getReportHistory() {

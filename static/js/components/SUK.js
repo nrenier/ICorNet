@@ -21,7 +21,7 @@ const SUK = ({ user, showToast }) => {
         } else {
             const filtered = companies.filter(company =>
                 company.nome_azienda?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                company.settore?.toLowerCase().includes(searchTerm.toLowerCase())
+                (company.settore && company.settore.toLowerCase().includes(searchTerm.toLowerCase()))
             ).slice(0, 20);
             setFilteredCompanies(filtered);
         }

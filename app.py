@@ -86,6 +86,18 @@ def create_app():
     def index():
         return send_from_directory('static', 'index.html')
     
+    @app.route('/images/<path:filename>')
+    def serve_images(filename):
+        return send_from_directory('static/images', filename)
+    
+    @app.route('/js/<path:filename>')
+    def serve_js(filename):
+        return send_from_directory('static/js', filename)
+    
+    @app.route('/css/<path:filename>')
+    def serve_css(filename):
+        return send_from_directory('static/css', filename)
+    
     @app.route('/api/health')
     def health_check():
         return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})

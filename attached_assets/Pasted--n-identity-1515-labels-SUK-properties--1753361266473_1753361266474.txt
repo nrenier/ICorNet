@@ -1,0 +1,79 @@
+[
+  {
+    "n": {
+      "identity": 1515,
+      "labels": [
+        "SUK"
+      ],
+      "properties": {
+        "revenues_200K": "No",
+        "revenues_50K_50M": "",
+        "indirizzo": "Via Buonconvento 6, 00148 - Roma (RM)",
+        "use_cases": "E-commerce: Feed di Prodotti Completi e OttimizzatiInput: Cataloghi PDF, siti web dei fornitori, immagini di prodotto, schede tecniche fotografateOutput: Feed completi con descrizioni SEO, categorie ottimizzate, tag automatici, prezzi comparativi, specifiche tecniche arricchite Pubblicità Online: Feed per Campagne PubblicitarieInput: Cataloghi di prodotti, listini prezzi, immagini, schede tecniche da qualsiasi fonteOutput: Feed ottimizzati per Google Merchant Center, Meta Catalog, Microsoft Advertising, Amazon Advertising con titoli ottimizzati, descrizioni persuasive, categorie corrette, attributi richiesti ERP: Dati Aziendali Arricchiti e CompletiInput: Fatture elettroniche, documenti cartacei scannerizzati, email commerciali, portali dei fornitoriOutput: Tracciati completi con codici normalizzati, categorie di prodotto automatiche, centri di costo suggeriti, tutti i metadati necessari compilati CRM: Database Clienti Completo e ArricchitoInput: Biglietti da visita fotografati, profili LinkedIn, siti web aziendali, directory onlineOutput: Database con informazioni aziendali arricchite, settori di attività automatici, dimensioni aziendali stimate, profili cliente completi al 100% Intelligence Competitiva: Monitoraggio del MercatoInput: Siti web dei concorrenti, listini prezzi pubblici, marketplace, social media, forum di settoreOutput: Database comparativo di prezzi, prodotti, strategie commerciali - sempre aggiornato Campagne Pubblicitarie: Feed Pubblicitari MultipiattaformaInput: Cataloghi disorganizzati, foto di prodotti, listini prezzi in diversi formatiOutput: Feed ottimizzati per Google Ads Shopping, Meta Dynamic Ads, Microsoft Shopping, Amazon DSP, TikTok Catalog con titoli persuasivi e attributi perfetti per ogni piattaforma",
+        "tipologia_attivita": [
+          "Sviluppo software per automazione e arricchimento dati",
+          "Integrazione di modelli di intelligenza artificiale in processi aziendali",
+          "Consulenza e supporto tecnico per la gestione e trasformazione di dataset"
+        ],
+        "TRL": "5",
+        "settore": [
+          "Intelligenza Artificiale",
+          "Analisi dei Dati",
+          "Tecnologie Digitali"
+        ],
+        "notizie_correlate": [
+
+        ],
+        "tipo_mercato": [
+          "Nazionale",
+          "Internazionale"
+        ],
+        "investitori": [
+
+        ],
+        "aziende_controllate": [
+
+        ],
+        "potenziali_clienti": [
+          "Medie e grandi imprese con esigenze di gestione e arricchimento dati su larga scala",
+          "Aziende di e-commerce, retail, marketing e vendite",
+          "Aziende che gestiscono grandi database di clienti, prodotti o inventari"
+        ],
+        "partita_iva": "18017981004",
+        "descrizione_soluzione": "42ROWS trasforma grandi quantità di dati grezzi in informazioni strutturate, organizzando e arricchendo set di dati complessi con l'IA, riducendo il lavoro manuale.",
+        "verticali": [
+          "Beni di Consumo",
+          "Energia e Servizi Pubblici",
+          "Governo e Settore Pubblico",
+          "Media, Intrattenimento e Giochi",
+          "Vendita al Dettaglio ed e-Commerce"
+        ],
+        "brevetti": "No",
+        "potenziali_partner": [
+          "Aziende di software enterprise e cloud computing",
+          "Fornitori di soluzioni CRM e marketing automation",
+          "Agenzie di digital transformation e consulenza dati",
+          "Settore e-commerce e retail (per arricchimento cataloghi prodotti)"
+        ],
+        "nome_azienda": "42ROWS Srl",
+        "data_inizio_attivita": "2025",
+        "fonti": [
+          "https://www.companyreports.it/42rows-srl-18017981004",
+          "https://42rows.com/it/",
+          "https://42rows.com/contact/"
+        ],
+        "descrizione": "42ROWS Srl è un'impresa con sede a Roma, Via Buonconvento 6, fondata nel marzo 2025[1]. Opera come fornitore di soluzioni tecnologiche per l'arricchimento e la trasformazione di dati tramite intelligenza artificiale e automazione di processi su fogli di calcolo. La piattaforma consente di arricchire cataloghi prodotti, database lead, liste clienti, inventari e altri dati strutturati con l'integrazione di modelli AI avanzati, gestendo anche elaborazioni di grandi volumi di dati (oltre 100.000 righe per operazione)[2]. Offre onboarding, supporto personalizzato e la possibilità di richiedere funzionalità custom per clienti enterprise[3].",
+        "classificazione_prodotti": [
+          "Piattaforma SaaS per l'arricchimento dati tramite AI",
+          "Strumenti di automazione per fogli di calcolo (Excel, CSV, JSON)",
+          "Servizi di integrazione dati da web e API",
+          "Generazione automatica di contenuti testuali e immagini tramite AI"
+        ],
+        "tecnologie_usate": "DatabasePostgreSQL con estensione vettoriale (pgvector)MySQLElaborazione DatiPHPPolarsPandasFrontendNext.jsTailwind CSSJavaScript per tabella tipo ExcelBackendNode.jsGestione codeRabbitMQInfrastrutturaDockerMicroserviziAI & Machine LearningLarge Language Models (LLM)EmbeddingsChunking ibridoGenerative AIComputer Vision",
+        "sito_web": "https://42rows.com/",
+        "prodotto_soluzione": "42ROWS"
+      },
+      "elementId": "4:7bd25bc2-1568-47c2-ba23-484cb601278e:1515"
+    }
+  }
+]

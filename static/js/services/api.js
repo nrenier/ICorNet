@@ -87,7 +87,7 @@ const apiService = {
     },
 
     downloadReport: async (reportId) => {
-        const response = await fetch(`/reports/download/${reportId}`, {
+        const response = await fetch(`/api/reports/download/${reportId}`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -97,13 +97,24 @@ const apiService = {
             throw new Error(error.error || 'Failed to download report');
         }
 
+        // Get filename from Content-Disposition header or use default
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `report_${reportId}.pdf`;
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename="([^"]*)"/) || 
+                                 contentDisposition.match(/filename=([^;]*)/);
+            if (filenameMatch) {
+                filename = filenameMatch[1];
+            }
+        }
+
         // Create a blob from the response and trigger download
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = `report_${reportId}.pdf`;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);

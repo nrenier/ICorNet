@@ -472,29 +472,13 @@ const Dashboard = ({ user, showToast }) => {
                         </div>
 
                         {/* Footer */}
-                        <div className="bg-gray-50 px-6 py-4 flex justify-between items-center border-t border-gray-200">
-                            <div className="flex items-center space-x-2 text-sm text-gray-500">
-                                <i data-feather="info" className="w-4 h-4"></i>
-                                <span>Dati aggiornati in tempo reale</span>
-                            </div>
-                            <div className="flex space-x-3">
-                                <button
-                                    onClick={() => {
-                                        // Future: Esporta lista aziende
-                                        showToast('Funzionalità di esportazione in arrivo', 'info');
-                                    }}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center space-x-2"
-                                >
-                                    <i data-feather="download" className="w-4 h-4"></i>
-                                    <span>Esporta</span>
-                                </button>
-                                <button
-                                    onClick={closeSectorModal}
-                                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium text-sm"
-                                >
-                                    Chiudi
-                                </button>
-                            </div>
+                        <div className="bg-gray-50 px-6 py-4 flex justify-end items-center border-t border-gray-200">
+                            <button
+                                onClick={closeSectorModal}
+                                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium text-sm"
+                            >
+                                Chiudi
+                            </button>
                         </div>
                     </div>
                 </div>

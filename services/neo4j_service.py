@@ -12,17 +12,17 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Neo4j connection failed: {str(e)}")
             self.driver = None
-    
+
     def close(self):
         if self.driver:
             self.driver.close()
-    
+
     def get_company_count(self):
         """Get total count of companies in Neo4j"""
         if not self.driver:
             logging.warning("Neo4j driver not available, returning mock data")
             return 150
-        
+
         try:
             with self.driver.session() as session:
                 result = session.run("MATCH (n:SUK) RETURN count(n) as count")
@@ -31,7 +31,7 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Error getting company count: {str(e)}")
             return 0
-    
+
     def get_companies_list(self):
         """Get list of all companies with their details"""
         if not self.driver:
@@ -43,7 +43,7 @@ class Neo4jService:
                 {"nome_azienda": "Delta Logistics", "settore": "Transportation", "descrizione": "Logistics and shipping services"},
                 {"nome_azienda": "Epsilon Energy", "settore": "Energy", "descrizione": "Renewable energy solutions"}
             ]
-        
+
         try:
             with self.driver.session() as session:
                 result = session.run("""
@@ -56,7 +56,7 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Error getting companies list: {str(e)}")
             return []
-    
+
     def get_sector_aggregations(self):
         """Get aggregated data by sector - unwind arrays and count individual elements"""
         if not self.driver:
@@ -68,7 +68,7 @@ class Neo4jService:
                 {"settore": "Riconoscimento delle immagini", "count": 1, "sample_companies": ["Company1"]},
                 {"settore": "IoT", "count": 1, "sample_companies": ["Company1"]}
             ]
-        
+
         try:
             with self.driver.session() as session:
                 result = session.run("""
@@ -86,13 +86,13 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Error getting sector aggregations: {str(e)}")
             return []
-    
+
     def get_company_details(self, company_name):
         """Get detailed information for a specific company"""
         if not self.driver:
             logging.warning("Neo4j driver not available")
             return None
-        
+
         try:
             with self.driver.session() as session:
                 result = session.run("""
@@ -100,7 +100,7 @@ class Neo4jService:
                     WHERE n.nome_azienda = $company_name
                     RETURN properties(n) as company_properties
                 """, company_name=company_name)
-                
+
                 record = result.single()
                 if record:
                     return record["company_properties"]
@@ -108,13 +108,13 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Error getting company details: {str(e)}")
             return None
-    
+
     def search_companies(self, search_term):
         """Search companies by name"""
         if not self.driver:
             logging.warning("Neo4j driver not available")
             return []
-        
+
         try:
             with self.driver.session() as session:
                 result = session.run("""
@@ -128,7 +128,7 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Error searching companies: {str(e)}")
             return []
-    
+
     def get_company_relationships(self, company_name):
         """Get relationships for a specific company"""
         if not self.driver:
@@ -156,7 +156,7 @@ class Neo4jService:
                     }
                 ]
             }
-        
+
         try:
             with self.driver.session() as session:
                 result = session.run("""
@@ -168,22 +168,22 @@ class Neo4jService:
                            r.weight as weight,
                            type(r) as type
                 """, company_name=company_name)
-                
+
                 relationships = []
                 related_companies = set()
-                
+
                 for record in result:
                     source = record["source_name"]
                     target = record["target_name"]
                     weight = record["weight"]
                     rel_props = record["relationship_properties"]
                     rel_type = record["type"]
-                    
+
                     # Aggiungi il tipo alle proprietà della relazione
                     if rel_props is None:
                         rel_props = {}
                     rel_props['type'] = rel_type
-                    
+
                     relationships.append({
                         'source': source,
                         'target': target,
@@ -191,10 +191,10 @@ class Neo4jService:
                         'type': rel_type,
                         'properties': rel_props
                     })
-                    
+
                     related_companies.add(source)
                     related_companies.add(target)
-                
+
                 # Create nodes
                 nodes = []
                 for company in related_companies:
@@ -204,20 +204,20 @@ class Neo4jService:
                         'name': company,
                         'type': node_type
                     })
-                
+
                 return {
                     'nodes': nodes,
                     'edges': relationships
                 }
-                
+
         except Exception as e:
             logging.error(f"Error getting company relationships: {str(e)}")
             return {'nodes': [], 'edges': []}
-    
+
     def get_companies_by_sector(self, sector):
         """Get all companies for a specific sector"""
         if not self.driver:
-            logging.warning("Neo4j driver not available, returning mock data")
+            logging.warning("Neo4j driver not available")
             return [
                 {
                     "nome_azienda": "Mock Company 1",
@@ -232,16 +232,22 @@ class Neo4jService:
                     "sito_web": "https://example2.com"
                 }
             ]
-        
+
         try:
             with self.driver.session() as session:
                 result = session.run("""
                     MATCH (n:SUK) 
-                    WHERE n.settore IS NOT NULL AND $sector IN n.settore
-                    RETURN properties(n) as company_properties
+                    WHERE ANY(settore_item IN n.settore WHERE toLower(settore_item) = toLower($sector))
+                    RETURN n.nome_azienda as nome_azienda,
+                           n.settore as settore,
+                           n.descrizione as descrizione,
+                           n.indirizzo as indirizzo,
+                           n.sito_web as sito_web,
+                           n.TRL as TRL,
+                           n.data_inizio_attivita as data_inizio_attivita
                     ORDER BY n.nome_azienda
                 """, sector=sector)
-                return [record["company_properties"] for record in result]
+                return [record.data() for record in result]
         except Exception as e:
             logging.error(f"Error getting companies by sector: {str(e)}")
             return []

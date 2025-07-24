@@ -688,7 +688,17 @@ const SUK = ({ user, showToast }) => {
         <div className="space-y-6">
             {/* Header */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-                <h1 className="text-2xl font-bold text-gray-900">SUK Analysis</h1>
+                <div className="flex items-center space-x-3 mb-2">
+                    <img 
+                        src="/images/logo_icornet.png" 
+                        alt="ICorNet Logo" 
+                        className="h-8 w-8 object-contain"
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                        }}
+                    />
+                    <h1 className="text-2xl font-bold text-gray-900">SUK Analysis</h1>
+                </div>
                 <p className="text-gray-600 mt-1">
                     Select a company and generate detailed analysis reports
                 </p>

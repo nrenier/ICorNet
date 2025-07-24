@@ -33,7 +33,23 @@ const Sidebar = ({ currentPage, onNavigate, user, onLogout }) => {
     return (
         <div className="bg-white shadow-lg h-screen w-64 fixed left-0 top-0 z-40">
             <div className="p-6 border-b border-gray-200">
-                <h1 className="text-2xl font-bold text-gray-800">ICorNet</h1>
+                <div className="flex items-center space-x-3 mb-2">
+                    <img 
+                        src="/images/logo_icornet.png" 
+                        alt="ICorNet Logo" 
+                        className="h-8 w-8 object-contain"
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                        }}
+                    />
+                    <div 
+                        className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center hidden"
+                    >
+                        <i data-feather="database" className="h-5 w-5 text-white"></i>
+                    </div>
+                    <h1 className="text-2xl font-bold text-gray-800">ICorNet</h1>
+                </div>
                 <p className="text-sm text-gray-600">Intelligent Corporate Network</p>
             </div>
             

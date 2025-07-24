@@ -19,17 +19,16 @@ def generate_report():
         company_name = data['company_name']
         
         # Create report record
-        new_report = Report(
-            user_id=user_id,
-            company_name=company_name,
-            status='pending'
-        )
+        new_report = Report()
+        new_report.user_id = user_id
+        new_report.company_name = company_name
+        new_report.status = 'pending'
         
         db.session.add(new_report)
         db.session.commit()
         
         # Trigger n8n workflow
-        n8n_service = current_app.n8n_service
+        n8n_service = current_app.config['n8n_service']
         workflow_result = n8n_service.trigger_workflow(company_name, user_id)
         
         # Update report with workflow ID
@@ -59,7 +58,7 @@ def get_report_status(report_id):
         
         # Check status with n8n if workflow_id exists
         if report.workflow_id and report.status == 'pending':
-            n8n_service = current_app.n8n_service
+            n8n_service = current_app.config['n8n_service']
             workflow_status = n8n_service.check_workflow_status(report.workflow_id)
             
             if workflow_status.get('finished'):
@@ -132,7 +131,7 @@ def get_report_history():
 @login_required
 def get_companies_for_reports():
     try:
-        neo4j_service = current_app.neo4j_service
+        neo4j_service = current_app.config['neo4j_service']
         companies = neo4j_service.get_companies_list()
         
         return jsonify({'companies': companies}), 200
@@ -145,7 +144,7 @@ def get_companies_for_reports():
 @login_required
 def get_company_relationships(company_name):
     try:
-        neo4j_service = current_app.neo4j_service
+        neo4j_service = current_app.config['neo4j_service']
         relationships = neo4j_service.get_company_relationships(company_name)
         
         return jsonify({'relationships': relationships}), 200

@@ -8,7 +8,7 @@ dashboard_bp = Blueprint('dashboard', __name__)
 @login_required
 def get_dashboard_stats():
     try:
-        neo4j_service = current_app.neo4j_service
+        neo4j_service = current_app.config['neo4j_service']
         
         # Get company count from Neo4j
         company_count = neo4j_service.get_company_count()
@@ -45,7 +45,7 @@ def get_dashboard_stats():
 @login_required
 def get_companies():
     try:
-        neo4j_service = current_app.neo4j_service
+        neo4j_service = current_app.config['neo4j_service']
         companies = neo4j_service.get_companies_list()
         
         return jsonify({'companies': companies}), 200
@@ -58,7 +58,7 @@ def get_companies():
 @login_required
 def get_sectors():
     try:
-        neo4j_service = current_app.neo4j_service
+        neo4j_service = current_app.config['neo4j_service']
         sectors = neo4j_service.get_sector_aggregations()
         
         return jsonify({'sectors': sectors}), 200

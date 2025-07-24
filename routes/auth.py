@@ -25,14 +25,13 @@ def register():
                 return jsonify({'error': 'Email already exists'}), 409
         
         # Create new user
-        new_user = User(
-            username=data['username'],
-            email=data.get('email'),
-            password_hash=generate_password_hash(data['password']),
-            first_name=data.get('first_name'),
-            last_name=data.get('last_name'),
-            role='user'  # Default role
-        )
+        new_user = User()
+        new_user.username = data['username']
+        new_user.email = data.get('email')
+        new_user.password_hash = generate_password_hash(data['password'])
+        new_user.first_name = data.get('first_name')
+        new_user.last_name = data.get('last_name')
+        new_user.role = 'user'  # Default role
         
         db.session.add(new_user)
         db.session.commit()

@@ -1,5 +1,206 @@
 const { useState, useEffect } = React;
 
+const CompanyRelationshipsGraph = ({ companyName, onRelationshipClick }) => {
+    const [relationships, setRelationships] = useState({ nodes: [], edges: [] });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (companyName) {
+            loadRelationships();
+        }
+    }, [companyName]);
+
+    const loadRelationships = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await apiService.getCompanyRelationships(companyName);
+            setRelationships(response.relationships || { nodes: [], edges: [] });
+        } catch (err) {
+            console.error('Error loading relationships:', err);
+            setError('Errore nel caricamento delle relazioni');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (relationships.nodes.length > 0 && !loading) {
+            renderGraph();
+        }
+    }, [relationships, loading]);
+
+    const renderGraph = () => {
+        const container = document.getElementById(`graph-${companyName.replace(/\s+/g, '-')}`);
+        if (!container || typeof d3 === 'undefined') return;
+
+        // Clear previous graph
+        d3.select(container).selectAll("*").remove();
+
+        const width = container.offsetWidth || 600;
+        const height = 400;
+
+        const svg = d3.select(container)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const simulation = d3.forceSimulation(relationships.nodes)
+            .force("link", d3.forceLink(relationships.edges).id(d => d.id).distance(100))
+            .force("charge", d3.forceManyBody().strength(-300))
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+        // Links
+        const link = svg.append("g")
+            .selectAll("line")
+            .data(relationships.edges)
+            .enter().append("line")
+            .attr("stroke-width", d => Math.sqrt(d.weight || 1) * 2)
+            .attr("stroke", "#999")
+            .attr("opacity", 0.6);
+
+        // Nodes
+        const node = svg.append("g")
+            .selectAll("circle")
+            .data(relationships.nodes)
+            .enter().append("circle")
+            .attr("r", d => d.type === 'center' ? 12 : 8)
+            .attr("fill", d => d.type === 'center' ? "#2563eb" : "#94a3b8")
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+        // Labels
+        const label = svg.append("g")
+            .selectAll("text")
+            .data(relationships.nodes)
+            .enter().append("text")
+            .text(d => d.name)
+            .attr("font-size", "10px")
+            .attr("text-anchor", "middle")
+            .attr("dy", -15);
+
+        // Add click handler for edges
+        link.on("click", (event, d) => {
+            if (onRelationshipClick) {
+                const relationship = {
+                    source: { properties: { nome_azienda: d.source.name || d.source } },
+                    target: { properties: { nome_azienda: d.target.name || d.target } },
+                    relationship: { properties: d.properties || {} }
+                };
+                onRelationshipClick(relationship);
+            }
+        }).style("cursor", "pointer");
+
+        simulation
+            .nodes(relationships.nodes)
+            .on("tick", ticked);
+
+        simulation.force("link")
+            .links(relationships.edges);
+
+        function ticked() {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            node
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+
+            label
+                .attr("x", d => d.x)
+                .attr("y", d => d.y);
+        }
+
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+    };
+
+    if (!companyName) return null;
+
+    return (
+        <div className="bg-teal-50 rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-teal-900">Grafo delle Relazioni</h3>
+                <button
+                    onClick={loadRelationships}
+                    disabled={loading}
+                    className="text-teal-600 hover:text-teal-800 text-sm font-medium disabled:opacity-50"
+                >
+                    <i data-feather="refresh-cw" className="w-4 h-4 inline mr-1"></i>
+                    Aggiorna
+                </button>
+            </div>
+
+            {loading && (
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto mb-2"></div>
+                        <p className="text-teal-600 text-sm">Caricamento relazioni...</p>
+                    </div>
+                </div>
+            )}
+
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {error}
+                </div>
+            )}
+
+            {!loading && !error && relationships.nodes.length === 0 && (
+                <div className="text-center py-8 text-teal-600">
+                    <i data-feather="link" className="w-12 h-12 mx-auto mb-2 text-teal-300"></i>
+                    <p>Nessuna relazione trovata per questa azienda</p>
+                </div>
+            )}
+
+            {!loading && !error && relationships.nodes.length > 0 && (
+                <div>
+                    <div 
+                        id={`graph-${companyName.replace(/\s+/g, '-')}`}
+                        className="w-full h-96 bg-white rounded border"
+                    ></div>
+                    <div className="mt-4 text-sm text-teal-700">
+                        <p><strong>Legenda:</strong></p>
+                        <div className="flex items-center space-x-4 mt-2">
+                            <div className="flex items-center">
+                                <div className="w-3 h-3 bg-blue-600 rounded-full mr-2"></div>
+                                <span>Azienda selezionata</span>
+                            </div>
+                            <div className="flex items-center">
+                                <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                                <span>Aziende correlate</span>
+                            </div>
+                        </div>
+                        <p className="text-xs mt-2 text-teal-600">
+                            Clicca sulle linee di connessione per vedere i dettagli della relazione
+                        </p>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const SUK = ({ user, showToast }) => {
     const [companies, setCompanies] = useState([]);
     const [filteredCompanies, setFilteredCompanies] = useState([]);
@@ -501,6 +702,12 @@ const SUK = ({ user, showToast }) => {
                                 </div>
                             </div>
                         )}
+
+                        {/* Grafo delle Relazioni */}
+                        <CompanyRelationshipsGraph 
+                            companyName={selectedCompany.nome_azienda}
+                            onRelationshipClick={openRelationshipModal}
+                        />
                     </div>
                 )}
             </div>

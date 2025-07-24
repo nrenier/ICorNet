@@ -58,15 +58,15 @@ class Neo4jService:
             return []
     
     def get_sector_aggregations(self):
-        """Get aggregated data by sector"""
+        """Get aggregated data by sector - unwind arrays and count individual elements"""
         if not self.driver:
             logging.warning("Neo4j driver not available, returning mock data")
             return [
-                {"settore": "Technology", "count": 45, "sample_companies": ["Acme Corporation", "TechCorp", "InnovateSoft"]},
-                {"settore": "Manufacturing", "count": 38, "sample_companies": ["Beta Industries", "MegaManufacturing", "PrecisionTools"]},
-                {"settore": "Consulting", "count": 27, "sample_companies": ["Gamma Solutions", "StrategicAdvisors", "BusinessPros"]},
-                {"settore": "Transportation", "count": 23, "sample_companies": ["Delta Logistics", "FastShip", "GlobalTransport"]},
-                {"settore": "Energy", "count": 17, "sample_companies": ["Epsilon Energy", "GreenPower", "SolarTech"]}
+                {"settore": "Intelligenza Artificiale", "count": 4, "sample_companies": ["Company1", "Company2", "Company3"]},
+                {"settore": "Analisi dei Dati", "count": 3, "sample_companies": ["Company2", "Company4"]},
+                {"settore": "Tecnologie digitali", "count": 1, "sample_companies": ["Company1"]},
+                {"settore": "Riconoscimento delle immagini", "count": 1, "sample_companies": ["Company1"]},
+                {"settore": "IoT", "count": 1, "sample_companies": ["Company1"]}
             ]
         
         try:
@@ -74,10 +74,13 @@ class Neo4jService:
                 result = session.run("""
                     MATCH (n:SUK) 
                     WHERE n.settore IS NOT NULL
-                    RETURN n.settore as settore, 
-                           count(n) as count, 
-                           collect(n.nome_azienda)[0..5] as sample_companies
+                    UNWIND n.settore AS settore_item
+                    WITH settore_item, collect(DISTINCT n.nome_azienda) AS companies
+                    RETURN settore_item as settore, 
+                           size(companies) as count,
+                           companies[0..5] as sample_companies
                     ORDER BY count DESC
+                    LIMIT 10
                 """)
                 return [record.data() for record in result]
         except Exception as e:

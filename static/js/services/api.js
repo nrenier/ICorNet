@@ -98,6 +98,10 @@ const apiService = {
         return await this.request('/reports/companies');
     },
 
+    async getCompanyRelationships(companyName) {
+        return await this.request(`/reports/relationships/${encodeURIComponent(companyName)}`);
+    },
+
     // Health check
     async healthCheck() {
         return await this.request('/health', { 

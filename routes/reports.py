@@ -140,3 +140,16 @@ def get_companies_for_reports():
     except Exception as e:
         logging.error(f"Get companies for reports error: {str(e)}")
         return jsonify({'error': 'Failed to fetch companies'}), 500
+
+@reports_bp.route('/relationships/<company_name>', methods=['GET'])
+@login_required
+def get_company_relationships(company_name):
+    try:
+        neo4j_service = current_app.neo4j_service
+        relationships = neo4j_service.get_company_relationships(company_name)
+        
+        return jsonify({'relationships': relationships}), 200
+        
+    except Exception as e:
+        logging.error(f"Get company relationships error: {str(e)}")
+        return jsonify({'error': 'Failed to fetch company relationships'}), 500

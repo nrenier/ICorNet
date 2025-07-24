@@ -9,6 +9,8 @@ const SUK = ({ user, showToast }) => {
     const [reportHistory, setReportHistory] = useState([]);
     const [generatingReport, setGeneratingReport] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [showRelationshipModal, setShowRelationshipModal] = useState(false);
+    const [selectedRelationship, setSelectedRelationship] = useState(null);
 
     useEffect(() => {
         loadData();
@@ -21,7 +23,7 @@ const SUK = ({ user, showToast }) => {
         } else {
             const filtered = companies.filter(company => {
                 const nameMatch = company.nome_azienda?.toLowerCase().includes(searchTerm.toLowerCase());
-                
+
                 let settoreMatch = false;
                 if (company.settore) {
                     if (Array.isArray(company.settore)) {
@@ -32,7 +34,7 @@ const SUK = ({ user, showToast }) => {
                         settoreMatch = company.settore.toLowerCase().includes(searchTerm.toLowerCase());
                     }
                 }
-                
+
                 return nameMatch || settoreMatch;
             }).slice(0, 20);
             setFilteredCompanies(filtered);
@@ -42,15 +44,15 @@ const SUK = ({ user, showToast }) => {
     const loadData = async () => {
         try {
             setLoading(true);
-            
+
             // Load companies from Neo4j
             const companiesResponse = await apiService.getCompaniesForReports();
             setCompanies(companiesResponse.companies || []);
-            
+
             // Load user's report history
             const historyResponse = await apiService.getReportHistory();
             setReportHistory(historyResponse.reports || []);
-            
+
         } catch (error) {
             console.error('Error loading SUK data:', error);
             showToast('Failed to load company data', 'error');
@@ -68,7 +70,7 @@ const SUK = ({ user, showToast }) => {
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
         setIsDropdownOpen(true);
-        
+
         // Clear selected company if search is cleared
         if (e.target.value.trim() === '') {
             setSelectedCompany(null);
@@ -83,15 +85,15 @@ const SUK = ({ user, showToast }) => {
 
         try {
             setGeneratingReport(true);
-            
+
             const response = await apiService.generateReport(selectedCompany.nome_azienda);
             showToast('Report generation started! Check the history section for updates.', 'success');
-            
+
             // Reload report history to show the new report
             setTimeout(() => {
                 loadReportHistory();
             }, 1000);
-            
+
         } catch (error) {
             console.error('Error generating report:', error);
             showToast('Failed to generate report', 'error');
@@ -122,7 +124,7 @@ const SUK = ({ user, showToast }) => {
     const refreshReportStatus = async (reportId) => {
         try {
             const response = await apiService.getReportStatus(reportId);
-            
+
             // Update the report in history
             setReportHistory(prev => 
                 prev.map(report => 
@@ -131,10 +133,24 @@ const SUK = ({ user, showToast }) => {
                         : report
                 )
             );
-            
+
         } catch (error) {
             console.error('Error refreshing report status:', error);
         }
+    };
+
+     const openRelationshipModal = (relationship) => {
+        setSelectedRelationship({
+            source: relationship.source.properties.nome_azienda,
+            target: relationship.target.properties.nome_azienda,
+            properties: relationship.relationship.properties,
+        });
+        setShowRelationshipModal(true);
+    };
+
+    const closeRelationshipModal = () => {
+        setShowRelationshipModal(false);
+        setSelectedRelationship(null);
     };
 
     if (loading) {
@@ -161,14 +177,14 @@ const SUK = ({ user, showToast }) => {
             {/* Company Selection */}
             <div className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Company Selection</h2>
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Search and Select */}
                     <div className="lg:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Search and Select Company
                         </label>
-                        
+
                         <div className="relative">
                             <div className="relative">
                                 <input
@@ -183,7 +199,7 @@ const SUK = ({ user, showToast }) => {
                                     <i data-feather="search" className="w-5 h-5 text-gray-400"></i>
                                 </div>
                             </div>
-                            
+
                             {/* Dropdown */}
                             {isDropdownOpen && filteredCompanies.length > 0 && (
                                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -206,14 +222,14 @@ const SUK = ({ user, showToast }) => {
                                 </div>
                             )}
                         </div>
-                        
+
                         {searchTerm && !selectedCompany && filteredCompanies.length === 0 && (
                             <p className="mt-2 text-sm text-gray-500">
                                 No companies found matching your search.
                             </p>
                         )}
                     </div>
-                    
+
                     {/* Generate Report Button */}
                     <div className="flex items-end">
                         <button
@@ -511,7 +527,7 @@ const SUK = ({ user, showToast }) => {
                         Refresh
                     </button>
                 </div>
-                
+
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -595,6 +611,57 @@ const SUK = ({ user, showToast }) => {
                     </table>
                 </div>
             </div>
+
+            {/* Relationship Details Modal */}
+            {showRelationshipModal && selectedRelationship && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold text-gray-900">Dettagli Relazione</h3>
+                            <button
+                                onClick={closeRelationshipModal}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <i data-feather="x" className="w-5 h-5"></i>
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <strong className="text-gray-700">Da:</strong>
+                                <span className="ml-2 text-gray-900">{selectedRelationship.source}</span>
+                            </div>
+                            <div>
+                                <strong className="text-gray-700">A:</strong>
+                                <span className="ml-2 text-gray-900">{selectedRelationship.target}</span>
+                            </div>
+
+                            {selectedRelationship.properties && (
+                                <div>
+                                    <strong className="text-gray-700">Proprietà della Relazione:</strong>
+                                    <div className="mt-2 bg-gray-50 rounded p-3">
+                                        {Object.entries(selectedRelationship.properties).map(([key, value]) => (
+                                            <div key={key} className="flex justify-between py-1 border-b border-gray-200 last:border-b-0">
+                                                <span className="text-sm font-medium text-gray-600">{key}:</span>
+                                                <span className="text-sm text-gray-900">{String(value)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={closeRelationshipModal}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            >
+                                Chiudi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -125,3 +125,80 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Error searching companies: {str(e)}")
             return []
+    
+    def get_company_relationships(self, company_name):
+        """Get relationships for a specific company"""
+        if not self.driver:
+            logging.warning("Neo4j driver not available, returning mock data")
+            return {
+                'nodes': [
+                    {'id': company_name, 'name': company_name, 'type': 'center'},
+                    {'id': 'Related Company 1', 'name': 'Related Company 1', 'type': 'related'},
+                    {'id': 'Related Company 2', 'name': 'Related Company 2', 'type': 'related'}
+                ],
+                'edges': [
+                    {
+                        'source': company_name,
+                        'target': 'Related Company 1',
+                        'weight': 5,
+                        'type': 'partnership',
+                        'properties': {'weight': 5, 'type': 'partnership', 'description': 'Strategic partnership'}
+                    },
+                    {
+                        'source': company_name,
+                        'target': 'Related Company 2',
+                        'weight': 4,
+                        'type': 'client',
+                        'properties': {'weight': 4, 'type': 'client', 'description': 'Client relationship'}
+                    }
+                ]
+            }
+        
+        try:
+            with self.driver.session() as session:
+                result = session.run("""
+                    MATCH p=(n:SUK)-[r]->(m:SUK) 
+                    WHERE n.nome_azienda = $company_name AND r.weight >= 3 
+                    RETURN n.nome_azienda as source_name, 
+                           m.nome_azienda as target_name,
+                           properties(r) as relationship_properties,
+                           r.weight as weight
+                """, company_name=company_name)
+                
+                relationships = []
+                related_companies = set()
+                
+                for record in result:
+                    source = record["source_name"]
+                    target = record["target_name"]
+                    weight = record["weight"]
+                    rel_props = record["relationship_properties"]
+                    
+                    relationships.append({
+                        'source': source,
+                        'target': target,
+                        'weight': weight,
+                        'properties': rel_props
+                    })
+                    
+                    related_companies.add(source)
+                    related_companies.add(target)
+                
+                # Create nodes
+                nodes = []
+                for company in related_companies:
+                    node_type = 'center' if company == company_name else 'related'
+                    nodes.append({
+                        'id': company,
+                        'name': company,
+                        'type': node_type
+                    })
+                
+                return {
+                    'nodes': nodes,
+                    'edges': relationships
+                }
+                
+        except Exception as e:
+            logging.error(f"Error getting company relationships: {str(e)}")
+            return {'nodes': [], 'edges': []}

@@ -1,0 +1,78 @@
+react-dom.development.js:11109 Uncaught NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+removeChild @ react-dom.development.js:11109
+commitDeletionEffectsOnFiber @ react-dom.development.js:24077
+commitDeletionEffects @ react-dom.development.js:24025
+recursivelyTraverseMutationEffects @ react-dom.development.js:24308
+commitMutationEffectsOnFiber @ react-dom.development.js:24395
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24395
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24395
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24395
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24395
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24395
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24342
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24395
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24395
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24395
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24342
+recursivelyTraverseMutationEffects @ react-dom.development.js:24322
+commitMutationEffectsOnFiber @ react-dom.development.js:24481
+commitMutationEffects @ react-dom.development.js:24292
+commitRootImpl @ react-dom.development.js:26859
+commitRoot @ react-dom.development.js:26731
+performSyncWorkOnRoot @ react-dom.development.js:26166
+flushSyncCallbacks @ react-dom.development.js:12052
+flushSyncCallbacksOnlyInLegacyMode @ react-dom.development.js:12031
+batchedUpdates$1 @ react-dom.development.js:26197
+batchedUpdates @ react-dom.development.js:3978
+dispatchEventForPluginEventSystem @ react-dom.development.js:9297
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6475
+dispatchEvent @ react-dom.development.js:6467
+dispatchDiscreteEvent @ react-dom.development.js:6440Comprendi l'errore
+react-dom.development.js:18714 The above error occurred in the <i> component:
+
+    at i
+    at div
+    at button
+    at div
+    at div
+    at div
+    at div
+    at SUK (<anonymous>:230:20)
+    at main
+    at div
+    at div
+    at App (<anonymous>:129:19)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+overrideMethod @ hook.js:608
+logCapturedError @ react-dom.development.js:18714
+update.callback @ react-dom.development.js:18747
+callCallback @ react-dom.development.js:15046
+commitUpdateQueue @ react-dom.development.js:15067
+commitLayoutEffectOnFiber @ react-dom.development.js:23440
+commitLayoutMountEffects_complete @ react-dom.development.js:24737
+commitLayoutEffects_begin @ react-dom.development.js:24723
+commitLayoutEffects @ react-dom.development.js:24661
+commitRootImpl @ react-dom.development.js:26872
+commitRoot @ react-dom.development.js:26731
+performSyncWorkOnRoot @ react-dom.development.js:26166
+flushSyncCallbacks @ react-dom.development.js:12052
+flushSyncCallbacksOnlyInLegacyMode @ react-dom.development.js:12031
+batchedUpdates$1 @ react-dom.development.js:26197
+batchedUpdates @ react-dom.development.js:3978
+dispatchEventForPluginEventSystem @ react-dom.development.js:9297
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6475
+dispatchEvent @ react-dom.development.js:6467
+dispatchDiscreteEvent @ react-dom.development.js:6440Comprendi l'errore
+react-dom.development.js:11109 Uncaught NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.

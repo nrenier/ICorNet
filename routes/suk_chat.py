@@ -41,18 +41,55 @@ def send_chat_message():
         if response.status_code == 200:
             webhook_data = response.json()
             
-            # Handle nested output structure if present
-            if 'output' in webhook_data:
-                try:
-                    import json
-                    output_data = json.loads(webhook_data['output']) if isinstance(webhook_data['output'], str) else webhook_data['output']
+            # Handle case where webhook_data is a list
+            if isinstance(webhook_data, list) and len(webhook_data) > 0:
+                # Extract the first item if it's a list
+                data_item = webhook_data[0]
+                if 'output' in data_item:
+                    try:
+                        import json
+                        output_data = json.loads(data_item['output']) if isinstance(data_item['output'], str) else data_item['output']
+                        formatted_response = {
+                            'prodotti_soluzioni_esistenti': output_data.get('prodotti_soluzioni_esistenti', []),
+                            'potenziali_fornitori': output_data.get('potenziali_fornitori', []),
+                            'timestamp': data_item.get('timestamp'),
+                            'success': True
+                        }
+                    except (json.JSONDecodeError, TypeError):
+                        formatted_response = {
+                            'prodotti_soluzioni_esistenti': data_item.get('prodotti_soluzioni_esistenti', []),
+                            'potenziali_fornitori': data_item.get('potenziali_fornitori', []),
+                            'timestamp': data_item.get('timestamp'),
+                            'success': True
+                        }
+                else:
                     formatted_response = {
-                        'prodotti_soluzioni_esistenti': output_data.get('prodotti_soluzioni_esistenti', []),
-                        'potenziali_fornitori': output_data.get('potenziali_fornitori', []),
-                        'timestamp': webhook_data.get('timestamp'),
+                        'prodotti_soluzioni_esistenti': data_item.get('prodotti_soluzioni_esistenti', []),
+                        'potenziali_fornitori': data_item.get('potenziali_fornitori', []),
+                        'timestamp': data_item.get('timestamp'),
                         'success': True
                     }
-                except (json.JSONDecodeError, TypeError):
+            elif isinstance(webhook_data, dict):
+                # Handle nested output structure if present
+                if 'output' in webhook_data:
+                    try:
+                        import json
+                        output_data = json.loads(webhook_data['output']) if isinstance(webhook_data['output'], str) else webhook_data['output']
+                        formatted_response = {
+                            'prodotti_soluzioni_esistenti': output_data.get('prodotti_soluzioni_esistenti', []),
+                            'potenziali_fornitori': output_data.get('potenziali_fornitori', []),
+                            'timestamp': webhook_data.get('timestamp'),
+                            'success': True
+                        }
+                    except (json.JSONDecodeError, TypeError):
+                        formatted_response = {
+                            'prodotti_soluzioni_esistenti': webhook_data.get('prodotti_soluzioni_esistenti', []),
+                            'potenziali_fornitori': webhook_data.get('potenziali_fornitori', []),
+                            'timestamp': webhook_data.get('timestamp'),
+                            'success': True
+                        }
+                else:
+                    # Format the response according to the expected structure
                     formatted_response = {
                         'prodotti_soluzioni_esistenti': webhook_data.get('prodotti_soluzioni_esistenti', []),
                         'potenziali_fornitori': webhook_data.get('potenziali_fornitori', []),
@@ -60,12 +97,13 @@ def send_chat_message():
                         'success': True
                     }
             else:
-                # Format the response according to the expected structure
+                # Fallback for unexpected data structure
                 formatted_response = {
-                    'prodotti_soluzioni_esistenti': webhook_data.get('prodotti_soluzioni_esistenti', []),
-                    'potenziali_fornitori': webhook_data.get('potenziali_fornitori', []),
-                    'timestamp': webhook_data.get('timestamp'),
-                    'success': True
+                    'prodotti_soluzioni_esistenti': [],
+                    'potenziali_fornitori': [],
+                    'timestamp': None,
+                    'success': True,
+                    'error': 'Unexpected response format'
                 }
             
             return jsonify(formatted_response)

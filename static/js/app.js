@@ -28,6 +28,7 @@ const Sidebar = ({ currentPage, onNavigate, user, onLogout }) => {
     const menuItems = [
         { id: 'dashboard', name: 'Dashboard', icon: 'home' },
         { id: 'suk', name: 'SUK Analysis', icon: 'bar-chart-2' },
+        { id: 'suk-chat', name: 'SUK Chat', icon: 'message-circle' },
     ];
 
     return (
@@ -233,6 +234,8 @@ const App = () => {
                 return <Dashboard user={user} showToast={showToast} />;
             case 'suk':
                 return <SUK user={user} showToast={showToast} />;
+            case 'suk-chat':
+                return <SUKChat user={user} showToast={showToast} />;
             default:
                 return <Dashboard user={user} showToast={showToast} />;
         }

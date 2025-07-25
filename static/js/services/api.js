@@ -188,6 +188,22 @@ const apiService = {
             method: 'DELETE',
             body: { report_ids: reportIds },
         });
+    },
+
+    // SUK Chat methods
+    async sendChatMessage(message, userId = null) {
+        return await this.request('/suk-chat/send-message', {
+            method: 'POST',
+            body: { 
+                message: message,
+                timestamp: new Date().toISOString(),
+                user_id: userId
+            },
+        });
+    },
+
+    async getChatHistory() {
+        return await this.request('/suk-chat/chat-history');
     }
 };
 

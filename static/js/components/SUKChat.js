@@ -23,7 +23,7 @@ const SUKChat = () => {
 
     const loadChatHistory = async () => {
         try {
-            const response = await api.get('/api/suk-chat/chat-history');
+            const response = await apiService.getChatHistory();
             if (response.success && response.history) {
                 setMessages(response.history);
             }
@@ -49,11 +49,10 @@ const SUKChat = () => {
         setError(null);
 
         try {
-            const response = await api.post('/api/suk-chat/send-message', {
-                message: userMessage.content,
-                timestamp: userMessage.timestamp,
-                user_id: window.currentUser?.id
-            });
+            const response = await apiService.sendChatMessage(
+                userMessage.content, 
+                window.currentUser?.id
+            );
 
             if (response.success) {
                 // Add assistant response to chat
@@ -108,14 +107,12 @@ const SUKChat = () => {
                         <div className="space-y-2">
                             {data.prodotti_soluzioni_esistenti.map((item, index) => (
                                 <div key={index} className="bg-white p-3 rounded border-l-4 border-blue-400">
-                                    <h5 className="font-medium text-gray-900">{item.nome || item.title}</h5>
-                                    {item.descrizione && (
-                                        <p className="text-sm text-gray-600 mt-1">{item.descrizione}</p>
+                                    <h5 className="font-medium text-gray-900">{item.nome_azienda}</h5>
+                                    {item.prodotto_soluzione_identificato && (
+                                        <p className="text-sm font-medium text-blue-700 mt-1">{item.prodotto_soluzione_identificato}</p>
                                     )}
-                                    {item.categoria && (
-                                        <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-2">
-                                            {item.categoria}
-                                        </span>
+                                    {item.motivo_del_match && (
+                                        <p className="text-sm text-gray-600 mt-2">{item.motivo_del_match}</p>
                                     )}
                                 </div>
                             ))}
@@ -133,23 +130,10 @@ const SUKChat = () => {
                         <div className="space-y-2">
                             {data.potenziali_fornitori.map((fornitore, index) => (
                                 <div key={index} className="bg-white p-3 rounded border-l-4 border-green-400">
-                                    <h5 className="font-medium text-gray-900">{fornitore.nome || fornitore.name}</h5>
-                                    {fornitore.specializzazione && (
-                                        <p className="text-sm text-gray-600 mt-1">{fornitore.specializzazione}</p>
+                                    <h5 className="font-medium text-gray-900">{fornitore.nome_azienda}</h5>
+                                    {fornitore.motivo_del_match && (
+                                        <p className="text-sm text-gray-600 mt-2">{fornitore.motivo_del_match}</p>
                                     )}
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        {fornitore.settore && (
-                                            <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
-                                                {fornitore.settore}
-                                            </span>
-                                        )}
-                                        {fornitore.localizzazione && (
-                                            <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
-                                                <i data-feather="map-pin" className="w-3 h-3 inline mr-1"></i>
-                                                {fornitore.localizzazione}
-                                            </span>
-                                        )}
-                                    </div>
                                 </div>
                             ))}
                         </div>

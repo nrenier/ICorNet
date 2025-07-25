@@ -41,13 +41,32 @@ def send_chat_message():
         if response.status_code == 200:
             webhook_data = response.json()
             
-            # Format the response according to the expected structure
-            formatted_response = {
-                'prodotti_soluzioni_esistenti': webhook_data.get('prodotti_soluzioni_esistenti', []),
-                'potenziali_fornitori': webhook_data.get('potenziali_fornitori', []),
-                'timestamp': webhook_data.get('timestamp'),
-                'success': True
-            }
+            # Handle nested output structure if present
+            if 'output' in webhook_data:
+                try:
+                    import json
+                    output_data = json.loads(webhook_data['output']) if isinstance(webhook_data['output'], str) else webhook_data['output']
+                    formatted_response = {
+                        'prodotti_soluzioni_esistenti': output_data.get('prodotti_soluzioni_esistenti', []),
+                        'potenziali_fornitori': output_data.get('potenziali_fornitori', []),
+                        'timestamp': webhook_data.get('timestamp'),
+                        'success': True
+                    }
+                except (json.JSONDecodeError, TypeError):
+                    formatted_response = {
+                        'prodotti_soluzioni_esistenti': webhook_data.get('prodotti_soluzioni_esistenti', []),
+                        'potenziali_fornitori': webhook_data.get('potenziali_fornitori', []),
+                        'timestamp': webhook_data.get('timestamp'),
+                        'success': True
+                    }
+            else:
+                # Format the response according to the expected structure
+                formatted_response = {
+                    'prodotti_soluzioni_esistenti': webhook_data.get('prodotti_soluzioni_esistenti', []),
+                    'potenziali_fornitori': webhook_data.get('potenziali_fornitori', []),
+                    'timestamp': webhook_data.get('timestamp'),
+                    'success': True
+                }
             
             return jsonify(formatted_response)
         else:

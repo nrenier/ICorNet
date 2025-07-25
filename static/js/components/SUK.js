@@ -398,19 +398,19 @@ const SUK = ({ user, showToast }) => {
     const confirmBulkDelete = async () => {
         try {
             setDeletingReports(true);
-            
+
             await apiService.bulkDeleteReports(selectedReports);
-            
+
             // Remove deleted reports from local state
             setReportHistory(prev => 
                 prev.filter(report => !selectedReports.includes(report.id))
             );
-            
+
             setSelectedReports([]);
             setShowDeleteModal(false);
-            
+
             showToast(`Successfully deleted ${selectedReports.length} report(s)`, 'success');
-            
+
         } catch (error) {
             console.error('Error deleting reports:', error);
             showToast('Failed to delete reports', 'error');

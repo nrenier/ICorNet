@@ -83,6 +83,7 @@ def create_app():
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(reports_bp, url_prefix='/api/reports')
     app.register_blueprint(suk_chat_bp, url_prefix='/api/suk-chat')
+    app.register_blueprint(suk_chat_bp, url_prefix='/api/suk-chat')
     
     @app.route('/')
     def index():

@@ -49,6 +49,7 @@ const Sidebar = ({
     ];
 
     return (
+        <>
         <div
             className={`bg-white shadow-lg h-screen fixed left-0 top-0 z-40 transition-all duration-300 ${
                 isOpen ? "w-64" : "w-16"
@@ -168,6 +169,21 @@ const Sidebar = ({
                 </button>
             </div>
         </div>
+
+            {/* Floating toggle button when sidebar is closed */}
+            {!isOpen && (
+                <button
+                    onClick={onToggle}
+                    className="fixed left-4 top-4 z-50 p-2 bg-white shadow-lg rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                    title="Apri sidebar"
+                >
+                    <i
+                        data-feather="chevron-right"
+                        className="w-5 h-5 text-gray-600"
+                    ></i>
+                </button>
+            )}
+        </>
     );
 };
 

@@ -45,6 +45,24 @@ class Report(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     report_data = db.Column(db.Text)  # JSON string containing the report data
+    workflow_id = db.Column(db.String(100))
+    file_name = db.Column(db.String(255))
+    file_path = db.Column(db.String(500))
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'company_name': self.company_name,
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'user_id': self.user_id,
+            'workflow_id': self.workflow_id,
+            'file_name': self.file_name,
+            'file_path': self.file_path,
+            'report_data': self.report_data
+        }
 
 class ChatMessage(db.Model):
     __tablename__ = 'chat_messages'

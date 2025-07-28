@@ -271,3 +271,26 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Error getting companies by sector: {str(e)}")
             return []
+
+    def get_federterziario_companies_list(self):
+        """Get list of all FEDERTERZIARIO companies with their details"""
+        if not self.driver:
+            logging.warning("Neo4j driver not available, returning mock data")
+            return [
+                {"nome_azienda": "Federterziario Corp", "settore": "Services", "descrizione": "Service company"},
+                {"nome_azienda": "Tertiary Solutions", "settore": "Consulting", "descrizione": "Business consulting"},
+                {"nome_azienda": "Service Industries", "settore": "Technology", "descrizione": "Tech services"},
+            ]
+
+        try:
+            with self.driver.session() as session:
+                result = session.run("""
+                    MATCH (n:FEDERTERZIARIO) 
+                    WHERE n.nome_azienda IS NOT NULL
+                    RETURN properties(n) as company_properties
+                    ORDER BY n.nome_azienda
+                """)
+                return [record["company_properties"] for record in result]
+        except Exception as e:
+            logging.error(f"Error getting FEDERTERZIARIO companies list: {str(e)}")
+            return []

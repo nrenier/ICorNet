@@ -226,6 +226,20 @@ def get_companies_for_reports():
         return jsonify({'error': 'Failed to fetch companies'}), 500
 
 
+@reports_bp.route('/federterziario-companies', methods=['GET'])
+@login_required
+def get_federterziario_companies_for_reports():
+    try:
+        neo4j_service = current_app.config['neo4j_service']
+        companies = neo4j_service.get_federterziario_companies_list()
+
+        return jsonify({'companies': companies}), 200
+
+    except Exception as e:
+        logging.error(f"Get FEDERTERZIARIO companies for reports error: {str(e)}")
+        return jsonify({'error': 'Failed to fetch FEDERTERZIARIO companies'}), 500
+
+
 @reports_bp.route('/relationships/<company_name>', methods=['GET'])
 @login_required
 def get_company_relationships(company_name):

@@ -150,7 +150,34 @@ const apiService = {
     },
 
     async getCompaniesForReports() {
-        return await this.request('/reports/companies');
+        const response = await fetch('/api/reports/companies', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch companies for reports');
+        }
+
+        return await response.json();
+    },
+
+    // Get FEDERTERZIARIO companies for reports
+    async getFederterziarioCompaniesForReports() {
+        const response = await fetch('/api/reports/federterziario-companies', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch FEDERTERZIARIO companies for reports');
+        }
+
+        return await response.json();
     },
 
     async getCompanyRelationships(companyName) {

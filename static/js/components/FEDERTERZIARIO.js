@@ -37,8 +37,8 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
         try {
             setLoading(true);
 
-            // Load companies from Neo4j
-            const companiesResponse = await apiService.getCompaniesForReports();
+            // Load FEDERTERZIARIO companies from Neo4j
+            const companiesResponse = await apiService.getFederterziarioCompaniesForReports();
             setCompanies(companiesResponse.companies || []);
 
             // Load user's report history

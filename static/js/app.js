@@ -9,13 +9,23 @@ const Toast = ({ message, type, onClose }) => {
         return () => clearTimeout(timer);
     }, [onClose]);
 
-    const bgColor = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
+    const bgColor =
+        type === "error"
+            ? "bg-red-500"
+            : type === "success"
+              ? "bg-green-500"
+              : "bg-blue-500";
 
     return (
-        <div className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300`}>
+        <div
+            className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300`}
+        >
             <div className="flex items-center justify-between">
                 <span>{message}</span>
-                <button onClick={onClose} className="ml-4 text-white hover:text-gray-200">
+                <button
+                    onClick={onClose}
+                    className="ml-4 text-white hover:text-gray-200"
+                >
                     <i data-feather="x" className="w-4 h-4"></i>
                 </button>
             </div>
@@ -24,44 +34,64 @@ const Toast = ({ message, type, onClose }) => {
 };
 
 // Navigation Sidebar Component
-const Sidebar = ({ currentPage, onNavigate, user, onLogout, isOpen, onToggle }) => {
+const Sidebar = ({
+    currentPage,
+    onNavigate,
+    user,
+    onLogout,
+    isOpen,
+    onToggle,
+}) => {
     const menuItems = [
-        { id: 'dashboard', name: 'Dashboard', icon: 'home' },
-        { id: 'suk', name: 'SUK Analysis', icon: 'bar-chart-2' },
-        { id: 'suk-chat', name: 'SUK Chat', icon: 'message-circle' },
+        { id: "dashboard", name: "Dashboard", icon: "home" },
+        { id: "suk", name: "SUK Analysis", icon: "bar-chart-2" },
+        { id: "suk-chat", name: "SUK Chat", icon: "message-circle" },
     ];
 
     return (
-        <div className={`bg-white shadow-lg h-screen fixed left-0 top-0 z-40 transition-all duration-300 ${
-            isOpen ? 'w-64' : 'w-16'
-        }`}>
+        <div
+            className={`bg-white shadow-lg h-screen fixed left-0 top-0 z-40 transition-all duration-300 ${
+                isOpen ? "w-64" : "w-16"
+            }`}
+        >
             <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                    <div className={`flex items-center space-x-3 ${!isOpen && 'justify-center'}`}>
-                        <img 
-                            src="/images/logo_icornet.png" 
-                            alt="ICorNet Logo" 
+                    <div
+                        className={`flex items-center space-x-3 ${!isOpen && "justify-center"}`}
+                    >
+                        <img
+                            src="/images/logo_icornet.png"
+                            alt="ICorNet Logo"
                             className="h-12 w-full object-contain max-w-[200px] flex-shrink-0"
                             onError={(e) => {
-                                console.log('Image failed to load, showing fallback icon');
-                                e.target.style.display = 'none';
-                                e.target.nextElementSibling.style.display = 'flex';
+                                console.log(
+                                    "Image failed to load, showing fallback icon",
+                                );
+                                e.target.style.display = "none";
+                                e.target.nextElementSibling.style.display =
+                                    "flex";
                             }}
                             onLoad={(e) => {
-                                console.log('Image loaded successfully');
-                                e.target.style.display = 'block';
-                                e.target.nextElementSibling.style.display = 'none';
+                                console.log("Image loaded successfully");
+                                e.target.style.display = "block";
+                                e.target.nextElementSibling.style.display =
+                                    "none";
                             }}
                         />
-                        <div 
+                        <div
                             className="h-12 w-full bg-blue-600 rounded-lg items-center justify-center max-w-[200px]"
-                            style={{display: 'none'}}
+                            style={{ display: "none" }}
                         >
-                            <i data-feather="database" className="h-8 w-8 text-white"></i>
+                            <i
+                                data-feather="database"
+                                className="h-8 w-8 text-white"
+                            ></i>
                         </div>
                         {isOpen && (
                             <div>
-                                <p className="text-sm text-gray-600 text-center">Intelligent Corporate Network</p>
+                                <p className="text-sm text-gray-600 text-center">
+                                    Intelligent Corporate Network
+                                </p>
                             </div>
                         )}
                     </div>
@@ -70,29 +100,41 @@ const Sidebar = ({ currentPage, onNavigate, user, onLogout, isOpen, onToggle }) 
                         className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
                         title={isOpen ? "Chiudi sidebar" : "Apri sidebar"}
                     >
-                        <i data-feather={isOpen ? "chevron-left" : "chevron-right"} className="w-5 h-5 text-gray-600"></i>
+                        <i
+                            data-feather={
+                                isOpen ? "chevron-left" : "chevron-right"
+                            }
+                            className="w-5 h-5 text-gray-600"
+                        ></i>
                     </button>
                 </div>
             </div>
 
             <nav className="mt-6">
-                {menuItems.map(item => (
+                {menuItems.map((item) => (
                     <button
                         key={item.id}
                         onClick={() => onNavigate(item.id)}
                         className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 transition-colors ${
-                            currentPage === item.id ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
-                        } ${!isOpen && 'justify-center'}`}
-                        title={!isOpen ? item.name : ''}
+                            currentPage === item.id
+                                ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                                : "text-gray-700"
+                        } ${!isOpen && "justify-center"}`}
+                        title={!isOpen ? item.name : ""}
                     >
-                        <i data-feather={item.icon} className={`w-5 h-5 ${isOpen ? 'mr-3' : ''}`}></i>
+                        <i
+                            data-feather={item.icon}
+                            className={`w-5 h-5 ${isOpen ? "mr-3" : ""}`}
+                        ></i>
                         {isOpen && item.name}
                     </button>
                 ))}
             </nav>
 
             <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200">
-                <div className={`flex items-center mb-4 ${!isOpen && 'justify-center'}`}>
+                <div
+                    className={`flex items-center mb-4 ${!isOpen && "justify-center"}`}
+                >
                     <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                         <span className="text-white text-sm font-semibold">
                             {user?.username?.charAt(0).toUpperCase()}
@@ -100,20 +142,27 @@ const Sidebar = ({ currentPage, onNavigate, user, onLogout, isOpen, onToggle }) 
                     </div>
                     {isOpen && (
                         <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-700">{user?.username}</p>
-                            <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+                            <p className="text-sm font-medium text-gray-700">
+                                {user?.username}
+                            </p>
+                            <p className="text-xs text-gray-500 capitalize">
+                                {user?.role}
+                            </p>
                         </div>
                     )}
                 </div>
                 <button
                     onClick={onLogout}
                     className={`w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ${
-                        !isOpen && 'justify-center'
+                        !isOpen && "justify-center"
                     }`}
-                    title={!isOpen ? 'Logout' : ''}
+                    title={!isOpen ? "Logout" : ""}
                 >
-                    <i data-feather="log-out" className={`w-4 h-4 ${isOpen ? 'mr-2' : ''}`}></i>
-                    {isOpen && 'Logout'}
+                    <i
+                        data-feather="log-out"
+                        className={`w-4 h-4 ${isOpen ? "mr-2" : ""}`}
+                    ></i>
+                    {isOpen && "Logout"}
                 </button>
             </div>
         </div>
@@ -122,13 +171,13 @@ const Sidebar = ({ currentPage, onNavigate, user, onLogout, isOpen, onToggle }) 
 
 // Main App Component
 const App = () => {
-    const [currentPage, setCurrentPage] = useState('dashboard');
+    const [currentPage, setCurrentPage] = useState("dashboard");
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
-    const showToast = (message, type = 'info') => {
+    const showToast = (message, type = "info") => {
         setToast({ message, type });
     };
 
@@ -144,7 +193,7 @@ const App = () => {
     // Initialize feather icons when app loads
     useEffect(() => {
         const initIcons = () => {
-            if (typeof window.initFeatherIcons === 'function') {
+            if (typeof window.initFeatherIcons === "function") {
                 window.initFeatherIcons();
             }
         };
@@ -164,7 +213,7 @@ const App = () => {
             const userData = await apiService.getCurrentUser();
             setUser(userData.user);
         } catch (error) {
-            console.log('Not authenticated');
+            console.log("Not authenticated");
         } finally {
             setLoading(false);
         }
@@ -174,10 +223,10 @@ const App = () => {
         try {
             const response = await apiService.login(credentials);
             setUser(response.user);
-            showToast('Login successful!', 'success');
+            showToast("Login successful!", "success");
             return true;
         } catch (error) {
-            showToast(error.message || 'Login failed', 'error');
+            showToast(error.message || "Login failed", "error");
             return false;
         }
     };
@@ -186,10 +235,10 @@ const App = () => {
         try {
             const response = await apiService.register(userData);
             setUser(response.user);
-            showToast('Registration successful!', 'success');
+            showToast("Registration successful!", "success");
             return true;
         } catch (error) {
-            showToast(error.message || 'Registration failed', 'error');
+            showToast(error.message || "Registration failed", "error");
             return false;
         }
     };
@@ -198,10 +247,10 @@ const App = () => {
         try {
             await apiService.logout();
             setUser(null);
-            setCurrentPage('dashboard');
-            showToast('Logged out successfully', 'success');
+            setCurrentPage("dashboard");
+            showToast("Logged out successfully", "success");
         } catch (error) {
-            showToast('Logout failed', 'error');
+            showToast("Logout failed", "error");
         }
     };
 
@@ -209,13 +258,13 @@ const App = () => {
         setCurrentPage(page);
         // Update feather icons after navigation
         setTimeout(() => {
-            if (typeof window.initFeatherIcons === 'function') {
+            if (typeof window.initFeatherIcons === "function") {
                 window.initFeatherIcons();
-            } else if (typeof feather !== 'undefined') {
+            } else if (typeof feather !== "undefined") {
                 try {
                     feather.replace();
                 } catch (e) {
-                    console.warn('Feather icons update failed:', e);
+                    console.warn("Feather icons update failed:", e);
                 }
             }
         }, 100);
@@ -252,11 +301,11 @@ const App = () => {
     // Render current page component
     const renderCurrentPage = () => {
         switch (currentPage) {
-            case 'dashboard':
+            case "dashboard":
                 return <Dashboard user={user} showToast={showToast} />;
-            case 'suk':
+            case "suk":
                 return <SUK user={user} showToast={showToast} />;
-            case 'suk-chat':
+            case "suk-chat":
                 return <SUKChat user={user} showToast={showToast} />;
             default:
                 return <Dashboard user={user} showToast={showToast} />;
@@ -274,10 +323,12 @@ const App = () => {
                 onToggle={() => setSidebarOpen(!sidebarOpen)}
             />
 
-            <div className={sidebarOpen ? "ml-64 min-h-screen" : "ml-16 min-h-screen"}>
-                <main className="p-6">
-                    {renderCurrentPage()}
-                </main>
+            <div
+                className={
+                    sidebarOpen ? "ml-64 min-h-screen" : "ml-16 min-h-screen"
+                }
+            >
+                <main className="p-6">{renderCurrentPage()}</main>
             </div>
 
             {toast && (
@@ -285,12 +336,13 @@ const App = () => {
                     message={toast.message}
                     type={toast.type}
                     onClose={hideToast}
-                )}
+                ></Toast>
+            )}
         </div>
     );
 };
 
 // Render the app using React 18 createRoot API
 const { createRoot } = ReactDOM;
-const root = createRoot(document.getElementById('root'));
+const root = createRoot(document.getElementById("root"));
 root.render(<App />);

@@ -2,8 +2,26 @@ from flask import Blueprint, request, jsonify, current_app
 import requests
 import logging
 import os
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+import json
 
 suk_chat_bp = Blueprint('suk_chat', __name__)
+
+# Initialize SQLAlchemy (if not already initialized elsewhere)
+db = SQLAlchemy()
+
+
+# Define the ChatMessage model
+class ChatMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    message_type = db.Column(db.String(50), nullable=False)  # e.g., 'user', 'assistant'
+    user_id = db.Column(db.String(50), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<ChatMessage {self.id}>'
 
 
 @suk_chat_bp.route('/send-message', methods=['POST'])
@@ -15,6 +33,7 @@ def send_chat_message():
             return jsonify({'error': 'Invalid JSON data'}), 400
 
         message = data.get('message', '').strip()
+        user_id = data.get('user_id')  # Get the user ID
 
         if not message:
             return jsonify({'error': 'Message is required'}), 400
@@ -29,8 +48,18 @@ def send_chat_message():
         payload = {
             'message': message,
             'timestamp': data.get('timestamp') if data else None,
-            'user_id': data.get('user_id') if data else None
+            'user_id': user_id if data else None
         }
+
+        # Save user message to database
+        user_message = ChatMessage(
+            content=message,
+            message_type='user',
+            user_id=user_id,
+            timestamp=datetime.utcnow()
+        )
+        db.session.add(user_message)
+        db.session.commit()
 
         # Send request to n8n webhook
         response = requests.post(webhook_url,
@@ -63,6 +92,17 @@ def send_chat_message():
                             'success':
                             True
                         }
+
+                        # Save assistant response to database
+                        assistant_message = ChatMessage(
+                            content=json.dumps(formatted_response),
+                            message_type='assistant',
+                            user_id=user_id,
+                            timestamp=datetime.utcnow()
+                        )
+                        db.session.add(assistant_message)
+                        db.session.commit()
+
                     except (json.JSONDecodeError, TypeError):
                         formatted_response = {
                             'prodotti_soluzioni_esistenti':
@@ -74,6 +114,16 @@ def send_chat_message():
                             'success':
                             True
                         }
+
+                        # Save assistant response to database
+                        assistant_message = ChatMessage(
+                            content=json.dumps(formatted_response),
+                            message_type='assistant',
+                            user_id=user_id,
+                            timestamp=datetime.utcnow()
+                        )
+                        db.session.add(assistant_message)
+                        db.session.commit()
                 else:
                     formatted_response = {
                         'prodotti_soluzioni_esistenti':
@@ -85,6 +135,16 @@ def send_chat_message():
                         'success':
                         True
                     }
+
+                    # Save assistant response to database
+                    assistant_message = ChatMessage(
+                        content=json.dumps(formatted_response),
+                        message_type='assistant',
+                        user_id=user_id,
+                        timestamp=datetime.utcnow()
+                    )
+                    db.session.add(assistant_message)
+                    db.session.commit()
             elif isinstance(webhook_data, dict):
                 # Handle nested output structure if present
                 if 'output' in webhook_data:
@@ -105,6 +165,17 @@ def send_chat_message():
                             'success':
                             True
                         }
+
+                        # Save assistant response to database
+                        assistant_message = ChatMessage(
+                            content=json.dumps(formatted_response),
+                            message_type='assistant',
+                            user_id=user_id,
+                            timestamp=datetime.utcnow()
+                        )
+                        db.session.add(assistant_message)
+                        db.session.commit()
+
                     except (json.JSONDecodeError, TypeError):
                         formatted_response = {
                             'prodotti_soluzioni_esistenti':
@@ -117,6 +188,16 @@ def send_chat_message():
                             'success':
                             True
                         }
+
+                        # Save assistant response to database
+                        assistant_message = ChatMessage(
+                            content=json.dumps(formatted_response),
+                            message_type='assistant',
+                            user_id=user_id,
+                            timestamp=datetime.utcnow()
+                        )
+                        db.session.add(assistant_message)
+                        db.session.commit()
                 else:
                     # Format the response according to the expected structure
                     formatted_response = {
@@ -129,6 +210,16 @@ def send_chat_message():
                         'success':
                         True
                     }
+
+                    # Save assistant response to database
+                    assistant_message = ChatMessage(
+                        content=json.dumps(formatted_response),
+                        message_type='assistant',
+                        user_id=user_id,
+                        timestamp=datetime.utcnow()
+                    )
+                    db.session.add(assistant_message)
+                    db.session.commit()
             else:
                 # Fallback for unexpected data structure
                 formatted_response = {
@@ -160,9 +251,19 @@ def send_chat_message():
 @suk_chat_bp.route('/chat-history', methods=['GET'])
 def get_chat_history():
     """Get chat history for the current user"""
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'User ID is required'}), 400
+
     try:
-        # For now, return empty history - this could be expanded to store chat history in database
-        return jsonify({'history': [], 'success': True})
+        chat_history = ChatMessage.query.filter_by(user_id=user_id).order_by(
+            ChatMessage.timestamp.asc()).all()
+        history = [{
+            'content': msg.content,
+            'message_type': msg.message_type,
+            'timestamp': msg.timestamp.isoformat()
+        } for msg in chat_history]
+        return jsonify({'history': history, 'success': True})
     except Exception as e:
         logging.error(f"Error retrieving chat history: {str(e)}")
         return jsonify({'error': 'Failed to retrieve chat history'}), 500

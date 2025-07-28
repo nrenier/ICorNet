@@ -204,6 +204,12 @@ const apiService = {
 
     async getChatHistory() {
         return await this.request('/suk-chat/chat-history');
+    },
+
+    async clearChatHistory() {
+        return await this.request('/suk-chat/clear-history', {
+            method: 'DELETE'
+        });
     }
 };
 

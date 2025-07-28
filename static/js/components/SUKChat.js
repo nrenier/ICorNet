@@ -54,7 +54,7 @@ const SUKChat = () => {
                 window.currentUser?.id
             );
 
-            if (response.success) {
+            if (response && (response.prodotti_soluzioni_esistenti || response.potenziali_fornitori)) {
                 // Add assistant response to chat
                 const assistantMessage = {
                     id: Date.now() + 1,
@@ -69,7 +69,7 @@ const SUKChat = () => {
         } catch (error) {
             console.error('Error sending message:', error);
             setError(error.message || 'Failed to send message');
-            
+
             // Add error message to chat
             const errorMessage = {
                 id: Date.now() + 1,

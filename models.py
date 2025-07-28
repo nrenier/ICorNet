@@ -9,7 +9,7 @@ db = SQLAlchemy(model_class=Base)
 
 class User(db.Model):
     __tablename__ = 'users'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True)
@@ -19,10 +19,10 @@ class User(db.Model):
     role = db.Column(db.String(20), default='user')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     # Relationship with reports
     reports = db.relationship('Report', backref='user', lazy=True)
-    
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -36,7 +36,7 @@ class User(db.Model):
 
 class Report(db.Model):
     __tablename__ = 'reports'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     company_name = db.Column(db.String(255), nullable=False)
@@ -46,7 +46,7 @@ class Report(db.Model):
     file_path = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -62,8 +62,31 @@ class Report(db.Model):
 
 class Session(db.Model):
     __tablename__ = 'sessions'
-    
+
     id = db.Column(db.String(255), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     data = db.Column(db.Text)
     expires_at = db.Column(db.DateTime)
+
+class ChatMessage(db.Model):
+    __tablename__ = 'chat_messages'
+
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    message_type = db.Column(db.String(20), nullable=False)  # 'user' or 'assistant'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    session_id = db.Column(db.String(100))  # Optional: group messages by session
+
+    # Relationship
+    user = db.relationship('User', backref=db.backref('chat_messages', lazy=True))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'content': self.content,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'message_type': self.message_type,
+            'user_id': self.user_id,
+            'session_id': self.session_id
+        }

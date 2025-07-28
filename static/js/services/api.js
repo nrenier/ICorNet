@@ -180,6 +180,22 @@ const apiService = {
         return await response.json();
     },
 
+    // Get FEDERTERZIARIO company details
+    async getFederterziarioCompanyDetails(companyName) {
+        const response = await fetch(`/api/reports/federterziario-company-details/${encodeURIComponent(companyName)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch FEDERTERZIARIO company details');
+        }
+
+        return await response.json();
+    },
+
     async getCompanyRelationships(companyName) {
         return await this.request(`/reports/relationships/${encodeURIComponent(companyName)}`);
     },

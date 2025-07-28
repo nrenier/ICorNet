@@ -53,10 +53,19 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
         }
     };
 
-    const handleCompanySelect = (company) => {
+    const handleCompanySelect = async (company) => {
         setSelectedCompany(company);
         setSearchTerm(company.nome_azienda);
         setIsDropdownOpen(false);
+        
+        // Load detailed company information
+        try {
+            const detailsResponse = await apiService.getFederterziarioCompanyDetails(company.nome_azienda);
+            setSelectedCompany(detailsResponse.company);
+        } catch (error) {
+            console.error('Error loading company details:', error);
+            // Keep the basic company info if detailed loading fails
+        }
     };
 
     const handleSearchChange = (e) => {
@@ -308,9 +317,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                         <strong>Nome Azienda:</strong> {selectedCompany.nome_azienda}
                                     </div>
                                 )}
-                                {selectedCompany.codice_fiscale && (
+                                {selectedCompany.partita_iva && (
                                     <div>
-                                        <strong>Codice Fiscale:</strong> {selectedCompany.codice_fiscale}
+                                        <strong>Partita IVA:</strong> {selectedCompany.partita_iva}
                                     </div>
                                 )}
                                 {selectedCompany.regione && (
@@ -318,74 +327,83 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                         <strong>Regione:</strong> {selectedCompany.regione}
                                     </div>
                                 )}
-                                {selectedCompany.comune && (
+                                {selectedCompany.sigla_provincia && (
                                     <div>
-                                        <strong>Comune:</strong> {selectedCompany.comune}
+                                        <strong>Provincia:</strong> {selectedCompany.sigla_provincia}
                                     </div>
                                 )}
-                                {selectedCompany.cap && (
+                                {selectedCompany.sito_web && (
                                     <div>
-                                        <strong>CAP:</strong> {selectedCompany.cap}
+                                        <strong>Sito Web:</strong> 
+                                        <a href={selectedCompany.sito_web} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 ml-1">
+                                            {selectedCompany.sito_web}
+                                        </a>
                                     </div>
                                 )}
-                                {selectedCompany.indirizzo && (
+                                {selectedCompany.alto_valore_tecnologico && (
                                     <div>
-                                        <strong>Indirizzo:</strong> {selectedCompany.indirizzo}
-                                    </div>
-                                )}
-                                {selectedCompany.natura_giuridica && (
-                                    <div>
-                                        <strong>Natura Giuridica:</strong> {selectedCompany.natura_giuridica}
-                                    </div>
-                                )}
-                                {selectedCompany.stato_attivita && (
-                                    <div>
-                                        <strong>Stato Attività:</strong> {selectedCompany.stato_attivita}
+                                        <strong>Alto Valore Tecnologico:</strong> {selectedCompany.alto_valore_tecnologico}
                                     </div>
                                 )}
                             </div>
+                            {selectedCompany.descrizione && (
+                                <div className="mt-4">
+                                    <strong className="block text-blue-900 mb-2">Descrizione:</strong>
+                                    <p className="text-blue-800">{selectedCompany.descrizione}</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Settore e Attività */}
                         <div className="bg-green-50 rounded-lg p-6">
                             <h3 className="text-lg font-semibold text-green-900 mb-4">Settore e Attività</h3>
                             <div className="space-y-4 text-sm text-green-800">
-                                {selectedCompany.settore && (
+                                {selectedCompany.sezione_ateco && (
                                     <div>
-                                        <strong>Settore:</strong> {selectedCompany.settore}
+                                        <strong>Sezione ATECO:</strong> {selectedCompany.sezione_ateco}
                                     </div>
                                 )}
-                                {selectedCompany.codice_ateco_2007_principale && (
+                                {selectedCompany.descrizione_ateco && (
                                     <div>
-                                        <strong>Codice ATECO 2007 Principale:</strong> {selectedCompany.codice_ateco_2007_principale}
+                                        <strong>Descrizione ATECO:</strong> {selectedCompany.descrizione_ateco}
                                     </div>
                                 )}
-                                {selectedCompany.descrizione_ateco_2007_principale && (
+                                {selectedCompany.tipologia_attivita && selectedCompany.tipologia_attivita.length > 0 && (
                                     <div>
-                                        <strong>Descrizione ATECO 2007:</strong> {selectedCompany.descrizione_ateco_2007_principale}
+                                        <strong className="block mb-2">Tipologia Attività:</strong>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {selectedCompany.tipologia_attivita.map((attivita, index) => (
+                                                <li key={index}>{attivita}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {selectedCompany.classificazione_prodotti && selectedCompany.classificazione_prodotti.length > 0 && (
+                                    <div>
+                                        <strong className="block mb-2">Classificazione Prodotti:</strong>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {selectedCompany.classificazione_prodotti.map((prodotto, index) => (
+                                                <li key={index}>{prodotto}</li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Informazioni Economiche */}
-                        {(selectedCompany.fascia_fatturato || selectedCompany.numero_dipendenti || selectedCompany.fascia_addetti) && (
+                        {/* Informazioni Economiche e Produzione */}
+                        {(selectedCompany.classe_valore_produzione || selectedCompany.tipo_mercato) && (
                             <div className="bg-yellow-50 rounded-lg p-6">
                                 <h3 className="text-lg font-semibold text-yellow-900 mb-4">Informazioni Economiche</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-800">
-                                    {selectedCompany.fascia_fatturato && (
+                                    {selectedCompany.classe_valore_produzione && (
                                         <div>
-                                            <strong>Fascia Fatturato:</strong> {selectedCompany.fascia_fatturato}
+                                            <strong>Classe Valore Produzione:</strong> {selectedCompany.classe_valore_produzione}
                                         </div>
                                     )}
-                                    {selectedCompany.numero_dipendenti && (
+                                    {selectedCompany.tipo_mercato && selectedCompany.tipo_mercato.length > 0 && (
                                         <div>
-                                            <strong>Numero Dipendenti:</strong> {selectedCompany.numero_dipendenti}
-                                        </div>
-                                    )}
-                                    {selectedCompany.fascia_addetti && (
-                                        <div>
-                                            <strong>Fascia Addetti:</strong> {selectedCompany.fascia_addetti}
+                                            <strong>Tipo Mercato:</strong> {selectedCompany.tipo_mercato.join(', ')}
                                         </div>
                                     )}
                                 </div>
@@ -393,43 +411,91 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                         )}
 
                         {/* Date Importanti */}
-                        {(selectedCompany.data_costituzione || selectedCompany.data_inizio_attivita || selectedCompany.data_cessazione || selectedCompany.data_ultima_variazione) && (
+                        {selectedCompany.data_inizio_attivita && (
                             <div className="bg-purple-50 rounded-lg p-6">
                                 <h3 className="text-lg font-semibold text-purple-900 mb-4">Date Importanti</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-purple-800">
-                                    {selectedCompany.data_costituzione && (
-                                        <div>
-                                            <strong>Data Costituzione:</strong> {selectedCompany.data_costituzione}
-                                        </div>
-                                    )}
-                                    {selectedCompany.data_inizio_attivita && (
-                                        <div>
-                                            <strong>Data Inizio Attività:</strong> {selectedCompany.data_inizio_attivita}
-                                        </div>
-                                    )}
-                                    {selectedCompany.data_cessazione && (
-                                        <div>
-                                            <strong>Data Cessazione:</strong> {selectedCompany.data_cessazione}
-                                        </div>
-                                    )}
-                                    {selectedCompany.data_ultima_variazione && (
-                                        <div>
-                                            <strong>Data Ultima Variazione:</strong> {selectedCompany.data_ultima_variazione}
-                                        </div>
-                                    )}
+                                <div className="text-sm text-purple-800">
+                                    <strong>Data Inizio Attività:</strong> {selectedCompany.data_inizio_attivita}
                                 </div>
                             </div>
                         )}
 
-                        {/* Codici e Identificativi */}
-                        {(selectedCompany.cciaa && (
-                            <div className="bg-indigo-50 rounded-lg p-6">
-                                <h3 className="text-lg font-semibold text-indigo-900 mb-4">Codici e Identificativi</h3>
-                                <div className="text-sm text-indigo-800">
-                                    <strong>CCIAA:</strong> {selectedCompany.cciaa}
+                        {/* Partner e Relazioni */}
+                        <div className="bg-indigo-50 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-indigo-900 mb-4">Partner e Relazioni</h3>
+                            <div className="space-y-4 text-sm text-indigo-800">
+                                {selectedCompany.potenziali_partner && selectedCompany.potenziali_partner.length > 0 && (
+                                    <div>
+                                        <strong className="block mb-2">Potenziali Partner:</strong>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {selectedCompany.potenziali_partner.map((partner, index) => (
+                                                <li key={index}>{partner}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {selectedCompany.potenziali_clienti && selectedCompany.potenziali_clienti.length > 0 && (
+                                    <div>
+                                        <strong className="block mb-2">Potenziali Clienti:</strong>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {selectedCompany.potenziali_clienti.map((cliente, index) => (
+                                                <li key={index}>{cliente}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {selectedCompany.investitori && selectedCompany.investitori.length > 0 && (
+                                    <div>
+                                        <strong className="block mb-2">Investitori:</strong>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {selectedCompany.investitori.map((investitore, index) => (
+                                                <li key={index}>{investitore}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {selectedCompany.aziende_controllate && selectedCompany.aziende_controllate.length > 0 && (
+                                    <div>
+                                        <strong className="block mb-2">Aziende Controllate:</strong>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {selectedCompany.aziende_controllate.map((controllata, index) => (
+                                                <li key={index}>{controllata}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Notizie Correlate */}
+                        {selectedCompany.notizie_correlate && selectedCompany.notizie_correlate.length > 0 && (
+                            <div className="bg-gray-50 rounded-lg p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Notizie Correlate</h3>
+                                <div className="space-y-2 text-sm text-gray-800">
+                                    {selectedCompany.notizie_correlate.map((notizia, index) => (
+                                        <div key={index} className="border-l-4 border-gray-300 pl-3">
+                                            {notizia}
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        ))}
+                        )}
+
+                        {/* Fonti */}
+                        {selectedCompany.fonti && selectedCompany.fonti.length > 0 && (
+                            <div className="bg-orange-50 rounded-lg p-6">
+                                <h3 className="text-lg font-semibold text-orange-900 mb-4">Fonti</h3>
+                                <div className="space-y-2 text-sm text-orange-800">
+                                    {selectedCompany.fonti.map((fonte, index) => (
+                                        <div key={index}>
+                                            <a href={fonte} target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-800 break-all">
+                                                {fonte}
+                                            </a>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

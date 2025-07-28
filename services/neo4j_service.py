@@ -294,3 +294,25 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Error getting FEDERTERZIARIO companies list: {str(e)}")
             return []
+
+    def get_federterziario_company_details(self, company_name):
+        """Get detailed information for a specific FEDERTERZIARIO company"""
+        if not self.driver:
+            logging.warning("Neo4j driver not available")
+            return None
+
+        try:
+            with self.driver.session() as session:
+                result = session.run("""
+                    MATCH (n:FEDERTERZIARIO) 
+                    WHERE n.nome_azienda = $company_name
+                    RETURN properties(n) as company_properties
+                """, company_name=company_name)
+
+                record = result.single()
+                if record:
+                    return record["company_properties"]
+                return None
+        except Exception as e:
+            logging.error(f"Error getting FEDERTERZIARIO company details: {str(e)}")
+            return None

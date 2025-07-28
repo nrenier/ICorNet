@@ -1,3 +1,5 @@
+
+```javascript
 const { useState, useEffect, useRef } = React;
 
 const SUKChat = () => {
@@ -5,6 +7,9 @@ const SUKChat = () => {
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [chatHistory, setChatHistory] = useState([]);
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [showHistory, setShowHistory] = useState(false);
     const messagesEndRef = useRef(null);
 
     // Scroll to bottom when new messages are added
@@ -28,33 +33,84 @@ const SUKChat = () => {
             const response = await apiService.getChatHistory(userId);
             console.log('Chat history response:', response);
             if (response.success && response.history) {
-                // Transform the history to match the expected format
-                const transformedHistory = response.history.map(msg => {
-                    let content = msg.content;
-                    
-                    // For assistant messages, parse JSON if it's a string
-                    if (msg.message_type === 'assistant' && typeof content === 'string') {
-                        try {
-                            content = JSON.parse(content);
-                        } catch (e) {
-                            console.error('Failed to parse assistant message content:', e);
-                            // Keep original content if parsing fails
-                        }
-                    }
-                    
-                    return {
-                        id: `${msg.timestamp}-${Math.random()}`,
-                        type: msg.message_type,
-                        content: content,
-                        timestamp: msg.timestamp
-                    };
-                });
-                console.log('Transformed history:', transformedHistory);
-                setMessages(transformedHistory);
+                // Group messages by conversation (simplified: group consecutive messages)
+                const conversations = groupMessagesIntoConversations(response.history);
+                setChatHistory(conversations);
+                
+                // If no conversation is selected, show the latest one
+                if (conversations.length > 0 && !selectedConversation) {
+                    setSelectedConversation(conversations[0]);
+                    setMessages(transformMessages(conversations[0].messages));
+                }
             }
         } catch (error) {
             console.error('Failed to load chat history:', error);
         }
+    };
+
+    const groupMessagesIntoConversations = (history) => {
+        const conversations = [];
+        let currentConversation = null;
+        
+        history.forEach((msg, index) => {
+            if (msg.message_type === 'user') {
+                // Start a new conversation with user message
+                if (currentConversation) {
+                    conversations.push(currentConversation);
+                }
+                currentConversation = {
+                    id: `conv_${index}`,
+                    title: msg.content.substring(0, 50) + (msg.content.length > 50 ? '...' : ''),
+                    timestamp: msg.timestamp,
+                    messages: [msg]
+                };
+            } else if (currentConversation) {
+                // Add assistant message to current conversation
+                currentConversation.messages.push(msg);
+            }
+        });
+        
+        // Add the last conversation
+        if (currentConversation) {
+            conversations.push(currentConversation);
+        }
+        
+        return conversations.reverse(); // Latest first
+    };
+
+    const transformMessages = (conversationMessages) => {
+        return conversationMessages.map(msg => {
+            let content = msg.content;
+            
+            // For assistant messages, parse JSON if it's a string
+            if (msg.message_type === 'assistant' && typeof content === 'string') {
+                try {
+                    content = JSON.parse(content);
+                } catch (e) {
+                    console.error('Failed to parse assistant message content:', e);
+                    // Keep original content if parsing fails
+                }
+            }
+            
+            return {
+                id: `${msg.timestamp}-${Math.random()}`,
+                type: msg.message_type,
+                content: content,
+                timestamp: msg.timestamp
+            };
+        });
+    };
+
+    const selectConversation = (conversation) => {
+        setSelectedConversation(conversation);
+        setMessages(transformMessages(conversation.messages));
+        setShowHistory(false); // Hide history on mobile after selection
+    };
+
+    const startNewConversation = () => {
+        setSelectedConversation(null);
+        setMessages([]);
+        setShowHistory(false);
     };
 
     const sendMessage = async () => {
@@ -89,6 +145,11 @@ const SUKChat = () => {
                     timestamp: response.timestamp || new Date().toISOString()
                 };
                 setMessages(prev => [...prev, assistantMessage]);
+                
+                // Reload history to include new messages
+                setTimeout(() => {
+                    loadChatHistory();
+                }, 1000);
             } else {
                 throw new Error(response.error || 'Failed to send message');
             }
@@ -170,96 +231,175 @@ const SUKChat = () => {
     };
 
     return (
-        <div className="flex flex-col h-full">
-            {/* Chat Header */}
-            <div className="bg-white border-b border-gray-200 p-4">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                    <i data-feather="message-circle" className="w-5 h-5 mr-2"></i>
-                    SUK Chat
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                    Chiedimi informazioni su prodotti, soluzioni e fornitori
-                </p>
+        <div className="flex h-full">
+            {/* History Sidebar */}
+            <div className={`bg-gray-900 text-white transition-all duration-300 ${
+                showHistory ? 'w-80' : 'w-0 md:w-80'
+            } overflow-hidden flex flex-col`}>
+                {/* Sidebar Header */}
+                <div className="p-4 border-b border-gray-700">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold">Chat History</h3>
+                        <button
+                            onClick={() => setShowHistory(false)}
+                            className="md:hidden text-gray-400 hover:text-white"
+                        >
+                            <i data-feather="x" className="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <button
+                        onClick={startNewConversation}
+                        className="w-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors"
+                    >
+                        <i data-feather="plus" className="w-4 h-4 mr-2"></i>
+                        Nuova Conversazione
+                    </button>
+                </div>
+
+                {/* Conversations List */}
+                <div className="flex-1 overflow-y-auto p-2">
+                    {chatHistory.length === 0 ? (
+                        <div className="text-center text-gray-400 mt-8">
+                            <i data-feather="message-circle" className="w-8 h-8 mx-auto mb-2"></i>
+                            <p className="text-sm">Nessuna conversazione</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {chatHistory.map((conversation) => (
+                                <button
+                                    key={conversation.id}
+                                    onClick={() => selectConversation(conversation)}
+                                    className={`w-full text-left p-3 rounded-lg transition-colors ${
+                                        selectedConversation?.id === conversation.id
+                                            ? 'bg-gray-700 text-white'
+                                            : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                                    }`}
+                                >
+                                    <div className="font-medium text-sm mb-1 truncate">{conversation.title}</div>
+                                    <div className="text-xs text-gray-400">
+                                        {new Date(conversation.timestamp).toLocaleDateString('it-IT')}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* Messages Container */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 && (
-                    <div className="text-center text-gray-500 mt-8">
-                        <i data-feather="message-circle" className="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
-                        <p>Inizia una conversazione chiedendo informazioni su prodotti o fornitori</p>
-                    </div>
-                )}
-
-                {messages.map((message) => (
-                    <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-3xl px-4 py-2 rounded-lg ${
-                            message.type === 'user' 
-                                ? 'bg-blue-600 text-white' 
-                                : message.type === 'error'
-                                ? 'bg-red-100 text-red-800 border border-red-200'
-                                : 'bg-gray-100 text-gray-900'
-                        }`}>
-                            {message.type === 'user' ? (
-                                <p>{message.content}</p>
-                            ) : message.type === 'error' ? (
-                                <p className="flex items-center">
-                                    <i data-feather="alert-circle" className="w-4 h-4 mr-2"></i>
-                                    {message.content}
+            {/* Main Chat Area */}
+            <div className="flex-1 flex flex-col">
+                {/* Chat Header */}
+                <div className="bg-white border-b border-gray-200 p-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <button
+                                onClick={() => setShowHistory(!showHistory)}
+                                className="md:hidden mr-3 text-gray-600 hover:text-gray-900"
+                            >
+                                <i data-feather="menu" className="w-5 h-5"></i>
+                            </button>
+                            <div>
+                                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                                    <i data-feather="message-circle" className="w-5 h-5 mr-2"></i>
+                                    SUK Chat
+                                </h2>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    {selectedConversation 
+                                        ? `Conversazione: ${selectedConversation.title}`
+                                        : 'Chiedimi informazioni su prodotti, soluzioni e fornitori'
+                                    }
                                 </p>
-                            ) : (
-                                formatAssistantResponse(message.content)
-                            )}
-                            <div className={`text-xs mt-2 ${message.type === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>
-                                {new Date(message.timestamp).toLocaleTimeString()}
                             </div>
                         </div>
-                    </div>
-                ))}
-
-                {isLoading && (
-                    <div className="flex justify-start">
-                        <div className="bg-gray-100 px-4 py-2 rounded-lg">
-                            <div className="flex items-center space-x-2">
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                                <span className="text-gray-600">Sto elaborando la tua richiesta...</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <div ref={messagesEndRef} />
-            </div>
-
-            {/* Error Display */}
-            {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mx-4 rounded-lg">
-                    <div className="flex items-center">
-                        <i data-feather="alert-circle" className="w-4 h-4 mr-2"></i>
-                        {error}
+                        <button
+                            onClick={loadChatHistory}
+                            className="text-gray-600 hover:text-gray-900"
+                            title="Aggiorna cronologia"
+                        >
+                            <i data-feather="refresh-cw" className="w-5 h-5"></i>
+                        </button>
                     </div>
                 </div>
-            )}
 
-            {/* Input Area */}
-            <div className="bg-white border-t border-gray-200 p-4">
-                <div className="flex space-x-2">
-                    <textarea
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Scrivi il tuo messaggio..."
-                        className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        rows="2"
-                        disabled={isLoading}
-                    />
-                    <button
-                        onClick={sendMessage}
-                        disabled={!inputMessage.trim() || isLoading}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        <i data-feather="send" className="w-4 h-4"></i>
-                    </button>
+                {/* Messages Container */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {messages.length === 0 && (
+                        <div className="text-center text-gray-500 mt-8">
+                            <i data-feather="message-circle" className="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+                            <p>Inizia una nuova conversazione o seleziona una dalla cronologia</p>
+                        </div>
+                    )}
+
+                    {messages.map((message) => (
+                        <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-3xl px-4 py-2 rounded-lg ${
+                                message.type === 'user' 
+                                    ? 'bg-blue-600 text-white' 
+                                    : message.type === 'error'
+                                    ? 'bg-red-100 text-red-800 border border-red-200'
+                                    : 'bg-gray-100 text-gray-900'
+                            }`}>
+                                {message.type === 'user' ? (
+                                    <p>{message.content}</p>
+                                ) : message.type === 'error' ? (
+                                    <p className="flex items-center">
+                                        <i data-feather="alert-circle" className="w-4 h-4 mr-2"></i>
+                                        {message.content}
+                                    </p>
+                                ) : (
+                                    formatAssistantResponse(message.content)
+                                )}
+                                <div className={`text-xs mt-2 ${message.type === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>
+                                    {new Date(message.timestamp).toLocaleTimeString()}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+
+                    {isLoading && (
+                        <div className="flex justify-start">
+                            <div className="bg-gray-100 px-4 py-2 rounded-lg">
+                                <div className="flex items-center space-x-2">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                    <span className="text-gray-600">Sto elaborando la tua richiesta...</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div ref={messagesEndRef} />
+                </div>
+
+                {/* Error Display */}
+                {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mx-4 rounded-lg">
+                        <div className="flex items-center">
+                            <i data-feather="alert-circle" className="w-4 h-4 mr-2"></i>
+                            {error}
+                        </div>
+                    </div>
+                )}
+
+                {/* Input Area */}
+                <div className="bg-white border-t border-gray-200 p-4">
+                    <div className="flex space-x-2">
+                        <textarea
+                            value={inputMessage}
+                            onChange={(e) => setInputMessage(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder="Scrivi il tuo messaggio..."
+                            className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows="2"
+                            disabled={isLoading}
+                        />
+                        <button
+                            onClick={sendMessage}
+                            disabled={!inputMessage.trim() || isLoading}
+                            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <i data-feather="send" className="w-4 h-4"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -267,3 +407,4 @@ const SUKChat = () => {
 };
 
 window.SUKChat = SUKChat;
+```

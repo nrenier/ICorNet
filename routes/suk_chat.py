@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, current_app
 import requests
 import logging
 import os
+import json
+from datetime import datetime
 
 suk_chat_bp = Blueprint('suk_chat', __name__)
 
@@ -138,6 +140,32 @@ def send_chat_message():
                     'success': True,
                     'error': 'Unexpected response format'
                 }
+
+            # Save messages to database
+            user_id = data.get('user_id') or request.headers.get('X-Replit-User-Id')
+            if user_id:
+                from app import db
+                from models import ChatMessage
+                import json
+
+                # Save user message
+                user_message = ChatMessage(
+                    user_id=user_id,
+                    message_type='user',
+                    content=message,
+                    timestamp=datetime.now()
+                )
+                db.session.add(user_message)
+
+                # Save assistant response
+                assistant_message = ChatMessage(
+                    user_id=user_id,
+                    message_type='assistant',
+                    content=json.dumps(formatted_response),
+                    timestamp=datetime.now()
+                )
+                db.session.add(assistant_message)
+                db.session.commit()
 
             return jsonify(formatted_response)
         else:

@@ -26,6 +26,7 @@ def generate_report():
         new_report = Report()
         new_report.user_id = user_id
         new_report.company_name = company_name
+        new_report.report_type = report_type
         new_report.status = 'pending'
 
         db.session.add(new_report)
@@ -199,9 +200,15 @@ def view_report(report_id):
 def get_report_history():
     try:
         user_id = session['user_id']
+        report_type = request.args.get('type')  # Optional filter by report type
 
-        reports = Report.query.filter_by(user_id=user_id).order_by(
-            Report.created_at.desc()).all()
+        query = Report.query.filter_by(user_id=user_id)
+        
+        # Add type filter if specified
+        if report_type:
+            query = query.filter_by(report_type=report_type)
+        
+        reports = query.order_by(Report.created_at.desc()).all()
 
         reports_data = [report.to_dict() for report in reports]
 

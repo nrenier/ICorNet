@@ -253,8 +253,8 @@ const SUK = ({ user, showToast }) => {
             const companiesResponse = await apiService.getCompaniesForReports();
             setCompanies(companiesResponse.companies || []);
 
-            // Load user's report history
-            const historyResponse = await apiService.getReportHistory();
+            // Load user's report history (SUK only)
+            const historyResponse = await apiService.getReportHistory('suk');
             setReportHistory(historyResponse.reports || []);
 
         } catch (error) {
@@ -308,7 +308,7 @@ const SUK = ({ user, showToast }) => {
 
     const loadReportHistory = async () => {
         try {
-            const historyResponse = await apiService.getReportHistory();
+            const historyResponse = await apiService.getReportHistory('suk');
             setReportHistory(historyResponse.reports || []);
         } catch (error) {
             console.error('Error loading report history:', error);

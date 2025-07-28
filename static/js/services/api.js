@@ -145,8 +145,9 @@ const apiService = {
         return { success: true };
     },
 
-    async getReportHistory() {
-        return await this.request('/reports/history');
+    async getReportHistory(reportType = null) {
+        const url = reportType ? `/reports/history?type=${encodeURIComponent(reportType)}` : '/reports/history';
+        return await this.request(url);
     },
 
     async getCompaniesForReports() {

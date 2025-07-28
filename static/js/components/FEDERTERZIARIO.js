@@ -244,8 +244,8 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
             const companiesResponse = await apiService.getFederterziarioCompaniesForReports();
             setCompanies(companiesResponse.companies || []);
 
-            // Load user's report history
-            const historyResponse = await apiService.getReportHistory();
+            // Load user's report history (FEDERTERZIARIO only)
+            const historyResponse = await apiService.getReportHistory('federterziario');
             setReportHistory(historyResponse.reports || []);
 
         } catch (error) {
@@ -308,7 +308,7 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
 
     const loadReportHistory = async () => {
         try {
-            const historyResponse = await apiService.getReportHistory();
+            const historyResponse = await apiService.getReportHistory('federterziario');
             setReportHistory(historyResponse.reports || []);
         } catch (error) {
             console.error('Error loading report history:', error);

@@ -17,20 +17,6 @@ class Neo4jService:
         if self.driver:
             self.driver.close()
 
-    def run_query(self, query, parameters=None):
-        """Execute a custom Cypher query with parameters"""
-        if not self.driver:
-            logging.warning("Neo4j driver not available")
-            return []
-
-        try:
-            with self.driver.session() as session:
-                result = session.run(query, parameters or {})
-                return [record.data() for record in result]
-        except Exception as e:
-            logging.error(f"Error running custom query: {str(e)}")
-            return []
-
     def get_company_count(self):
         """Get total count of companies in Neo4j"""
         if not self.driver:

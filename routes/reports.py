@@ -20,6 +20,7 @@ def generate_report():
 
         user_id = session['user_id']
         company_name = data['company_name']
+        report_type = data.get('type', 'suk')  # Default to 'suk' for backward compatibility
 
         # Create report record
         new_report = Report()
@@ -30,9 +31,12 @@ def generate_report():
         db.session.add(new_report)
         db.session.commit()
 
-        # Call n8n webhook directly
-        webhook_url = "http://host.docker.internal:5678/webhook/baf08e2e-8b5b-414e-bde2-109cec9b60ab"
-        webhook_payload = {"nome_azienda": company_name}
+        # Call n8n webhook using environment variable
+        webhook_url = current_app.config.get('N8N_REPORT_WEBHOOK_URL', 'http://host.docker.internal:5678/webhook/baf08e2e-8b5b-414e-bde2-109cec9b60ab')
+        webhook_payload = {
+            "nome_azienda": company_name,
+            "type": report_type
+        }
 
         try:
             webhook_response = requests.post(

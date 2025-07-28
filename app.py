@@ -77,6 +77,7 @@ def create_app():
     app.config['neo4j_service'] = neo4j_service
     app.config['n8n_service'] = n8n_service
     app.config['auth_service'] = auth_service
+    app.config['N8N_REPORT_WEBHOOK_URL'] = os.getenv('N8N_REPORT_WEBHOOK_URL', 'http://host.docker.internal:5678/webhook/baf08e2e-8b5b-414e-bde2-109cec9b60ab')
     
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/api')

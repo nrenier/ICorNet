@@ -75,10 +75,13 @@ const apiService = {
     },
 
     // Reports methods
-    async generateReport(companyName) {
+    async generateReport(companyName, type = 'suk') {
         return await this.request('/reports/generate', {
             method: 'POST',
-            body: { company_name: companyName },
+            body: { 
+                company_name: companyName,
+                type: type
+            },
         });
     },
 

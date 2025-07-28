@@ -290,7 +290,7 @@ const SUK = ({ user, showToast }) => {
         try {
             setGeneratingReport(true);
 
-            const response = await apiService.generateReport(selectedCompany.nome_azienda);
+            const response = await apiService.generateReport(selectedCompany.nome_azienda, 'suk');
             showToast('Report generation started! Check the history section for updates.', 'success');
 
             // Reload report history to show the new report

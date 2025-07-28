@@ -45,6 +45,7 @@ const Sidebar = ({
     const menuItems = [
         { id: "dashboard", name: "Dashboard", icon: "home" },
         { id: "suk", name: "SUK Analysis", icon: "bar-chart-2" },
+        { id: "federterziario", name: "FEDERTERZIARIO Analysis", icon: "briefcase" },
         { id: "suk-chat", name: "SUK Chat", icon: "message-circle" },
     ];
 
@@ -323,6 +324,8 @@ const App = () => {
                 return <Dashboard user={user} showToast={showToast} />;
             case "suk":
                 return <SUK user={user} showToast={showToast} />;
+            case "federterziario":
+                return <FEDERTERZIARIO user={user} showToast={showToast} />;
             case "suk-chat":
                 return <SUKChat user={user} showToast={showToast} />;
             default:

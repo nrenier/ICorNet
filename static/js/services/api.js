@@ -192,14 +192,19 @@ const apiService = {
 
     // SUK Chat methods
     async sendChatMessage(message, userId = null) {
-        return await this.request('/suk-chat/send-message', {
-            method: 'POST',
-            body: { 
-                message: message,
-                timestamp: new Date().toISOString(),
-                user_id: userId
-            },
-        });
+        try {
+            return await this.request('/suk-chat/send-message', {
+                method: 'POST',
+                body: { 
+                    message: message,
+                    timestamp: new Date().toISOString(),
+                    user_id: userId
+                },
+            });
+        } catch (error) {
+            console.error('Chat message error:', error);
+            throw new Error(`Failed to send message: ${error.message}`);
+        }
     },
 
     async getChatHistory() {

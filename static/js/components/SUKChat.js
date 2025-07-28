@@ -71,7 +71,8 @@ const SUKChat = () => {
                 window.currentUser?.id,
             );
 
-            if (response.success) {
+            // Check if response has the expected structure
+            if (response && response.response) {
                 // Add assistant response to chat
                 const assistantMessage = {
                     id: Date.now() + 1,
@@ -84,7 +85,7 @@ const SUKChat = () => {
                 };
                 setMessages((prev) => [...prev, assistantMessage]);
             } else {
-                throw new Error(response.error || "Failed to send message");
+                throw new Error(response.error || "Invalid response format");
             }
         } catch (error) {
             console.error("Error sending message:", error);

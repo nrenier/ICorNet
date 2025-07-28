@@ -267,5 +267,7 @@ const App = () => {
     );
 };
 
-// Render the app
-ReactDOM.render(<App />, document.getElementById('root'));
+// Render the app using React 18 createRoot API
+const { createRoot } = ReactDOM;
+const root = createRoot(document.getElementById('root'));
+root.render(<App />);

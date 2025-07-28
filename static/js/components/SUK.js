@@ -146,7 +146,10 @@ const CompanyRelationshipsGraph = ({ companyName, onRelationshipClick }) => {
                     disabled={loading}
                     className="text-teal-600 hover:text-teal-800 text-sm font-medium disabled:opacity-50"
                 >
-                    <i data-feather="refresh-cw" className="w-4 h-4 inline mr-1"></i>
+                    <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
                     Aggiorna
                 </button>
             </div>
@@ -1135,7 +1138,10 @@ const SUK = ({ user, showToast }) => {
                             onClick={loadReportHistory}
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                         >
-                            <i data-feather="refresh-cw" className="w-4 h-4 inline mr-1"></i>
+                            <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                    </svg>
                             Refresh
                         </button>
                     </div>
@@ -1202,7 +1208,10 @@ const SUK = ({ user, showToast }) => {
                                                         className="ml-2 text-gray-400 hover:text-gray-600"
                                                         title="Refresh status"
                                                     >
-                                                        <i data-feather="refresh-cw" className="w-3 h-3"></i>
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                                    </svg>
                                                     </button>
                                                 )}
                                             </div>

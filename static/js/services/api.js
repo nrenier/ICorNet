@@ -202,8 +202,9 @@ const apiService = {
         });
     },
 
-    async getChatHistory() {
-        return await this.request('/suk-chat/chat-history');
+    async getChatHistory(userId = null) {
+        const params = userId ? `?user_id=${encodeURIComponent(userId)}` : '';
+        return await this.request(`/suk-chat/chat-history${params}`);
     },
 
     async clearChatHistory() {

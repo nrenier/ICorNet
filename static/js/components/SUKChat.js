@@ -23,9 +23,18 @@ const SUKChat = () => {
 
     const loadChatHistory = async () => {
         try {
-            const response = await apiService.getChatHistory();
+            const response = await apiService.getChatHistory(window.currentUser?.id);
             if (response.success && response.history) {
-                setMessages(response.history);
+                // Transform the history to match the expected format
+                const transformedHistory = response.history.map(msg => ({
+                    id: `${msg.timestamp}-${Math.random()}`,
+                    type: msg.message_type,
+                    content: msg.message_type === 'assistant' ? 
+                        (typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content) : 
+                        msg.content,
+                    timestamp: msg.timestamp
+                }));
+                setMessages(transformedHistory);
             }
         } catch (error) {
             console.error('Failed to load chat history:', error);

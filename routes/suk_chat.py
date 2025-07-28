@@ -2,26 +2,11 @@ from flask import Blueprint, request, jsonify, current_app
 import requests
 import logging
 import os
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
+from models import db, ChatMessage
 
 suk_chat_bp = Blueprint('suk_chat', __name__)
-
-# Initialize SQLAlchemy (if not already initialized elsewhere)
-db = SQLAlchemy()
-
-
-# Define the ChatMessage model
-class ChatMessage(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Text, nullable=False)
-    message_type = db.Column(db.String(50), nullable=False)  # e.g., 'user', 'assistant'
-    user_id = db.Column(db.String(50), nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f'<ChatMessage {self.id}>'
 
 
 @suk_chat_bp.route('/send-message', methods=['POST'])
@@ -33,7 +18,7 @@ def send_chat_message():
             return jsonify({'error': 'Invalid JSON data'}), 400
 
         message = data.get('message', '').strip()
-        user_id = data.get('user_id')  # Get the user ID
+        user_id = data.get('user_id') or 'anonymous'  # Get the user ID with fallback
 
         if not message:
             return jsonify({'error': 'Message is required'}), 400
@@ -251,9 +236,7 @@ def send_chat_message():
 @suk_chat_bp.route('/chat-history', methods=['GET'])
 def get_chat_history():
     """Get chat history for the current user"""
-    user_id = request.args.get('user_id')
-    if not user_id:
-        return jsonify({'error': 'User ID is required'}), 400
+    user_id = request.args.get('user_id') or 'anonymous'
 
     try:
         chat_history = ChatMessage.query.filter_by(user_id=user_id).order_by(

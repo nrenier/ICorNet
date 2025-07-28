@@ -1,3 +1,7 @@
+Applying the changes to the CSS file to include styles for chat history and a two-column layout for results.
+```
+
+```
 /* Custom styles for ICorNet application */
 
 /* Base styles */
@@ -173,11 +177,11 @@ body {
     .sidebar {
         @apply transform -translate-x-full;
     }
-    
+
     .main-content {
         @apply ml-0;
     }
-    
+
     .sidebar.mobile-open {
         @apply transform translate-x-0;
     }
@@ -225,12 +229,167 @@ body {
     .no-print {
         display: none !important;
     }
-    
+
     .sidebar {
         display: none !important;
     }
-    
+
     .main-content {
         margin-left: 0 !important;
     }
 }
+
+.suk-chat-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.chat-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.send-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.send-button:hover {
+    background-color: #0056b3;
+}
+
+.send-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Chat History Styles */
+.history-toggle-btn {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.history-toggle-btn:hover {
+    background-color: #e9ecef;
+}
+
+.chat-history-section {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.history-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.history-item {
+    background: white;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    border-left: 3px solid #007bff;
+}
+
+.history-question {
+    margin-bottom: 5px;
+}
+
+.history-timestamp {
+    font-size: 0.8em;
+    color: #666;
+}
+
+/* Results Container Styles */
+.results-container {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.results-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.column {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.company-list h4 {
+    margin: 0 0 15px 0;
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+.companies {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.company-item {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border-left: 3px solid #28a745;
+}
+
+.company-item strong {
+    color: #495057;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.company-sector {
+    font-size: 0.9em;
+    color: #6c757d;
+    font-style: italic;
+    margin-bottom: 5px;
+}
+
+.company-description {
+    font-size: 0.85em;
+    color: #6c757d;
+    line-height: 1.4;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .results-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .suk-chat-container {
+        padding: 10px;
+    }
+}
+</replit_final_file>

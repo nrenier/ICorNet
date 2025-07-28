@@ -77,7 +77,9 @@ const SUKChat = () => {
                     id: Date.now() + 1,
                     type: 'assistant',
                     content: response,
-                    timestamp: response.timestamp || new Date().toISOString()
+                    timestamp: response.timestamp || new Date().toISOString(),
+                    prodotti_soluzioni_esistenti: response.prodotti_soluzioni_esistenti || [],
+                    potenziali_fornitori: response.potenziali_fornitori || []
                 };
                 setMessages(prev => [...prev, assistantMessage]);
             } else {
@@ -86,7 +88,7 @@ const SUKChat = () => {
         } catch (error) {
             console.error('Error sending message:', error);
             setError(error.message || 'Failed to send message');
-            
+
             // Add error message to chat
             const errorMessage = {
                 id: Date.now() + 1,
@@ -183,7 +185,7 @@ const SUKChat = () => {
                             {(() => {
                                 const sessions = [];
                                 let currentSession = [];
-                                
+
                                 chatHistory.forEach((msg, index) => {
                                     if (msg.type === 'user') {
                                         if (currentSession.length > 0) {
@@ -194,15 +196,15 @@ const SUKChat = () => {
                                         currentSession.push(msg);
                                     }
                                 });
-                                
+
                                 if (currentSession.length > 0) {
                                     sessions.push(currentSession);
                                 }
-                                
+
                                 return sessions.reverse().map((session, sessionIndex) => {
                                     const userMessage = session.find(m => m.type === 'user');
                                     const timestamp = userMessage ? new Date(userMessage.timestamp) : new Date();
-                                    
+
                                     return (
                                         <div key={sessionIndex} 
                                              className="bg-white p-3 rounded-lg border hover:bg-gray-50 cursor-pointer"

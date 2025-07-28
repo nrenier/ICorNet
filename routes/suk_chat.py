@@ -1,9 +1,10 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, session
 import requests
 import logging
 import os
 import json
 from datetime import datetime
+import uuid
 
 suk_chat_bp = Blueprint('suk_chat', __name__)
 
@@ -12,185 +13,134 @@ suk_chat_bp = Blueprint('suk_chat', __name__)
 def send_chat_message():
     """Send chat message to n8n webhook and return response"""
     try:
-        data = request.json
-        if not data:
-            return jsonify({'error': 'Invalid JSON data'}), 400
+        data = request.get_json()
+        message = data.get('message', '')
 
-        message = data.get('message', '').strip()
+        if not message.strip():
+            return jsonify({'error': 'Message cannot be empty'}), 400
 
-        if not message:
-            return jsonify({'error': 'Message is required'}), 400
+        if 'user_id' not in session:
+            return jsonify({'error': 'User not authenticated'}), 401
 
-        # Get n8n webhook URL from environment
-        webhook_url = os.getenv('N8N_CHAT_WEBHOOK_URL')
-        if not webhook_url:
-            return jsonify({'error':
-                            'N8N_CHAT_WEBHOOK_URL not configured'}), 500
+        user_id = session['user_id']
+        session_id = str(uuid.uuid4())
 
-        # Prepare payload for n8n webhook
-        payload = {
-            'message': message,
-            'timestamp': data.get('timestamp') if data else None,
-            'user_id': data.get('user_id') if data else None
-        }
+        # Get Neo4j service from app config
+        neo4j_service = current_app.config.get('neo4j_service')
 
-        # Send request to n8n webhook
-        response = requests.post(webhook_url,
-                                 json=payload,
-                                 timeout=300,
-                                 headers={'Content-Type': 'application/json'})
+        if not neo4j_service:
+            return jsonify({'error': 'Neo4j service not available'}), 500
 
-        if response.status_code == 200:
-            webhook_data = response.json()
+        # Query Neo4j for SUK data based on the message
+        try:
+            # Query for existing products/solutions
+            existing_query = """
+            MATCH (n:SUK) 
+            WHERE toLower(n.nome_azienda) CONTAINS toLower($keyword) 
+               OR toLower(n.settore) CONTAINS toLower($keyword)
+               OR toLower(n.descrizione) CONTAINS toLower($keyword)
+            RETURN n.nome_azienda, n.settore, n.descrizione, 'existing' as type
+            LIMIT 10
+            """
 
-            # Handle case where webhook_data is a list
-            if isinstance(webhook_data, list) and len(webhook_data) > 0:
-                # Extract the first item if it's a list
-                data_item = webhook_data[0]
-                if 'output' in data_item:
-                    try:
-                        import json
-                        output_data = json.loads(
-                            data_item['output']) if isinstance(
-                                data_item['output'],
-                                str) else data_item['output']
-                        formatted_response = {
-                            'prodotti_soluzioni_esistenti':
-                            output_data.get('prodotti_soluzioni_esistenti',
-                                            []),
-                            'potenziali_fornitori':
-                            output_data.get('potenziali_fornitori', []),
-                            'timestamp':
-                            data_item.get('timestamp'),
-                            'success':
-                            True
-                        }
-                    except (json.JSONDecodeError, TypeError):
-                        formatted_response = {
-                            'prodotti_soluzioni_esistenti':
-                            data_item.get('prodotti_soluzioni_esistenti', []),
-                            'potenziali_fornitori':
-                            data_item.get('potenziali_fornitori', []),
-                            'timestamp':
-                            data_item.get('timestamp'),
-                            'success':
-                            True
-                        }
-                else:
-                    formatted_response = {
-                        'prodotti_soluzioni_esistenti':
-                        data_item.get('prodotti_soluzioni_esistenti', []),
-                        'potenziali_fornitori':
-                        data_item.get('potenziali_fornitori', []),
-                        'timestamp':
-                        data_item.get('timestamp'),
-                        'success':
-                        True
-                    }
-            elif isinstance(webhook_data, dict):
-                # Handle nested output structure if present
-                if 'output' in webhook_data:
-                    try:
-                        import json
-                        output_data = json.loads(
-                            webhook_data['output']) if isinstance(
-                                webhook_data['output'],
-                                str) else webhook_data['output']
-                        formatted_response = {
-                            'prodotti_soluzioni_esistenti':
-                            output_data.get('prodotti_soluzioni_esistenti',
-                                            []),
-                            'potenziali_fornitori':
-                            output_data.get('potenziali_fornitori', []),
-                            'timestamp':
-                            webhook_data.get('timestamp'),
-                            'success':
-                            True
-                        }
-                    except (json.JSONDecodeError, TypeError):
-                        formatted_response = {
-                            'prodotti_soluzioni_esistenti':
-                            webhook_data.get('prodotti_soluzioni_esistenti',
-                                             []),
-                            'potenziali_fornitori':
-                            webhook_data.get('potenziali_fornitori', []),
-                            'timestamp':
-                            webhook_data.get('timestamp'),
-                            'success':
-                            True
-                        }
-                else:
-                    # Format the response according to the expected structure
-                    formatted_response = {
-                        'prodotti_soluzioni_esistenti':
-                        webhook_data.get('prodotti_soluzioni_esistenti', []),
-                        'potenziali_fornitori':
-                        webhook_data.get('potenziali_fornitori', []),
-                        'timestamp':
-                        webhook_data.get('timestamp'),
-                        'success':
-                        True
-                    }
-            else:
-                # Fallback for unexpected data structure
-                formatted_response = {
-                    'prodotti_soluzioni_esistenti': [],
-                    'potenziali_fornitori': [],
-                    'timestamp': None,
-                    'success': True,
-                    'error': 'Unexpected response format'
-                }
+            # Query for potential suppliers
+            suppliers_query = """
+            MATCH (n:SUK) 
+            WHERE toLower(n.settore) CONTAINS toLower($keyword)
+               OR toLower(n.descrizione) CONTAINS toLower($keyword)
+            RETURN n.nome_azienda, n.settore, n.descrizione, 'supplier' as type
+            LIMIT 10
+            """
 
-            # Save messages to database
-            user_id = data.get('user_id') or request.headers.get('X-Replit-User-Id')
-            if user_id:
-                from app import db
-                from models import ChatMessage
-                import json
+            # Extract keywords from message
+            keywords = message.lower().split()
+            existing_products = []
+            potential_suppliers = []
 
-                # Save user message
-                user_message = ChatMessage(
-                    user_id=user_id,
-                    message_type='user',
-                    content=message,
-                    timestamp=datetime.now()
-                )
-                db.session.add(user_message)
+            for keyword in keywords:
+                # Get existing products/solutions
+                existing_results = neo4j_service.run_query(existing_query, {'keyword': keyword})
+                if existing_results:
+                    existing_products.extend(existing_results)
 
-                # Save assistant response
-                assistant_message = ChatMessage(
-                    user_id=user_id,
-                    message_type='assistant',
-                    content=json.dumps(formatted_response),
-                    timestamp=datetime.now()
-                )
-                db.session.add(assistant_message)
-                db.session.commit()
+                # Get potential suppliers
+                supplier_results = neo4j_service.run_query(suppliers_query, {'keyword': keyword})
+                if supplier_results:
+                    potential_suppliers.extend(supplier_results)
 
-            return jsonify(formatted_response)
-        else:
-            logging.error(
-                f"n8n webhook failed with status {response.status_code}: {response.text}"
+            # Remove duplicates
+            def remove_duplicates(results):
+                unique_results = []
+                seen = set()
+                for result in results:
+                    company_name = result.get('n.nome_azienda')
+                    if company_name and company_name not in seen:
+                        seen.add(company_name)
+                        unique_results.append({
+                            'nome_azienda': result.get('n.nome_azienda', 'N/A'),
+                            'settore': result.get('n.settore', 'N/A'),
+                            'descrizione': result.get('n.descrizione', '')
+                        })
+                return unique_results
+
+            existing_products = remove_duplicates(existing_products)
+            potential_suppliers = remove_duplicates(potential_suppliers)
+
+            # Generate response
+            response_text = f"Analisi completata per la richiesta: '{message}'\n\n"
+            response_text += f"Trovati {len(existing_products)} prodotti/soluzioni esistenti e {len(potential_suppliers)} potenziali fornitori."
+
+            # Save to chat history
+            from app import db
+            from models import ChatHistory
+
+            chat_entry = ChatHistory(
+                user_id=user_id,
+                session_id=session_id,
+                question=message,
+                response=response_text,
+                prodotti_soluzioni_esistenti=json.dumps(existing_products),
+                potenziali_fornitori=json.dumps(potential_suppliers)
             )
-            return jsonify({'error': 'Failed to process message'}), 500
 
-    except requests.exceptions.Timeout:
-        logging.error("n8n webhook request timed out")
-        return jsonify({'error': 'Request timed out'}), 408
-    except requests.exceptions.RequestException as e:
-        logging.error(f"n8n webhook request failed: {str(e)}")
-        return jsonify({'error': 'Failed to connect to chat service'}), 503
+            db.session.add(chat_entry)
+            db.session.commit()
+
+            return jsonify({
+                'response': response_text,
+                'prodotti_soluzioni_esistenti': existing_products,
+                'potenziali_fornitori': potential_suppliers,
+                'timestamp': datetime.now().isoformat(),
+                'session_id': session_id
+            }), 200
+
+        except Exception as neo4j_error:
+            logging.error(f"Neo4j query error: {str(neo4j_error)}")
+
+            # Save error response to history
+            error_response = 'Mi dispiace, al momento non riesco ad accedere al database delle aziende. Riprova più tardi.'
+            from app import db
+            from models import ChatHistory
+            chat_entry = ChatHistory(
+                user_id=user_id,
+                session_id=session_id,
+                question=message,
+                response=error_response,
+                prodotti_soluzioni_esistenti=json.dumps([]),
+                potenziali_fornitori=json.dumps([])
+            )
+
+            db.session.add(chat_entry)
+            db.session.commit()
+
+            return jsonify({
+                'response': error_response,
+                'prodotti_soluzioni_esistenti': [],
+                'potenziali_fornitori': [],
+                'timestamp': datetime.now().isoformat(),
+                'session_id': session_id
+            }), 200
+
     except Exception as e:
-        logging.error(f"Unexpected error in chat endpoint: {str(e)}")
+        logging.error(f"SUK Chat error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
-
-
-@suk_chat_bp.route('/chat-history', methods=['GET'])
-def get_chat_history():
-    """Get chat history for the current user"""
-    try:
-        # For now, return empty history - this could be expanded to store chat history in database
-        return jsonify({'history': [], 'success': True})
-    except Exception as e:
-        logging.error(f"Error retrieving chat history: {str(e)}")
-        return jsonify({'error': 'Failed to retrieve chat history'}), 500

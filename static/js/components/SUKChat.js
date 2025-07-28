@@ -238,16 +238,16 @@ const SUKChat = () => {
     return (
         <div className="flex h-full">
             {/* History Sidebar */}
-            <div className={`bg-gray-900 text-white transition-all duration-300 ${
+            <div className={`bg-gray-50 border-r border-gray-200 transition-all duration-300 ${
                 showHistory ? 'w-80' : 'w-0 md:w-80'
             } overflow-hidden flex flex-col`}>
                 {/* Sidebar Header */}
-                <div className="p-4 border-b border-gray-700">
+                <div className="p-4 border-b border-gray-300">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold">Chat History</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">Chat History</h3>
                         <button
                             onClick={() => setShowHistory(false)}
-                            className="md:hidden text-gray-400 hover:text-white"
+                            className="md:hidden text-gray-500 hover:text-gray-700"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -256,7 +256,7 @@ const SUKChat = () => {
                     </div>
                     <button
                         onClick={startNewConversation}
-                        className="w-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors"
                     >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -268,7 +268,7 @@ const SUKChat = () => {
                 {/* Conversations List */}
                 <div className="flex-1 overflow-y-auto p-2">
                     {chatHistory.length === 0 ? (
-                        <div className="text-center text-gray-400 mt-8">
+                        <div className="text-center text-gray-500 mt-8">
                             <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
@@ -282,12 +282,16 @@ const SUKChat = () => {
                                     onClick={() => selectConversation(conversation)}
                                     className={`w-full text-left p-3 rounded-lg transition-colors ${
                                         selectedConversation?.id === conversation.id
-                                            ? 'bg-gray-700 text-white'
-                                            : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                                            ? 'bg-blue-100 text-blue-900 border border-blue-200'
+                                            : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
                                     }`}
                                 >
                                     <div className="font-medium text-sm mb-1 truncate">{conversation.title}</div>
-                                    <div className="text-xs text-gray-400">
+                                    <div className={`text-xs ${
+                                        selectedConversation?.id === conversation.id 
+                                            ? 'text-blue-600' 
+                                            : 'text-gray-500'
+                                    }`}>
                                         {new Date(conversation.timestamp).toLocaleDateString('it-IT')}
                                     </div>
                                 </button>

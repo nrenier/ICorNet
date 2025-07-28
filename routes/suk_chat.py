@@ -9,6 +9,43 @@ import uuid
 suk_chat_bp = Blueprint('suk_chat', __name__)
 
 
+@suk_chat_bp.route('/chat-history', methods=['GET'])
+def get_chat_history():
+    """Get chat history for the current user"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'error': 'User not authenticated'}), 401
+
+        user_id = session['user_id']
+        
+        from app import db
+        from models import ChatHistory
+        
+        # Get recent chat history for this user
+        chat_history = ChatHistory.query.filter_by(user_id=user_id)\
+                                       .order_by(ChatHistory.timestamp.desc())\
+                                       .limit(50)\
+                                       .all()
+        
+        history_data = []
+        for chat in chat_history:
+            history_data.append({
+                'id': chat.id,
+                'session_id': chat.session_id,
+                'question': chat.question,
+                'response': chat.response,
+                'prodotti_soluzioni_esistenti': json.loads(chat.prodotti_soluzioni_esistenti) if chat.prodotti_soluzioni_esistenti else [],
+                'potenziali_fornitori': json.loads(chat.potenziali_fornitori) if chat.potenziali_fornitori else [],
+                'timestamp': chat.timestamp.isoformat()
+            })
+        
+        return jsonify({'history': history_data}), 200
+    
+    except Exception as e:
+        logging.error(f"Get chat history error: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+
 @suk_chat_bp.route('/send-message', methods=['POST'])
 def send_chat_message():
     """Send chat message to n8n webhook and return response"""

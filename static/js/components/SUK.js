@@ -218,9 +218,15 @@ const SUK = ({ user, showToast }) => {
     const [selectedReports, setSelectedReports] = useState([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deletingReports, setDeletingReports] = useState(false);
+    const mountedRef = React.useRef(true);
 
     useEffect(() => {
         loadData();
+        
+        // Cleanup function to mark component as unmounted
+        return () => {
+            mountedRef.current = false;
+        };
     }, []);
 
     useEffect(() => {
@@ -248,23 +254,32 @@ const SUK = ({ user, showToast }) => {
         }
     }, [searchTerm, companies]);
 
+    // Safe state update utility
+    const safeSetState = (setter, value) => {
+        if (mountedRef.current) {
+            setter(value);
+        }
+    };
+
     const loadData = async () => {
         try {
-            setLoading(true);
+            safeSetState(setLoading, true);
 
             // Load companies from Neo4j
             const companiesResponse = await apiService.getCompaniesForReports();
-            setCompanies(companiesResponse.companies || []);
+            safeSetState(setCompanies, companiesResponse.companies || []);
 
             // Load user's report history (SUK only)
             const historyResponse = await apiService.getReportHistory('suk');
-            setReportHistory(historyResponse.reports || []);
+            safeSetState(setReportHistory, historyResponse.reports || []);
 
         } catch (error) {
             console.error('Error loading SUK data:', error);
-            showToast('Failed to load company data', 'error');
+            if (mountedRef.current) {
+                showToast('Failed to load company data', 'error');
+            }
         } finally {
-            setLoading(false);
+            safeSetState(setLoading, false);
         }
     };
 
@@ -401,22 +416,25 @@ const SUK = ({ user, showToast }) => {
     const confirmBulkDelete = async () => {
         try {
             setDeletingReports(true);
+            const reportsToDelete = [...selectedReports]; // Create a copy
 
-            await apiService.bulkDeleteReports(selectedReports);
+            await apiService.bulkDeleteReports(reportsToDelete);
 
-            // Remove deleted reports from local state
-            setReportHistory(prev => 
-                prev.filter(report => !selectedReports.includes(report.id))
-            );
-
+            // Update state in the correct order to prevent React errors
             setSelectedReports([]);
             setShowDeleteModal(false);
+            
+            // Remove deleted reports from local state
+            setReportHistory(prev => 
+                prev.filter(report => !reportsToDelete.includes(report.id))
+            );
 
-            showToast(`Successfully deleted ${selectedReports.length} report(s)`, 'success');
+            showToast(`Successfully deleted ${reportsToDelete.length} report(s)`, 'success');
 
         } catch (error) {
             console.error('Error deleting reports:', error);
             showToast('Failed to delete reports', 'error');
+            setShowDeleteModal(false);
         } finally {
             setDeletingReports(false);
         }

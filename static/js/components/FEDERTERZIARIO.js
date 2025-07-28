@@ -216,9 +216,15 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
     const [deletingReports, setDeletingReports] = useState(false);
     const [showRelationshipModal, setShowRelationshipModal] = useState(false);
     const [selectedRelationship, setSelectedRelationship] = useState(null);
+    const mountedRef = React.useRef(true);
 
     useEffect(() => {
         loadData();
+        
+        // Cleanup function to mark component as unmounted
+        return () => {
+            mountedRef.current = false;
+        };
     }, []);
 
     useEffect(() => {
@@ -236,23 +242,32 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
         }
     }, [searchTerm, companies]);
 
+    // Safe state update utility
+    const safeSetState = (setter, value) => {
+        if (mountedRef.current) {
+            setter(value);
+        }
+    };
+
     const loadData = async () => {
         try {
-            setLoading(true);
+            safeSetState(setLoading, true);
 
             // Load FEDERTERZIARIO companies from Neo4j
             const companiesResponse = await apiService.getFederterziarioCompaniesForReports();
-            setCompanies(companiesResponse.companies || []);
+            safeSetState(setCompanies, companiesResponse.companies || []);
 
             // Load user's report history (FEDERTERZIARIO only)
             const historyResponse = await apiService.getReportHistory('federterziario');
-            setReportHistory(historyResponse.reports || []);
+            safeSetState(setReportHistory, historyResponse.reports || []);
 
         } catch (error) {
             console.error('Error loading FEDERTERZIARIO data:', error);
-            showToast('Failed to load company data', 'error');
+            if (mountedRef.current) {
+                showToast('Failed to load company data', 'error');
+            }
         } finally {
-            setLoading(false);
+            safeSetState(setLoading, false);
         }
     };
 
@@ -383,25 +398,32 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
 
     const confirmBulkDelete = async () => {
         try {
-            setDeletingReports(true);
+            safeSetState(setDeletingReports, true);
+            const reportsToDelete = [...selectedReports]; // Create a copy
 
-            await apiService.bulkDeleteReports(selectedReports);
+            await apiService.bulkDeleteReports(reportsToDelete);
 
+            // Update state in the correct order to prevent React errors
+            safeSetState(setSelectedReports, []);
+            safeSetState(setShowDeleteModal, false);
+            
             // Remove deleted reports from local state
-            setReportHistory(prev => 
-                prev.filter(report => !selectedReports.includes(report.id))
+            safeSetState(setReportHistory, prev => 
+                prev.filter(report => !reportsToDelete.includes(report.id))
             );
 
-            setSelectedReports([]);
-            setShowDeleteModal(false);
-
-            showToast(`Successfully deleted ${selectedReports.length} report(s)`, 'success');
+            if (mountedRef.current) {
+                showToast(`Successfully deleted ${reportsToDelete.length} report(s)`, 'success');
+            }
 
         } catch (error) {
             console.error('Error deleting reports:', error);
-            showToast('Failed to delete reports', 'error');
+            if (mountedRef.current) {
+                showToast('Failed to delete reports', 'error');
+            }
+            safeSetState(setShowDeleteModal, false);
         } finally {
-            setDeletingReports(false);
+            safeSetState(setDeletingReports, false);
         }
     };
 

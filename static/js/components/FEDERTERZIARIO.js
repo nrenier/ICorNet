@@ -292,10 +292,14 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                     const settoreMatch = company.settore
                         ?.toLowerCase()
                         .includes(searchTerm.toLowerCase());
-                    const regioneMatch = company.regione
-                        ?.toLowerCase()
-                        .includes(searchTerm.toLowerCase());
-                    return nameMatch || settoreMatch || regioneMatch;
+                    const classificazioneMatch = company.classificazione_prodotti
+                        ? Array.isArray(company.classificazione_prodotti)
+                            ? company.classificazione_prodotti.some(c => 
+                                c?.toLowerCase().includes(searchTerm.toLowerCase())
+                              )
+                            : company.classificazione_prodotti.toLowerCase().includes(searchTerm.toLowerCase())
+                        : false;
+                    return nameMatch || settoreMatch || classificazioneMatch;
                 })
                 .slice(0, 20);
             setFilteredCompanies(filtered);
@@ -599,15 +603,15 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                                 {company.nome_azienda}
                                             </div>
                                             {(company.settore ||
-                                                company.regione) && (
+                                                company.classificazione_prodotti) && (
                                                 <div className="text-sm text-gray-500">
                                                     {company.settore &&
                                                         `Settore: ${company.settore}`}
                                                     {company.settore &&
-                                                        company.regione &&
+                                                        company.classificazione_prodotti &&
                                                         " | "}
-                                                    {company.regione &&
-                                                        `Regione: ${company.regione}`}
+                                                    {company.classificazione_prodotti &&
+                                                        `Classificazione: ${Array.isArray(company.classificazione_prodotti) ? company.classificazione_prodotti.join(', ') : company.classificazione_prodotti}`}
                                                 </div>
                                             )}
                                         </button>

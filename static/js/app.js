@@ -55,58 +55,60 @@ const Sidebar = ({
             }`}
         >
             <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                    <div
-                        className={`flex items-center space-x-3 ${!isOpen && "justify-center"}`}
-                    >
-                        <img
-                            src="/images/logo_icornet.png"
-                            alt="ICorNet Logo"
-                            className="h-12 w-full object-contain max-w-[200px] flex-shrink-0"
-                            onError={(e) => {
-                                console.log(
-                                    "Image failed to load, showing fallback icon",
-                                );
-                                e.target.style.display = "none";
-                                e.target.nextElementSibling.style.display =
-                                    "flex";
-                            }}
-                            onLoad={(e) => {
-                                console.log("Image loaded successfully");
-                                e.target.style.display = "block";
-                                e.target.nextElementSibling.style.display =
-                                    "none";
-                            }}
-                        />
+                <div className="flex flex-col space-y-3">
+                    <div className="flex items-center justify-between">
                         <div
-                            className="h-12 w-full bg-blue-600 rounded-lg items-center justify-center max-w-[200px]"
-                            style={{ display: "none" }}
+                            className={`flex items-center ${!isOpen && "justify-center"}`}
+                        >
+                            <img
+                                src="/images/logo_icornet.png"
+                                alt="ICorNet Logo"
+                                className="h-12 w-auto object-contain flex-shrink-0"
+                                onError={(e) => {
+                                    console.log(
+                                        "Image failed to load, showing fallback icon",
+                                    );
+                                    e.target.style.display = "none";
+                                    e.target.nextElementSibling.style.display =
+                                        "flex";
+                                }}
+                                onLoad={(e) => {
+                                    console.log("Image loaded successfully");
+                                    e.target.style.display = "block";
+                                    e.target.nextElementSibling.style.display =
+                                        "none";
+                                }}
+                            />
+                            <div
+                                className="h-12 w-12 bg-blue-600 rounded-lg items-center justify-center"
+                                style={{ display: "none" }}
+                            >
+                                <i
+                                    data-feather="database"
+                                    className="h-8 w-8 text-white"
+                                ></i>
+                            </div>
+                        </div>
+                        <button
+                            onClick={onToggle}
+                            className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                            title={isOpen ? "Chiudi sidebar" : "Apri sidebar"}
                         >
                             <i
-                                data-feather="database"
-                                className="h-8 w-8 text-white"
+                                data-feather={
+                                    isOpen ? "chevron-left" : "chevron-right"
+                                }
+                                className="w-5 h-5 text-gray-600"
                             ></i>
-                        </div>
-                        {isOpen && (
-                            <div>
-                                <p className="text-sm text-gray-600 text-center">
-                                    Intelligent Corporate Network
-                                </p>
-                            </div>
-                        )}
+                        </button>
                     </div>
-                    <button
-                        onClick={onToggle}
-                        className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-                        title={isOpen ? "Chiudi sidebar" : "Apri sidebar"}
-                    >
-                        <i
-                            data-feather={
-                                isOpen ? "chevron-left" : "chevron-right"
-                            }
-                            className="w-5 h-5 text-gray-600"
-                        ></i>
-                    </button>
+                    {isOpen && (
+                        <div>
+                            <p className="text-sm text-gray-600 text-left">
+                                Intelligent Corporate Network
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 

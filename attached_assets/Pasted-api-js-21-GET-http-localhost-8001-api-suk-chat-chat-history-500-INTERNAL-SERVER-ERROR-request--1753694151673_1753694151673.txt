@@ -1,0 +1,139 @@
+api.js:21  GET http://localhost:8001/api/suk-chat/chat-history 500 (INTERNAL SERVER ERROR)
+request @ api.js:21
+getChatHistory @ api.js:207
+(anonime) @ SUKChat.js:26
+(anonime) @ app.js:2
+(anonime) @ app.js:2
+asyncGeneratorStep @ app.js:2
+_next @ app.js:2
+(anonime) @ app.js:2
+(anonime) @ app.js:2
+loadChatHistory @ SUKChat.js:24
+(anonime) @ SUKChat.js:21
+commitHookEffectListMount @ react-dom.development.js:23199
+commitPassiveMountOnFiber @ react-dom.development.js:24975
+commitPassiveMountEffects_complete @ react-dom.development.js:24940
+commitPassiveMountEffects_begin @ react-dom.development.js:24927
+commitPassiveMountEffects @ react-dom.development.js:24915
+flushPassiveEffectsImpl @ react-dom.development.js:27088
+flushPassiveEffects @ react-dom.development.js:27033
+commitRootImpl @ react-dom.development.js:26984
+commitRoot @ react-dom.development.js:26731
+performSyncWorkOnRoot @ react-dom.development.js:26166
+flushSyncCallbacks @ react-dom.development.js:12052
+(anonime) @ react-dom.development.js:25700Comprendi l'errore
+api.js:30 API request failed: Error: Failed to retrieve chat history
+    at Object.request (api.js:25:23)
+    at async Object.getChatHistory (api.js:207:16)
+overrideMethod @ hook.js:608
+request @ api.js:30
+await in request
+getChatHistory @ api.js:207
+(anonime) @ SUKChat.js:26
+(anonime) @ app.js:2
+(anonime) @ app.js:2
+asyncGeneratorStep @ app.js:2
+_next @ app.js:2
+(anonime) @ app.js:2
+(anonime) @ app.js:2
+loadChatHistory @ SUKChat.js:24
+(anonime) @ SUKChat.js:21
+commitHookEffectListMount @ react-dom.development.js:23199
+commitPassiveMountOnFiber @ react-dom.development.js:24975
+commitPassiveMountEffects_complete @ react-dom.development.js:24940
+commitPassiveMountEffects_begin @ react-dom.development.js:24927
+commitPassiveMountEffects @ react-dom.development.js:24915
+flushPassiveEffectsImpl @ react-dom.development.js:27088
+flushPassiveEffects @ react-dom.development.js:27033
+commitRootImpl @ react-dom.development.js:26984
+commitRoot @ react-dom.development.js:26731
+performSyncWorkOnRoot @ react-dom.development.js:26166
+flushSyncCallbacks @ react-dom.development.js:12052
+(anonime) @ react-dom.development.js:25700Comprendi l'errore
+SUKChat.js:40 Failed to load chat history: Error: Failed to retrieve chat history
+    at Object.request (api.js:25:23)
+    at async Object.getChatHistory (api.js:207:16)
+overrideMethod @ hook.js:608
+(anonime) @ SUKChat.js:40
+(anonime) @ app.js:2
+(anonime) @ app.js:2
+asyncGeneratorStep @ app.js:2
+_throw @ app.js:2
+Promise.then
+asyncGeneratorStep @ app.js:2
+_next @ app.js:2
+(anonime) @ app.js:2
+(anonime) @ app.js:2
+loadChatHistory @ SUKChat.js:24
+(anonime) @ SUKChat.js:21
+commitHookEffectListMount @ react-dom.development.js:23199
+commitPassiveMountOnFiber @ react-dom.development.js:24975
+commitPassiveMountEffects_complete @ react-dom.development.js:24940
+commitPassiveMountEffects_begin @ react-dom.development.js:24927
+commitPassiveMountEffects @ react-dom.development.js:24915
+flushPassiveEffectsImpl @ react-dom.development.js:27088
+flushPassiveEffects @ react-dom.development.js:27033
+commitRootImpl @ react-dom.development.js:26984
+commitRoot @ react-dom.development.js:26731
+performSyncWorkOnRoot @ react-dom.development.js:26166
+flushSyncCallbacks @ react-dom.development.js:12052
+(anonime) @ react-dom.development.js:25700Comprendi l'errore
+api.js:21  POST http://localhost:8001/api/suk-chat/send-message 500 (INTERNAL SERVER ERROR)
+request @ api.js:21
+sendChatMessage @ api.js:195
+(anonime) @ SUKChat.js:61
+(anonime) @ app.js:2
+(anonime) @ app.js:2
+asyncGeneratorStep @ app.js:2
+_next @ app.js:2
+(anonime) @ app.js:2
+(anonime) @ app.js:2
+sendMessage @ SUKChat.js:44
+callCallback @ react-dom.development.js:4151
+invokeGuardedCallbackDev @ react-dom.development.js:4200
+invokeGuardedCallback @ react-dom.development.js:4264
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4278
+executeDispatch @ react-dom.development.js:9051
+processDispatchQueueItemsInOrder @ react-dom.development.js:9083
+processDispatchQueue @ react-dom.development.js:9096
+dispatchEventsForPlugins @ react-dom.development.js:9107
+(anonime) @ react-dom.development.js:9298
+batchedUpdates$1 @ react-dom.development.js:26189
+batchedUpdates @ react-dom.development.js:3978
+dispatchEventForPluginEventSystem @ react-dom.development.js:9297
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6475
+dispatchEvent @ react-dom.development.js:6467
+dispatchDiscreteEvent @ react-dom.development.js:6440Comprendi l'errore
+api.js:30 API request failed: Error: Internal server error
+    at Object.request (api.js:25:23)
+    at async Object.sendChatMessage (api.js:195:16)
+overrideMethod @ hook.js:608
+request @ api.js:30
+await in request
+sendChatMessage @ api.js:195
+(anonime) @ SUKChat.js:61
+(anonime) @ app.js:2
+(anonime) @ app.js:2
+asyncGeneratorStep @ app.js:2
+_next @ app.js:2
+(anonime) @ app.js:2
+(anonime) @ app.js:2
+sendMessage @ SUKChat.js:44
+callCallback @ react-dom.development.js:4151
+invokeGuardedCallbackDev @ react-dom.development.js:4200
+invokeGuardedCallback @ react-dom.development.js:4264
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4278
+executeDispatch @ react-dom.development.js:9051
+processDispatchQueueItemsInOrder @ react-dom.development.js:9083
+processDispatchQueue @ react-dom.development.js:9096
+dispatchEventsForPlugins @ react-dom.development.js:9107
+(anonime) @ react-dom.development.js:9298
+batchedUpdates$1 @ react-dom.development.js:26189
+batchedUpdates @ react-dom.development.js:3978
+dispatchEventForPluginEventSystem @ react-dom.development.js:9297
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6475
+dispatchEvent @ react-dom.development.js:6467
+dispatchDiscreteEvent @ react-dom.development.js:6440Comprendi l'errore
+SUKChat.js:79 Error sending message: Error: Internal server error
+    at Object.request (api.js:25:23)
+    at async Object.sendChatMessage (api.js:195:16)

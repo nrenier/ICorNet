@@ -3,6 +3,8 @@ from routes.auth import login_required
 from models import db, Report, User
 import logging
 import os
+import requests
+from datetime import datetime
 
 reports_bp = Blueprint('reports', __name__)
 
@@ -29,8 +31,7 @@ def generate_report():
         db.session.commit()
 
         # Call n8n webhook directly
-        import requests
-        webhook_url = "http://host.docker.internal:5678/webhook-test/baf08e2e-8b5b-414e-bde2-109cec9b60ab"
+        webhook_url = "http://host.docker.internal:5678/webhook/baf08e2e-8b5b-414e-bde2-109cec9b60ab"
         webhook_payload = {"nome_azienda": company_name}
 
         try:
@@ -50,9 +51,8 @@ def generate_report():
                     # Clean company name: replace spaces with underscores and remove special characters
                     clean_company_name = company_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
                     # Use current date in YYYYMMDD format
-                    from datetime import datetime
-                    current_date = datetime.now().strftime('%Y%m%d')
-                    file_name = f"{clean_company_name}_{current_date}.pdf"
+                    current_date_extended = datetime.now().strftime('%Y%m%d%H%M')
+                    file_name = f"{clean_company_name}_{current_date_extended}.pdf"
                     file_path = os.path.join('reports', file_name)
 
                     with open(file_path, 'wb') as f:
@@ -111,9 +111,8 @@ def get_report_status(report_id):
                     # Mock file path - in real implementation, this would come from n8n
                     clean_company_name = report.company_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
                     # Use current date in YYYYMMDD format
-                    from datetime import datetime
-                    current_date = datetime.now().strftime('%Y%m%d')
-                    report.file_name = f"{clean_company_name}_{current_date}.pdf"
+                    current_date_extended = datetime.now().strftime('%Y%m%d%H%M')
+                    report.file_name = f"{clean_company_name}_{current_date_extended}.pdf"
                     report.file_path = os.path.join('reports', report.file_name)
                 else:
                     report.status = 'failed'
@@ -155,7 +154,6 @@ def download_report(report_id):
         if not os.path.exists(report.file_path):
             return jsonify({'error': 'Report file not found'}), 404
 
-        from flask import Response
         response = send_file(report.file_path,
                          as_attachment=True,
                          download_name=report.file_name,

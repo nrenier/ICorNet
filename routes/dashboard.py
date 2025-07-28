@@ -1,6 +1,9 @@
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, jsonify, current_app, request
 from routes.auth import login_required
 import logging
+from models import Report, db, User
+from sqlalchemy import func, and_
+from datetime import datetime, timedelta
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -20,9 +23,7 @@ def get_dashboard_stats():
         total_sector_count = neo4j_service.get_total_sector_count()
 
         # Get report stats from PostgreSQL
-        from models import Report, db
-        from sqlalchemy import func, and_
-        from datetime import datetime, timedelta
+        
 
         today = datetime.utcnow().date()
         reports_today = db.session.query(func.count(Report.id)).filter(
@@ -74,7 +75,7 @@ def get_sectors():
 @login_required
 def get_recent_reports():
     try:
-        from models import Report, User
+        
 
         # Get recent reports with user info
         recent_reports = Report.query.join(User).add_columns(
@@ -105,7 +106,6 @@ def get_recent_reports():
 @login_required
 def get_sector_companies():
     try:
-        from flask import request
         sector = request.args.get('sector')
 
         if not sector:

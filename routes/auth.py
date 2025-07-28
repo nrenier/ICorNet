@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, session, current_app
 from werkzeug.security import check_password_hash, generate_password_hash
 from models import db, User
 import logging
+from functools import wraps
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -107,7 +108,7 @@ def get_current_user():
 
 def login_required(f):
     """Decorator to require login for routes"""
-    from functools import wraps
+    
     
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -118,7 +119,6 @@ def login_required(f):
 
 def admin_required(f):
     """Decorator to require admin role for routes"""
-    from functools import wraps
     
     @wraps(f)
     def decorated_function(*args, **kwargs):

@@ -24,17 +24,32 @@ const SUKChat = () => {
     const loadChatHistory = async () => {
         try {
             const userId = window.currentUser?.id || 'anonymous';
+            console.log('Loading chat history for user:', userId);
             const response = await apiService.getChatHistory(userId);
+            console.log('Chat history response:', response);
             if (response.success && response.history) {
                 // Transform the history to match the expected format
-                const transformedHistory = response.history.map(msg => ({
-                    id: `${msg.timestamp}-${Math.random()}`,
-                    type: msg.message_type,
-                    content: msg.message_type === 'assistant' ? 
-                        (typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content) : 
-                        msg.content,
-                    timestamp: msg.timestamp
-                }));
+                const transformedHistory = response.history.map(msg => {
+                    let content = msg.content;
+                    
+                    // For assistant messages, parse JSON if it's a string
+                    if (msg.message_type === 'assistant' && typeof content === 'string') {
+                        try {
+                            content = JSON.parse(content);
+                        } catch (e) {
+                            console.error('Failed to parse assistant message content:', e);
+                            // Keep original content if parsing fails
+                        }
+                    }
+                    
+                    return {
+                        id: `${msg.timestamp}-${Math.random()}`,
+                        type: msg.message_type,
+                        content: content,
+                        timestamp: msg.timestamp
+                    };
+                });
+                console.log('Transformed history:', transformedHistory);
                 setMessages(transformedHistory);
             }
         } catch (error) {

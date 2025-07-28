@@ -271,6 +271,20 @@ def get_company_relationships(company_name):
         return jsonify({'error': 'Failed to fetch company relationships'}), 500
 
 
+@reports_bp.route('/federterziario-relationships/<company_name>', methods=['GET'])
+@login_required
+def get_federterziario_company_relationships(company_name):
+    try:
+        neo4j_service = current_app.config['neo4j_service']
+        relationships = neo4j_service.get_federterziario_company_relationships(company_name)
+
+        return jsonify({'relationships': relationships}), 200
+
+    except Exception as e:
+        logging.error(f"Get FEDERTERZIARIO company relationships error: {str(e)}")
+        return jsonify({'error': 'Failed to fetch FEDERTERZIARIO company relationships'}), 500
+
+
 @reports_bp.route('/bulk-delete', methods=['DELETE'])
 @login_required
 def bulk_delete_reports():

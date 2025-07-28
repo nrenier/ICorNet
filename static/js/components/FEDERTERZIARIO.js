@@ -1,6 +1,207 @@
 
 const { useState, useEffect } = React;
 
+const FederterziarioCompanyRelationshipsGraph = ({ companyName, onRelationshipClick }) => {
+    const [relationships, setRelationships] = useState({ nodes: [], edges: [] });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (companyName) {
+            loadRelationships();
+        }
+    }, [companyName]);
+
+    const loadRelationships = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await apiService.getFederterziarioCompanyRelationships(companyName);
+            setRelationships(response.relationships || { nodes: [], edges: [] });
+        } catch (err) {
+            console.error('Error loading FEDERTERZIARIO relationships:', err);
+            setError('Errore nel caricamento delle relazioni');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (relationships.nodes.length > 0 && !loading) {
+            renderGraph();
+        }
+    }, [relationships, loading]);
+
+    const renderGraph = () => {
+        const container = document.getElementById(`federterziario-graph-${companyName.replace(/\s+/g, '-')}`);
+        if (!container || typeof d3 === 'undefined') return;
+
+        // Clear previous graph
+        d3.select(container).selectAll("*").remove();
+
+        const width = container.offsetWidth || 600;
+        const height = 400;
+
+        const svg = d3.select(container)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const simulation = d3.forceSimulation(relationships.nodes)
+            .force("link", d3.forceLink(relationships.edges).id(d => d.id).distance(100))
+            .force("charge", d3.forceManyBody().strength(-300))
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+        // Links
+        const link = svg.append("g")
+            .selectAll("line")
+            .data(relationships.edges)
+            .enter().append("line")
+            .attr("stroke-width", d => Math.sqrt(d.weight || 1) * 2)
+            .attr("stroke", "#999")
+            .attr("opacity", 0.6);
+
+        // Nodes
+        const node = svg.append("g")
+            .selectAll("circle")
+            .data(relationships.nodes)
+            .enter().append("circle")
+            .attr("r", d => d.type === 'center' ? 12 : 8)
+            .attr("fill", d => d.type === 'center' ? "#dc2626" : "#94a3b8")
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+        // Labels
+        const label = svg.append("g")
+            .selectAll("text")
+            .data(relationships.nodes)
+            .enter().append("text")
+            .text(d => d.name)
+            .attr("font-size", "10px")
+            .attr("text-anchor", "middle")
+            .attr("dy", -15);
+
+        // Add click handler for edges
+        link.on("click", (event, d) => {
+            if (onRelationshipClick) {
+                const relationship = {
+                    source: { properties: { nome_azienda: d.source.name || d.source } },
+                    target: { properties: { nome_azienda: d.target.name || d.target } },
+                    relationship: { properties: d.properties || {} }
+                };
+                onRelationshipClick(relationship);
+            }
+        }).style("cursor", "pointer");
+
+        simulation
+            .nodes(relationships.nodes)
+            .on("tick", ticked);
+
+        simulation.force("link")
+            .links(relationships.edges);
+
+        function ticked() {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            node
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+
+            label
+                .attr("x", d => d.x)
+                .attr("y", d => d.y);
+        }
+
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+    };
+
+    if (!companyName) return null;
+
+    return (
+        <div className="bg-red-50 rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-red-900">Grafo delle Relazioni FEDERTERZIARIO</h3>
+                <button
+                    onClick={loadRelationships}
+                    disabled={loading}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50"
+                >
+                    <i data-feather="refresh-cw" className="w-4 h-4 inline mr-1"></i>
+                    Aggiorna
+                </button>
+            </div>
+
+            {loading && (
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-2"></div>
+                        <p className="text-red-600 text-sm">Caricamento relazioni...</p>
+                    </div>
+                </div>
+            )}
+
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {error}
+                </div>
+            )}
+
+            {!loading && !error && relationships.nodes.length === 0 && (
+                <div className="text-center py-8 text-red-600">
+                    <i data-feather="link" className="w-12 h-12 mx-auto mb-2 text-red-300"></i>
+                    <p>Nessuna relazione trovata per questa azienda</p>
+                </div>
+            )}
+
+            {!loading && !error && relationships.nodes.length > 0 && (
+                <div>
+                    <div 
+                        id={`federterziario-graph-${companyName.replace(/\s+/g, '-')}`}
+                        className="w-full h-96 bg-white rounded border"
+                    ></div>
+                    <div className="mt-4 text-sm text-red-700">
+                        <p><strong>Legenda:</strong></p>
+                        <div className="flex items-center space-x-4 mt-2">
+                            <div className="flex items-center">
+                                <div className="w-3 h-3 bg-red-600 rounded-full mr-2"></div>
+                                <span>Azienda selezionata</span>
+                            </div>
+                            <div className="flex items-center">
+                                <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                                <span>Aziende correlate</span>
+                            </div>
+                        </div>
+                        <p className="text-xs mt-2 text-red-600">
+                            Clicca sulle linee di connessione per vedere i dettagli della relazione
+                        </p>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const FEDERTERZIARIO = ({ user, showToast }) => {
     const [companies, setCompanies] = useState([]);
     const [filteredCompanies, setFilteredCompanies] = useState([]);
@@ -13,6 +214,8 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
     const [selectedReports, setSelectedReports] = useState([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deletingReports, setDeletingReports] = useState(false);
+    const [showRelationshipModal, setShowRelationshipModal] = useState(false);
+    const [selectedRelationship, setSelectedRelationship] = useState(null);
 
     useEffect(() => {
         loadData();
@@ -200,6 +403,20 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
         } finally {
             setDeletingReports(false);
         }
+    };
+
+    const openRelationshipModal = (relationship) => {
+        setSelectedRelationship({
+            source: relationship.source.properties.nome_azienda,
+            target: relationship.target.properties.nome_azienda,
+            properties: relationship.relationship.properties,
+        });
+        setShowRelationshipModal(true);
+    };
+
+    const closeRelationshipModal = () => {
+        setShowRelationshipModal(false);
+        setSelectedRelationship(null);
     };
 
     if (loading) {
@@ -496,6 +713,12 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                 </div>
                             </div>
                         )}
+
+                        {/* Grafo delle Relazioni */}
+                        <FederterziarioCompanyRelationshipsGraph 
+                            companyName={selectedCompany.nome_azienda}
+                            onRelationshipClick={openRelationshipModal}
+                        />
                     </div>
                 )}
             </div>
@@ -644,6 +867,138 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                     </table>
                 </div>
             </div>
+
+            {/* Relationship Details Modal */}
+            {showRelationshipModal && selectedRelationship && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h[90vh] overflow-y-auto">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 rounded-t-xl">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-xl font-bold">Dettagli Relazione FEDERTERZIARIO</h3>
+                                    <p className="text-red-100 text-sm mt-1">Analisi delle connessioni aziendali</p>
+                                </div>
+                                <button
+                                    onClick={closeRelationshipModal}
+                                    className="text-white hover:text-gray-200 transition-colors"
+                                >
+                                    <i data-feather="x" className="w-6 h-6"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            {/* Companies Connection */}
+                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex flex-col items-center">
+                                        <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-center min-w-[120px]">
+                                            {selectedRelationship.source}
+                                        </div>
+                                        <span className="text-xs text-gray-500 mt-1">Azienda Origine</span>
+                                    </div>
+
+                                    <div className="flex flex-col items-center mx-4">
+                                        <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                                            {selectedRelationship.properties?.type || 'Relazione'}
+                                        </div>
+                                        <i data-feather="arrow-right" className="w-6 h-6 text-gray-400 mt-2"></i>
+                                    </div>
+
+                                    <div className="flex flex-col items-center">
+                                        <div className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-center min-w-[120px]">
+                                            {selectedRelationship.target}
+                                        </div>
+                                        <span className="text-xs text-gray-500 mt-1">Azienda Destinazione</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Relationship Type */}
+                            {selectedRelationship.properties?.type && (
+                                <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                                    <div className="flex items-center">
+                                        <i data-feather="tag" className="w-5 h-5 text-green-600 mr-2"></i>
+                                        <h4 className="text-lg font-semibold text-green-800">Tipologia Relazione</h4>
+                                    </div>
+                                    <p className="text-green-700 mt-2 font-medium capitalize">
+                                        {selectedRelationship.properties.type}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Relationship Properties */}
+                            {selectedRelationship.properties && Object.keys(selectedRelationship.properties).length > 0 && (
+                                <div>
+                                    <div className="flex items-center mb-4">
+                                        <i data-feather="info" className="w-5 h-5 text-red-600 mr-2"></i>
+                                        <h4 className="text-lg font-semibold text-gray-900">Dettagli Aggiuntivi</h4>
+                                    </div>
+
+                                    <div className="grid gap-4">
+                                        {Object.entries(selectedRelationship.properties).map(([key, value]) => {
+                                            if (key === 'type') return null; // Già mostrato sopra
+
+                                            return (
+                                                <div key={key} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="flex-1">
+                                                            <h5 className="font-medium text-gray-900 capitalize mb-1">
+                                                                {key.replace(/_/g, ' ')}
+                                                            </h5>
+                                                            <div className="text-gray-700 text-sm leading-relaxed">
+                                                                {key === 'weight' ? (
+                                                                    <div className="flex items-center">
+                                                                        <div className="flex space-x-1 mr-2">
+                                                                            {[...Array(5)].map((_, i) => (
+                                                                                <i 
+                                                                                    key={i}
+                                                                                    data-feather="star" 
+                                                                                    className={`w-4 h-4 ${i < parseInt(value) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                                                                                ></i>
+                                                                            ))}
+                                                                        </div>
+                                                                        <span className="font-medium">{value}/5</span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span>{String(value)}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {key === 'weight' && (
+                                                            <div className="ml-4">
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                                    parseInt(value) >= 4 ? 'bg-green-100 text-green-800' :
+                                                                    parseInt(value) >= 3 ? 'bg-yellow-100 text-yellow-800' :
+                                                                    'bg-red-100 text-red-800'
+                                                                }`}>
+                                                                    {parseInt(value) >= 4 ? 'Forte' : parseInt(value) >= 3 ? 'Media' : 'Debole'}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="bg-gray-50 px-6 py-4 rounded-b-xl flex justify-end space-x-3">
+                            <button
+                                onClick={closeRelationshipModal}
+                                className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                            >
+                                Chiudi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (

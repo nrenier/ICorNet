@@ -200,6 +200,10 @@ const apiService = {
         return await this.request(`/reports/relationships/${encodeURIComponent(companyName)}`);
     },
 
+    async getFederterziarioCompanyRelationships(companyName) {
+        return await this.request(`/reports/federterziario-relationships/${encodeURIComponent(companyName)}`);
+    },
+
     // Health check
     async healthCheck() {
         return await this.request('/health', { 

@@ -222,7 +222,7 @@ const SUK = ({ user, showToast }) => {
 
     useEffect(() => {
         loadData();
-        
+
         // Cleanup function to mark component as unmounted
         return () => {
             mountedRef.current = false;
@@ -423,7 +423,7 @@ const SUK = ({ user, showToast }) => {
             // Update state in the correct order to prevent React errors
             setSelectedReports([]);
             setShowDeleteModal(false);
-            
+
             // Remove deleted reports from local state
             setReportHistory(prev => 
                 prev.filter(report => !reportsToDelete.includes(report.id))
@@ -852,7 +852,9 @@ const SUK = ({ user, showToast }) => {
                                 </div>
                             ) : (
                                 <span className="flex items-center justify-center">
-                                    <i data-feather="file-text" className="w-4 h-4 mr-2"></i>
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
+                                    </svg>
                                     Generate Report
                                 </span>
                             )}
@@ -865,7 +867,9 @@ const SUK = ({ user, showToast }) => {
                             title="Export company information to PDF"
                         >
                             <span className="flex items-center justify-center">
-                                <i data-feather="download" className="w-4 h-4 mr-2"></i>
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-5l-4 4-4-4m-4-5l4 4 4-4" />
+                                </svg>
                                 Export PDF
                             </span>
                         </button>
@@ -1148,7 +1152,9 @@ const SUK = ({ user, showToast }) => {
                                 onClick={openDeleteModal}
                                 className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm font-medium flex items-center"
                             >
-                                <i data-feather="trash-2" className="w-4 h-4 mr-1"></i>
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                                 Delete Selected ({selectedReports.length})
                             </button>
                         )}
@@ -1248,7 +1254,10 @@ const SUK = ({ user, showToast }) => {
                                                         className="text-green-600 hover:text-green-800 font-medium"
                                                         title="View PDF"
                                                     >
-                                                        <i data-feather="eye" className="w-4 h-4 inline mr-1"></i>
+                                                        <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7 1.274 4.057-1.512 8.057-5.954 8.057-4.441 0-7.229-4-8.503-8z" />
+                                                        </svg>
                                                         View
                                                     </button>
                                                     <button
@@ -1256,7 +1265,9 @@ const SUK = ({ user, showToast }) => {
                                                         className="text-blue-600 hover:text-blue-800 font-medium"
                                                         title="Download PDF"
                                                     >
-                                                        <i data-feather="download" className="w-4 h-4 inline mr-1"></i>
+                                                        <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-5l-4 4-4-4m-4-5l4 4 4-4" />
+                                                        </svg>
                                                         Download
                                                     </button>
                                                 </div>
@@ -1270,7 +1281,9 @@ const SUK = ({ user, showToast }) => {
                                 <tr>
                                     <td colSpan="5" className="px-6 py-8 text-center text-sm text-gray-500">
                                         <div className="flex flex-col items-center">
-                                            <i data-feather="file-text" className="w-8 h-8 text-gray-300 mb-2"></i>
+                                            <svg className="w-8 h-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
+                                            </svg>
                                             <p>No reports generated yet</p>
                                             <p className="text-xs mt-1">Select a company and generate your first report</p>
                                         </div>
@@ -1289,7 +1302,9 @@ const SUK = ({ user, showToast }) => {
                         {/* Header */}
                         <div className="bg-red-600 text-white p-6 rounded-t-xl">
                             <div className="flex items-center">
-                                <i data-feather="trash-2" className="w-6 h-6 mr-3"></i>
+                                <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                                 <h3 className="text-xl font-bold">Conferma Eliminazione</h3>
                             </div>
                         </div>
@@ -1304,7 +1319,9 @@ const SUK = ({ user, showToast }) => {
 
                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                                 <div className="flex items-start">
-                                    <i data-feather="alert-triangle" className="w-5 h-5 text-yellow-600 mr-2 mt-0.5"></i>
+                                    <svg className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
                                     <div>
                                         <h4 className="text-sm font-medium text-yellow-800">Attenzione</h4>
                                         <p className="text-sm text-yellow-700 mt-1">
@@ -1336,7 +1353,9 @@ const SUK = ({ user, showToast }) => {
                                     </>
                                 ) : (
                                     <>
-                                        <i data-feather="trash-2" className="w-4 h-4 mr-2"></i>
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
                                         Elimina {selectedReports.length} Report{selectedReports.length > 1 ? 's' : ''}
                                     </>
                                 )}
@@ -1361,7 +1380,9 @@ const SUK = ({ user, showToast }) => {
                                     onClick={closeRelationshipModal}
                                     className="text-white hover:text-gray-200 transition-colors"
                                 >
-                                    <i data-feather="x" className="w-6 h-6"></i>
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -1381,7 +1402,9 @@ const SUK = ({ user, showToast }) => {
                                         <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-1 rounded-full text-xs font-medium">
                                             {selectedRelationship.properties?.type || 'Relazione'}
                                         </div>
-                                        <i data-feather="arrow-right" className="w-6 h-6 text-gray-400 mt-2"></i>
+                                        <svg className="w-6 h-6 text-gray-400 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                        </svg>
                                     </div>
 
                                     <div className="flex flex-col items-center">
@@ -1397,7 +1420,9 @@ const SUK = ({ user, showToast }) => {
                             {selectedRelationship.properties?.type && (
                                 <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
                                     <div className="flex items-center">
-                                        <i data-feather="tag" className="w-5 h-5 text-green-600 mr-2"></i>
+                                        <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                        </svg>
                                         <h4 className="text-lg font-semibold text-green-800">Tipologia Relazione</h4>
                                     </div>
                                     <p className="text-green-700 mt-2 font-medium capitalize">
@@ -1410,7 +1435,9 @@ const SUK = ({ user, showToast }) => {
                             {selectedRelationship.properties && Object.keys(selectedRelationship.properties).length > 0 && (
                                 <div>
                                     <div className="flex items-center mb-4">
-                                        <i data-feather="info" className="w-5 h-5 text-blue-600 mr-2"></i>
+                                        <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
                                         <h4 className="text-lg font-semibold text-gray-900">Dettagli Aggiuntivi</h4>
                                     </div>
 
@@ -1430,11 +1457,12 @@ const SUK = ({ user, showToast }) => {
                                                                     <div className="flex items-center">
                                                                         <div className="flex space-x-1 mr-2">
                                                                             {[...Array(5)].map((_, i) => (
-                                                                                <i 
+                                                                                <svg 
                                                                                     key={i}
-                                                                                    data-feather="star" 
                                                                                     className={`w-4 h-4 ${i < parseInt(value) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-                                                                                ></i>
+                                                                                    fill="currentColor" viewBox="0 0 20 20">
+                                                                                    <path d="M10 15l-5.878 3.09 1.123-6.545L.587 8.41l6.545-.953L10 2.102l2.868 5.355 6.545.953-4.758 4.14.545 6.545L10 15z"/>
+                                                                                </svg>
                                                                             ))}
                                                                         </div>
                                                                         <span className="font-medium">{value}/5</span>

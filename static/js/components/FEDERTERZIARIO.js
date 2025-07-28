@@ -1,4 +1,3 @@
-
 const { useState, useEffect } = React;
 
 const FederterziarioCompanyRelationshipsGraph = ({ companyName, onRelationshipClick }) => {
@@ -147,7 +146,10 @@ const FederterziarioCompanyRelationshipsGraph = ({ companyName, onRelationshipCl
                     disabled={loading}
                     className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50"
                 >
-                    <i data-feather="refresh-cw" className="w-4 h-4 inline mr-1"></i>
+                    <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
                     Aggiorna
                 </button>
             </div>
@@ -169,7 +171,9 @@ const FederterziarioCompanyRelationshipsGraph = ({ companyName, onRelationshipCl
 
             {!loading && !error && relationships.nodes.length === 0 && (
                 <div className="text-center py-8 text-red-600">
-                    <i data-feather="link" className="w-12 h-12 mx-auto mb-2 text-red-300"></i>
+                    <svg className="w-12 h-12 mx-auto mb-2 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    </svg>
                     <p>Nessuna relazione trovata per questa azienda</p>
                 </div>
             )}
@@ -220,7 +224,7 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
 
     useEffect(() => {
         loadData();
-        
+
         // Cleanup function to mark component as unmounted
         return () => {
             mountedRef.current = false;
@@ -275,7 +279,7 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
         setSelectedCompany(company);
         setSearchTerm(company.nome_azienda);
         setIsDropdownOpen(false);
-        
+
         // Load detailed company information
         try {
             const detailsResponse = await apiService.getFederterziarioCompanyDetails(company.nome_azienda);
@@ -406,7 +410,7 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
             // Update state in the correct order to prevent React errors
             safeSetState(setSelectedReports, []);
             safeSetState(setShowDeleteModal, false);
-            
+
             // Remove deleted reports from local state
             safeSetState(setReportHistory, prev => 
                 prev.filter(report => !reportsToDelete.includes(report.id))
@@ -486,7 +490,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                     placeholder="Type to search companies..."
                                 />
                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                    <i data-feather="search" className="w-5 h-5 text-gray-400"></i>
+                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
                                 </div>
                             </div>
 
@@ -536,7 +542,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                 </div>
                             ) : (
                                 <span className="flex items-center justify-center">
-                                    <i data-feather="file-text" className="w-4 h-4 mr-2"></i>
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                                    </svg>
                                     Generate Report
                                 </span>
                             )}
@@ -762,15 +770,20 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                 onClick={openDeleteModal}
                                 className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm font-medium flex items-center"
                             >
-                                <i data-feather="trash-2" className="w-4 h-4 mr-1"></i>
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6h18M19 9l-2 2m-2 2l-2 2m-2-2l-2-2m-2 2l-2 2M7 21h10a2 2 0 002-2V9a2 2 0 00-2-2h-1.937m-2.383 0l-3.76 3.76A1.5 1.5 0 015.15 8.55L12 15.4"></path>
+                                </svg>
                                 Delete Selected ({selectedReports.length})
-                            </button>
+                            </button
                         )}
                         <button
                             onClick={loadReportHistory}
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                         >
-                            <i data-feather="refresh-cw" className="w-4 h-4 inline mr-1"></i>
+                            <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                    </svg>
                             Refresh
                         </button>
                     </div>
@@ -837,7 +850,10 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                                         className="ml-2 text-gray-400 hover:text-gray-600"
                                                         title="Refresh status"
                                                     >
-                                                        <i data-feather="refresh-cw" className="w-3 h-3"></i>
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                    </svg>
                                                     </button>
                                                 )}
                                             </div>
@@ -856,7 +872,10 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                                         className="text-green-600 hover:text-green-800 font-medium"
                                                         title="View PDF"
                                                     >
-                                                        <i data-feather="eye" className="w-4 h-4 inline mr-1"></i>
+                                                        <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7 1.274 4.057 1.274 8.057 0 12.114-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7-1.274-4.057-1.274-8.057 0-12.114z"></path>
+                                </svg>
                                                         View
                                                     </button>
                                                     <button
@@ -864,7 +883,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                                         className="text-blue-600 hover:text-blue-800 font-medium"
                                                         title="Download PDF"
                                                     >
-                                                        <i data-feather="download" className="w-4 h-4 inline mr-1"></i>
+                                                        <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-5l-4 4-4-4m-4-5l4 4 4-4m7 4v7m-4-7v7"></path>
+                                </svg>
                                                         Download
                                                     </button>
                                                 </div>
@@ -878,7 +899,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                 <tr>
                                     <td colSpan="5" className="px-6 py-8 text-center text-sm text-gray-500">
                                         <div className="flex flex-col items-center">
-                                            <i data-feather="file-text" className="w-8 h-8 text-gray-300 mb-2"></i>
+                                            <svg className="w-8 h-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                                </svg>
                                             <p>No reports generated yet</p>
                                             <p className="text-xs mt-1">Select a company and generate your first report</p>
                                         </div>
@@ -905,7 +928,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                     onClick={closeRelationshipModal}
                                     className="text-white hover:text-gray-200 transition-colors"
                                 >
-                                    <i data-feather="x" className="w-6 h-6"></i>
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -925,7 +950,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                         <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full text-xs font-medium">
                                             {selectedRelationship.properties?.type || 'Relazione'}
                                         </div>
-                                        <i data-feather="arrow-right" className="w-6 h-6 text-gray-400 mt-2"></i>
+                                        <svg className="w-6 h-6 text-gray-400 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
                                     </div>
 
                                     <div className="flex flex-col items-center">
@@ -941,7 +968,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                             {selectedRelationship.properties?.type && (
                                 <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
                                     <div className="flex items-center">
-                                        <i data-feather="tag" className="w-5 h-5 text-green-600 mr-2"></i>
+                                        <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                                </svg>
                                         <h4 className="text-lg font-semibold text-green-800">Tipologia Relazione</h4>
                                     </div>
                                     <p className="text-green-700 mt-2 font-medium capitalize">
@@ -954,7 +983,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                             {selectedRelationship.properties && Object.keys(selectedRelationship.properties).length > 0 && (
                                 <div>
                                     <div className="flex items-center mb-4">
-                                        <i data-feather="info" className="w-5 h-5 text-red-600 mr-2"></i>
+                                        <svg className="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
                                         <h4 className="text-lg font-semibold text-gray-900">Dettagli Aggiuntivi</h4>
                                     </div>
 
@@ -974,11 +1005,11 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                                                     <div className="flex items-center">
                                                                         <div className="flex space-x-1 mr-2">
                                                                             {[...Array(5)].map((_, i) => (
-                                                                                <i 
+                                                                                <svg 
                                                                                     key={i}
-                                                                                    data-feather="star" 
-                                                                                    className={`w-4 h-4 ${i < parseInt(value) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-                                                                                ></i>
+                                                                                    className={`w-4 h-4 ${i < parseInt(value) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} viewBox="0 0 24 24" fill="currentColor">
+                                                                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 5.19 8.63L-7.19.61L5.46 9.24 3.82 13.97 18.18 21z"></path>
+                                                                                </svg>
                                                                             ))}
                                                                         </div>
                                                                         <span className="font-medium">{value}/5</span>
@@ -1029,7 +1060,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                         {/* Header */}
                         <div className="bg-red-600 text-white p-6 rounded-t-xl">
                             <div className="flex items-center">
-                                <i data-feather="trash-2" className="w-6 h-6 mr-3"></i>
+                                <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6h18M19 9l-2 2m-2 2l-2 2m-2-2l-2-2m-2 2l-2 2M7 21h10a2 2 0 002-2V9a2 2 0 00-2-2h-1.937m-2.383 0l-3.76 3.76A1.5 1.5 0 015.15 8.55L12 15.4"></path>
+                                </svg>
                                 <h3 className="text-xl font-bold">Conferma Eliminazione</h3>
                             </div>
                         </div>
@@ -1044,7 +1077,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
 
                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                                 <div className="flex items-start">
-                                    <i data-feather="alert-triangle" className="w-5 h-5 text-yellow-600 mr-2 mt-0.5"></i>
+                                    <svg className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
                                     <div>
                                         <h4 className="text-sm font-medium text-yellow-800">Attenzione</h4>
                                         <p className="text-sm text-yellow-700 mt-1">
@@ -1076,7 +1111,9 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                     </>
                                 ) : (
                                     <>
-                                        <i data-feather="trash-2" className="w-4 h-4 mr-2"></i>
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6h18M19 9l-2 2m-2 2l-2 2m-2-2l-2-2m-2 2l-2 2M7 21h10a2 2 0 002-2V9a2 2 0 00-2-2h-1.937m-2.383 0l-3.76 3.76A1.5 1.5 0 015.15 8.55L12 15.4"></path>
+                                </svg>
                                         Elimina {selectedReports.length} Report{selectedReports.length > 1 ? 's' : ''}
                                     </>
                                 )}

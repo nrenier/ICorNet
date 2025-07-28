@@ -70,58 +70,66 @@ def send_chat_message():
 
         # Query Neo4j for SUK data based on the message
         try:
-            # Query for existing products/solutions
-            existing_query = """
-            MATCH (n:SUK) 
-            WHERE toLower(n.nome_azienda) CONTAINS toLower($keyword) 
-               OR toLower(n.settore) CONTAINS toLower($keyword)
-               OR toLower(n.descrizione) CONTAINS toLower($keyword)
-            RETURN n.nome_azienda, n.settore, n.descrizione, 'existing' as type
-            LIMIT 10
-            """
-
-            # Query for potential suppliers
-            suppliers_query = """
-            MATCH (n:SUK) 
-            WHERE toLower(n.settore) CONTAINS toLower($keyword)
-               OR toLower(n.descrizione) CONTAINS toLower($keyword)
-            RETURN n.nome_azienda, n.settore, n.descrizione, 'supplier' as type
-            LIMIT 10
-            """
-
-            # Extract keywords from message
-            keywords = message.lower().split()
+            # Extract keywords from message for search
+            search_terms = message.lower().split()
             existing_products = []
             potential_suppliers = []
 
-            for keyword in keywords:
-                # Get existing products/solutions
-                existing_results = neo4j_service.run_query(existing_query, {'keyword': keyword})
-                if existing_results:
-                    existing_products.extend(existing_results)
+            # Search for companies using existing Neo4j service methods
+            for term in search_terms:
+                if len(term) > 2:  # Only search for terms longer than 2 characters
+                    # Search companies by name
+                    search_results = neo4j_service.search_companies(term)
+                    
+                    # Add results as both existing products and potential suppliers
+                    for company in search_results:
+                        company_data = {
+                            'nome_azienda': company.get('nome_azienda', 'N/A'),
+                            'settore': company.get('settore', 'N/A') if isinstance(company.get('settore'), str) else ', '.join(company.get('settore', [])),
+                            'descrizione': company.get('descrizione', ''),
+                            'motivo_del_match': f"Trovato per ricerca: '{term}'"
+                        }
+                        
+                        # Add to existing products if not already present
+                        if not any(p['nome_azienda'] == company_data['nome_azienda'] for p in existing_products):
+                            existing_products.append({
+                                'nome_azienda': company_data['nome_azienda'],
+                                'prodotto_soluzione_identificato': company_data['settore'],
+                                'motivo_del_match': company_data['motivo_del_match']
+                            })
+                        
+                        # Add to potential suppliers if not already present
+                        if not any(p['nome_azienda'] == company_data['nome_azienda'] for p in potential_suppliers):
+                            potential_suppliers.append({
+                                'nome_azienda': company_data['nome_azienda'],
+                                'motivo_del_match': company_data['motivo_del_match']
+                            })
 
-                # Get potential suppliers
-                supplier_results = neo4j_service.run_query(suppliers_query, {'keyword': keyword})
-                if supplier_results:
-                    potential_suppliers.extend(supplier_results)
+            # If no specific search results, get some general companies from Neo4j
+            if not existing_products and not potential_suppliers:
+                all_companies = neo4j_service.get_companies_list()[:10]  # Get first 10 companies
+                for company in all_companies:
+                    company_data = {
+                        'nome_azienda': company.get('nome_azienda', 'N/A'),
+                        'settore': company.get('settore', 'N/A') if isinstance(company.get('settore'), str) else ', '.join(company.get('settore', [])),
+                        'descrizione': company.get('descrizione', ''),
+                        'motivo_del_match': 'Azienda del database SUK'
+                    }
+                    
+                    existing_products.append({
+                        'nome_azienda': company_data['nome_azienda'],
+                        'prodotto_soluzione_identificato': company_data['settore'],
+                        'motivo_del_match': company_data['motivo_del_match']
+                    })
+                    
+                    potential_suppliers.append({
+                        'nome_azienda': company_data['nome_azienda'],
+                        'motivo_del_match': company_data['motivo_del_match']
+                    })
 
-            # Remove duplicates
-            def remove_duplicates(results):
-                unique_results = []
-                seen = set()
-                for result in results:
-                    company_name = result.get('n.nome_azienda')
-                    if company_name and company_name not in seen:
-                        seen.add(company_name)
-                        unique_results.append({
-                            'nome_azienda': result.get('n.nome_azienda', 'N/A'),
-                            'settore': result.get('n.settore', 'N/A'),
-                            'descrizione': result.get('n.descrizione', '')
-                        })
-                return unique_results
-
-            existing_products = remove_duplicates(existing_products)
-            potential_suppliers = remove_duplicates(potential_suppliers)
+            # Limit results to avoid overwhelming the user
+            existing_products = existing_products[:5]
+            potential_suppliers = potential_suppliers[:5]
 
             # Generate response
             response_text = f"Analisi completata per la richiesta: '{message}'\n\n"

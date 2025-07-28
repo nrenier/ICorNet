@@ -25,6 +25,13 @@ const SUKChat = () => {
         loadChatHistory();
     }, []);
 
+    // Initialize feather icons after component mounts and updates
+    useEffect(() => {
+        if (window.feather) {
+            window.feather.replace();
+        }
+    });
+
     const loadChatHistory = async () => {
         try {
             const userId = window.currentUser?.id || 'anonymous';

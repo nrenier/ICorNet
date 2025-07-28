@@ -76,7 +76,6 @@ class ChatMessage(db.Model):
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     message_type = db.Column(db.String(20), nullable=False)  # 'user' or 'assistant'
     user_id = db.Column(db.String(100), nullable=False)  # Support string IDs and anonymous users
-    session_id = db.Column(db.String(100))  # Optional: group messages by session
 
     # Note: Removed foreign key relationship to support anonymous users
 
@@ -86,6 +85,5 @@ class ChatMessage(db.Model):
             'content': self.content,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
             'message_type': self.message_type,
-            'user_id': self.user_id,
-            'session_id': self.session_id
+            'user_id': self.user_id
         }

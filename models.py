@@ -75,11 +75,10 @@ class ChatMessage(db.Model):
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     message_type = db.Column(db.String(20), nullable=False)  # 'user' or 'assistant'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.String(100), nullable=False)  # Support string IDs and anonymous users
     session_id = db.Column(db.String(100))  # Optional: group messages by session
 
-    # Relationship
-    user = db.relationship('User', backref=db.backref('chat_messages', lazy=True))
+    # Note: Removed foreign key relationship to support anonymous users
 
     def to_dict(self):
         return {

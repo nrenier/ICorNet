@@ -23,7 +23,8 @@ const SUKChat = () => {
 
     const loadChatHistory = async () => {
         try {
-            const response = await apiService.getChatHistory(window.currentUser?.id);
+            const userId = window.currentUser?.id || 'anonymous';
+            const response = await apiService.getChatHistory(userId);
             if (response.success && response.history) {
                 // Transform the history to match the expected format
                 const transformedHistory = response.history.map(msg => ({
@@ -58,9 +59,10 @@ const SUKChat = () => {
         setError(null);
 
         try {
+            const userId = window.currentUser?.id || 'anonymous';
             const response = await apiService.sendChatMessage(
                 userMessage.content, 
-                window.currentUser?.id
+                userId
             );
 
             if (response && (response.prodotti_soluzioni_esistenti || response.potenziali_fornitori)) {

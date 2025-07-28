@@ -1,5 +1,4 @@
 
-```javascript
 const { useState, useEffect, useRef } = React;
 
 const SUKChat = () => {
@@ -407,4 +406,3 @@ const SUKChat = () => {
 };
 
 window.SUKChat = SUKChat;
-```

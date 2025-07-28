@@ -121,29 +121,32 @@ def create_app():
 def run_database_migrations():
     """Run database migrations to update schema"""
     try:
-        # Add report_type column if it doesn't exist
-        db.engine.execute(text("""
-            ALTER TABLE reports 
-            ADD COLUMN IF NOT EXISTS report_type VARCHAR(50) DEFAULT 'suk'
-        """))
+        with db.engine.connect() as conn:
+            # Add report_type column if it doesn't exist
+            conn.execute(text("""
+                ALTER TABLE reports 
+                ADD COLUMN IF NOT EXISTS report_type VARCHAR(50) DEFAULT 'suk'
+            """))
 
-        # Update existing records
-        db.engine.execute(text("""
-            UPDATE reports 
-            SET report_type = 'suk' 
-            WHERE report_type IS NULL
-        """))
+            # Update existing records
+            conn.execute(text("""
+                UPDATE reports 
+                SET report_type = 'suk' 
+                WHERE report_type IS NULL
+            """))
 
-        # Create performance indexes
-        db.engine.execute(text("""
-            CREATE INDEX IF NOT EXISTS idx_reports_user_id_type 
-            ON reports(user_id, report_type)
-        """))
+            # Create performance indexes
+            conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_reports_user_id_type 
+                ON reports(user_id, report_type)
+            """))
 
-        db.engine.execute(text("""
-            CREATE INDEX IF NOT EXISTS idx_reports_created_at 
-            ON reports(created_at DESC)
-        """))
+            conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_reports_created_at 
+                ON reports(created_at DESC)
+            """))
+            
+            conn.commit()
 
         logging.info("Database migrations completed successfully")
 

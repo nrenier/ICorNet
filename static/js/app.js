@@ -289,6 +289,14 @@ const App = () => {
         }, 100);
     };
 
+    // Make navigation function globally available
+    useEffect(() => {
+        window.appNavigate = handleNavigate;
+        return () => {
+            delete window.appNavigate;
+        };
+    }, []);
+
     // Show loading spinner
     if (loading) {
         return (
@@ -363,47 +371,18 @@ const App = () => {
     );
 };
 
-const showTab = (tabName) => {
-        // Hide all tabs
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.style.display = 'none';
-        });
+// Global function for switching tabs - used by other components
+const switchToTab = (tabName) => {
+    // Get the current App instance and trigger navigation
+    if (window.appNavigate) {
+        window.appNavigate(tabName);
+    } else {
+        console.warn('App navigation not available');
+    }
+};
 
-        // Remove active class from all nav links
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('bg-blue-600', 'text-white');
-            link.classList.add('text-gray-600', 'hover:text-gray-900');
-        });
-
-        // Show selected tab
-        const selectedTab = document.getElementById(`${tabName}-tab`);
-        if (selectedTab) {
-            selectedTab.style.display = 'block';
-        }
-
-        // Add active class to current nav link
-        const currentNavLink = document.querySelector(`[onclick="showTab('${tabName}')"]`);
-        if (currentNavLink) {
-            currentNavLink.classList.remove('text-gray-600', 'hover:text-gray-900');
-            currentNavLink.classList.add('bg-blue-600', 'text-white');
-        }
-
-        currentTab = tabName;
-
-        // Re-render component if needed
-        if (tabName === 'dashboard' && window.Dashboard) {
-            renderDashboard();
-        } else if (tabName === 'suk' && window.SUK) {
-            renderSUK();
-        } else if (tabName === 'federterziario' && window.FEDERTERZIARIO) {
-            renderFEDERTERZIARIO();
-        } else if (tabName === 'suk-chat' && window.SUKChat) {
-            renderSUKChat();
-        }
-    };
-
-    // Make switchToTab available globally for other components
-    window.switchToTab = showTab;
+// Make switchToTab available globally for other components
+window.switchToTab = switchToTab;
 
 // Render the app using React 18 createRoot API
 const { createRoot } = ReactDOM;

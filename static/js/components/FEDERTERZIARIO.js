@@ -322,10 +322,17 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                 await apiService.getFederterziarioCompaniesForReports();
             safeSetState(setCompanies, companiesResponse.companies || []);
 
-            // Load user's report history (FEDERTERZIARIO only)
-            const historyResponse =
-                await apiService.getReportHistory("federterziario");
-            safeSetState(setReportHistory, historyResponse.reports || []);
+            // Load user's report history (FEDERTERZIARIO and filiera reports)
+            const historyResponse = await apiService.getReportHistory();
+            const allReports = historyResponse.reports || [];
+            
+            // Filter for FEDERTERZIARIO related reports
+            const federterziarioReports = allReports.filter(report => 
+                report.report_type === 'federterziario' || 
+                report.report_type === 'federterziario_filiera'
+            );
+            
+            safeSetState(setReportHistory, federterziarioReports);
         } catch (error) {
             console.error("Error loading FEDERTERZIARIO data:", error);
             if (mountedRef.current) {
@@ -403,7 +410,7 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                 "federterziario_filiera",
             );
             showToast(
-                "Report Filiera generation started! Check the history section for updates.",
+                "Supply Chain Report generation started! Check the history section for updates.",
                 "success",
             );
 
@@ -412,8 +419,8 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                 loadReportHistory();
             }, 1000);
         } catch (error) {
-            console.error("Error generating filiera report:", error);
-            showToast("Failed to generate filiera report", "error");
+            console.error("Error generating supply chain report:", error);
+            showToast("Failed to generate supply chain report", "error");
         } finally {
             setGeneratingReport(false);
         }
@@ -421,9 +428,17 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
 
     const loadReportHistory = async () => {
         try {
-            const historyResponse =
-                await apiService.getReportHistory("federterziario");
-            setReportHistory(historyResponse.reports || []);
+            // Load both federterziario and federterziario_filiera reports
+            const historyResponse = await apiService.getReportHistory();
+            const allReports = historyResponse.reports || [];
+            
+            // Filter for FEDERTERZIARIO related reports
+            const federterziarioReports = allReports.filter(report => 
+                report.report_type === 'federterziario' || 
+                report.report_type === 'federterziario_filiera'
+            );
+            
+            setReportHistory(federterziarioReports);
         } catch (error) {
             console.error("Error loading report history:", error);
         }
@@ -578,10 +593,10 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                 <div className="flex justify-between items-center">
                     <div>
                         <h2 className="text-xl font-bold mb-2">
-                            Report Filiera FEDERTERZIARIO
+                            FEDERTERZIARIO Supply Chain Report
                         </h2>
                         <p className="text-purple-100">
-                            Genera un report completo dell'intera filiera FEDERTERZIARIO
+                            Generate a comprehensive report of the entire FEDERTERZIARIO supply chain
                         </p>
                     </div>
                     <button
@@ -592,7 +607,7 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                         {generatingReport ? (
                             <div className="flex items-center">
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600 mr-2"></div>
-                                Generando...
+                                Generating...
                             </div>
                         ) : (
                             <span className="flex items-center">
@@ -609,28 +624,10 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                                         d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                     ></path>
                                 </svg>
-                                Genera Report Filiera
+                                Generate Supply Chain Report
                             </span>
                         )}
                     </button>
-                </div>
-                <div className="mt-4 text-sm text-purple-100">
-                    <div className="flex items-center">
-                        <svg
-                            className="w-4 h-4 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            ></path>
-                        </svg>
-                        Nome file: Federterziario_filiera_{new Date().toISOString().slice(0, 10).replace(/-/g, '')}.pdf
-                    </div>
                 </div>
             </div>
 

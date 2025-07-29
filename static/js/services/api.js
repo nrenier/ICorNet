@@ -275,23 +275,10 @@ const apiService = {
         });
     },
 
-    // Get companies for reports
-    async getCompaniesForReports() {
-        try {
-            const response = await this.request('/api/companies', {
-                method: 'GET'
-            });
-            return response;
-        } catch (error) {
-            console.error('Error getting companies for reports:', error);
-            throw error;
-        }
-    },
-
     // Search companies by name
     async searchCompanies(searchTerm) {
         try {
-            const response = await this.request(`/api/companies/search?term=${encodeURIComponent(searchTerm)}`, {
+            const response = await this.request(`/reports/companies/search?term=${encodeURIComponent(searchTerm)}`, {
                 method: 'GET'
             });
             return response.companies || [];

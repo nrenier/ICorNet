@@ -339,28 +339,12 @@ def bulk_delete_reports():
         db.session.rollback()
         return jsonify({'error': 'Failed to delete reports'}), 500
 
-@reports_bp.route('/api/companies', methods=['GET'])
-def get_companies():
-    """Get companies from Neo4j for SUK reports"""
-    try:
-        neo4j_service = current_app.config['neo4j_service']
-        companies = neo4j_service.get_companies_list()
-        return jsonify({
-            'success': True,
-            'companies': companies
-        })
-    except Exception as e:
-        logging.error(f"Error getting companies: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-@reports_bp.route('/api/companies/search', methods=['GET'])
+@reports_bp.route('/companies/search', methods=['GET'])
+@login_required
 def search_companies():
     """Search companies by name"""
     try:
-        neo4j_service = current_app.config['neo4j_service']  # Access neo4j_service through current_app
+        neo4j_service = current_app.config['neo4j_service']
         search_term = request.args.get('term', '')
         if not search_term:
             return jsonify({

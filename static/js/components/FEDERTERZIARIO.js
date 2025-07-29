@@ -394,6 +394,31 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
         }
     };
 
+    const generateFiliereReport = async () => {
+        try {
+            setGeneratingReport(true);
+
+            const response = await apiService.generateReport(
+                "FEDERTERZIARIO_FILIERA", // Special company name for filiera reports
+                "federterziario_filiera",
+            );
+            showToast(
+                "Report Filiera generation started! Check the history section for updates.",
+                "success",
+            );
+
+            // Reload report history to show the new report
+            setTimeout(() => {
+                loadReportHistory();
+            }, 1000);
+        } catch (error) {
+            console.error("Error generating filiera report:", error);
+            showToast("Failed to generate filiera report", "error");
+        } finally {
+            setGeneratingReport(false);
+        }
+    };
+
     const loadReportHistory = async () => {
         try {
             const historyResponse =
@@ -546,6 +571,67 @@ const FEDERTERZIARIO = ({ user, showToast }) => {
                     Select a company and generate detailed FEDERTERZIARIO
                     analysis reports
                 </p>
+            </div>
+
+            {/* Filiera Report Section */}
+            <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg shadow-sm p-6 text-white">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h2 className="text-xl font-bold mb-2">
+                            Report Filiera FEDERTERZIARIO
+                        </h2>
+                        <p className="text-purple-100">
+                            Genera un report completo dell'intera filiera FEDERTERZIARIO
+                        </p>
+                    </div>
+                    <button
+                        onClick={generateFiliereReport}
+                        disabled={generatingReport}
+                        className="bg-white text-purple-600 px-6 py-3 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors"
+                    >
+                        {generatingReport ? (
+                            <div className="flex items-center">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600 mr-2"></div>
+                                Generando...
+                            </div>
+                        ) : (
+                            <span className="flex items-center">
+                                <svg
+                                    className="w-5 h-5 mr-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    ></path>
+                                </svg>
+                                Genera Report Filiera
+                            </span>
+                        )}
+                    </button>
+                </div>
+                <div className="mt-4 text-sm text-purple-100">
+                    <div className="flex items-center">
+                        <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            ></path>
+                        </svg>
+                        Nome file: Federterziario_filiera_{new Date().toISOString().slice(0, 10).replace(/-/g, '')}.pdf
+                    </div>
+                </div>
             </div>
 
             {/* Company Selection */}

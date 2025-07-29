@@ -49,15 +49,16 @@ def generate_report():
             if webhook_response.status_code == 200:
                 # Check if response is binary PDF
                 content_type = webhook_response.headers.get('content-type', '')
-                if 'application/pdf' in content_type or webhook_response.content.startswith(
-                        b'%PDF'):
-                    # Save the PDF file
-                    os.makedirs('reports', exist_ok=True)
-                    # Clean company name: replace spaces with underscores and remove special characters
-                    clean_company_name = company_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
-                    # Use current date in YYYYMMDD format
-                    current_date_extended = datetime.now().strftime('%Y%m%d%H%M')
-                    file_name = f"{clean_company_name}_{current_date_extended}.pdf"
+                if 'application/pdf' in content_type:
+                    # Direct PDF response - file is ready
+                    # Save the file
+                    if report_type == 'federterziario_filiera':
+                        current_date = datetime.now().strftime('%Y%m%d')
+                        file_name = f"Federterziario_filiera_{current_date}.pdf"
+                    else:
+                        clean_company_name = company_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
+                        current_date_extended = datetime.now().strftime('%Y%m%d%H%M')
+                        file_name = f"{clean_company_name}_{current_date_extended}.pdf"
                     file_path = os.path.join('reports', file_name)
 
                     with open(file_path, 'wb') as f:

@@ -66,12 +66,24 @@ def send_chat_message():
                             data_item['output']) if isinstance(
                                 data_item['output'],
                                 str) else data_item['output']
+                        # Sort and limit results
+                        prodotti_esistenti = output_data.get('prodotti_soluzioni_esistenti', [])
+                        if prodotti_esistenti:
+                            # Sort by ranking descending (higher ranking first)
+                            prodotti_esistenti = sorted(prodotti_esistenti, 
+                                                      key=lambda x: float(x.get('ranking', 0)), 
+                                                      reverse=True)[:10]
+                        
+                        fornitori = output_data.get('potenziali_fornitori', [])
+                        if fornitori:
+                            # Sort by ranking descending (higher ranking first)
+                            fornitori = sorted(fornitori, 
+                                             key=lambda x: float(x.get('ranking', 0)), 
+                                             reverse=True)[:10]
+
                         formatted_response = {
-                            'prodotti_soluzioni_esistenti':
-                            output_data.get('prodotti_soluzioni_esistenti',
-                                            []),
-                            'potenziali_fornitori':
-                            output_data.get('potenziali_fornitori', []),
+                            'prodotti_soluzioni_esistenti': prodotti_esistenti,
+                            'potenziali_fornitori': fornitori,
                             'timestamp':
                             data_item.get('timestamp'),
                             'success':
@@ -89,11 +101,22 @@ def send_chat_message():
                         db.session.commit()
 
                     except (json.JSONDecodeError, TypeError):
+                        # Sort and limit results for fallback case
+                        prodotti_esistenti = data_item.get('prodotti_soluzioni_esistenti', [])
+                        if prodotti_esistenti:
+                            prodotti_esistenti = sorted(prodotti_esistenti, 
+                                                      key=lambda x: float(x.get('ranking', 0)), 
+                                                      reverse=True)[:10]
+                        
+                        fornitori = data_item.get('potenziali_fornitori', [])
+                        if fornitori:
+                            fornitori = sorted(fornitori, 
+                                             key=lambda x: float(x.get('ranking', 0)), 
+                                             reverse=True)[:10]
+
                         formatted_response = {
-                            'prodotti_soluzioni_esistenti':
-                            data_item.get('prodotti_soluzioni_esistenti', []),
-                            'potenziali_fornitori':
-                            data_item.get('potenziali_fornitori', []),
+                            'prodotti_soluzioni_esistenti': prodotti_esistenti,
+                            'potenziali_fornitori': fornitori,
                             'timestamp':
                             data_item.get('timestamp'),
                             'success':
@@ -110,11 +133,22 @@ def send_chat_message():
                         db.session.add(assistant_message)
                         db.session.commit()
                 else:
+                    # Sort and limit results for direct case
+                    prodotti_esistenti = data_item.get('prodotti_soluzioni_esistenti', [])
+                    if prodotti_esistenti:
+                        prodotti_esistenti = sorted(prodotti_esistenti, 
+                                                  key=lambda x: float(x.get('ranking', 0)), 
+                                                  reverse=True)[:10]
+                    
+                    fornitori = data_item.get('potenziali_fornitori', [])
+                    if fornitori:
+                        fornitori = sorted(fornitori, 
+                                         key=lambda x: float(x.get('ranking', 0)), 
+                                         reverse=True)[:10]
+
                     formatted_response = {
-                        'prodotti_soluzioni_esistenti':
-                        data_item.get('prodotti_soluzioni_esistenti', []),
-                        'potenziali_fornitori':
-                        data_item.get('potenziali_fornitori', []),
+                        'prodotti_soluzioni_esistenti': prodotti_esistenti,
+                        'potenziali_fornitori': fornitori,
                         'timestamp':
                         data_item.get('timestamp'),
                         'success':
@@ -139,12 +173,22 @@ def send_chat_message():
                             webhook_data['output']) if isinstance(
                                 webhook_data['output'],
                                 str) else webhook_data['output']
+                        # Sort and limit results for dict with output
+                        prodotti_esistenti = output_data.get('prodotti_soluzioni_esistenti', [])
+                        if prodotti_esistenti:
+                            prodotti_esistenti = sorted(prodotti_esistenti, 
+                                                      key=lambda x: float(x.get('ranking', 0)), 
+                                                      reverse=True)[:10]
+                        
+                        fornitori = output_data.get('potenziali_fornitori', [])
+                        if fornitori:
+                            fornitori = sorted(fornitori, 
+                                             key=lambda x: float(x.get('ranking', 0)), 
+                                             reverse=True)[:10]
+
                         formatted_response = {
-                            'prodotti_soluzioni_esistenti':
-                            output_data.get('prodotti_soluzioni_esistenti',
-                                            []),
-                            'potenziali_fornitori':
-                            output_data.get('potenziali_fornitori', []),
+                            'prodotti_soluzioni_esistenti': prodotti_esistenti,
+                            'potenziali_fornitori': fornitori,
                             'timestamp':
                             webhook_data.get('timestamp'),
                             'success':
@@ -162,12 +206,22 @@ def send_chat_message():
                         db.session.commit()
 
                     except (json.JSONDecodeError, TypeError):
+                        # Sort and limit results for dict fallback
+                        prodotti_esistenti = webhook_data.get('prodotti_soluzioni_esistenti', [])
+                        if prodotti_esistenti:
+                            prodotti_esistenti = sorted(prodotti_esistenti, 
+                                                      key=lambda x: float(x.get('ranking', 0)), 
+                                                      reverse=True)[:10]
+                        
+                        fornitori = webhook_data.get('potenziali_fornitori', [])
+                        if fornitori:
+                            fornitori = sorted(fornitori, 
+                                             key=lambda x: float(x.get('ranking', 0)), 
+                                             reverse=True)[:10]
+
                         formatted_response = {
-                            'prodotti_soluzioni_esistenti':
-                            webhook_data.get('prodotti_soluzioni_esistenti',
-                                             []),
-                            'potenziali_fornitori':
-                            webhook_data.get('potenziali_fornitori', []),
+                            'prodotti_soluzioni_esistenti': prodotti_esistenti,
+                            'potenziali_fornitori': fornitori,
                             'timestamp':
                             webhook_data.get('timestamp'),
                             'success':
@@ -184,12 +238,23 @@ def send_chat_message():
                         db.session.add(assistant_message)
                         db.session.commit()
                 else:
+                    # Sort and limit results for dict direct response
+                    prodotti_esistenti = webhook_data.get('prodotti_soluzioni_esistenti', [])
+                    if prodotti_esistenti:
+                        prodotti_esistenti = sorted(prodotti_esistenti, 
+                                                  key=lambda x: float(x.get('ranking', 0)), 
+                                                  reverse=True)[:10]
+                    
+                    fornitori = webhook_data.get('potenziali_fornitori', [])
+                    if fornitori:
+                        fornitori = sorted(fornitori, 
+                                         key=lambda x: float(x.get('ranking', 0)), 
+                                         reverse=True)[:10]
+
                     # Format the response according to the expected structure
                     formatted_response = {
-                        'prodotti_soluzioni_esistenti':
-                        webhook_data.get('prodotti_soluzioni_esistenti', []),
-                        'potenziali_fornitori':
-                        webhook_data.get('potenziali_fornitori', []),
+                        'prodotti_soluzioni_esistenti': prodotti_esistenti,
+                        'potenziali_fornitori': fornitori,
                         'timestamp':
                         webhook_data.get('timestamp'),
                         'success':

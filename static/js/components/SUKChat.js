@@ -208,6 +208,21 @@ const SUKChat = () => {
         }
     };
 
+    const handleCompanyClick = (companyName) => {
+        // Store the selected company in sessionStorage for the SUK Analysis page
+        sessionStorage.setItem('selectedCompanyForSUK', companyName);
+        
+        // Trigger custom event to notify other components
+        window.dispatchEvent(new CustomEvent('sukCompanySelected', { 
+            detail: { companyName } 
+        }));
+        
+        // Switch to SUK Analysis tab
+        if (window.switchToTab) {
+            window.switchToTab('suk');
+        }
+    };
+
     const formatAssistantResponse = (data) => {
         if (!data.prodotti_soluzioni_esistenti && !data.potenziali_fornitori) {
             return <div className="text-gray-600">No data available</div>;
@@ -233,7 +248,16 @@ const SUKChat = () => {
                             {data.prodotti_soluzioni_esistenti.map((item, index) => (
                                 <div key={index} className="bg-white p-3 rounded border-l-4 border-blue-400">
                                     <div className="flex justify-between items-start mb-2">
-                                        <h5 className="font-medium text-gray-900 flex-1">{item.nome_azienda}</h5>
+                                        <button
+                                            onClick={() => handleCompanyClick(item.nome_azienda)}
+                                            className="font-medium text-blue-600 hover:text-blue-800 hover:underline flex-1 text-left transition-colors cursor-pointer"
+                                            title="Clicca per aprire in SUK Analysis"
+                                        >
+                                            {item.nome_azienda}
+                                            <svg className="w-3 h-3 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </button>
                                         {item.ranking && (
                                             <div className="flex items-center ml-2">
                                                 <svg className="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -273,7 +297,16 @@ const SUKChat = () => {
                             {data.potenziali_fornitori.map((fornitore, index) => (
                                 <div key={index} className="bg-white p-3 rounded border-l-4 border-green-400">
                                     <div className="flex justify-between items-start mb-2">
-                                        <h5 className="font-medium text-gray-900 flex-1">{fornitore.nome_azienda}</h5>
+                                        <button
+                                            onClick={() => handleCompanyClick(fornitore.nome_azienda)}
+                                            className="font-medium text-green-600 hover:text-green-800 hover:underline flex-1 text-left transition-colors cursor-pointer"
+                                            title="Clicca per aprire in SUK Analysis"
+                                        >
+                                            {fornitore.nome_azienda}
+                                            <svg className="w-3 h-3 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </button>
                                         {fornitore.ranking && (
                                             <div className="flex items-center ml-2">
                                                 <svg className="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">

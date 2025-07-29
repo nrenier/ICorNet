@@ -223,9 +223,25 @@ const SUK = ({ user, showToast }) => {
     useEffect(() => {
         loadData();
 
+        // Listen for company selection from SUK Chat
+        const handleCompanySelection = (event) => {
+            const companyName = event.detail.companyName;
+            handleCompanySelectionFromChat(companyName);
+        };
+
+        // Check for stored company selection on mount
+        const storedCompany = sessionStorage.getItem('selectedCompanyForSUK');
+        if (storedCompany) {
+            handleCompanySelectionFromChat(storedCompany);
+            sessionStorage.removeItem('selectedCompanyForSUK');
+        }
+
+        window.addEventListener('sukCompanySelected', handleCompanySelection);
+
         // Cleanup function to mark component as unmounted
         return () => {
             mountedRef.current = false;
+            window.removeEventListener('sukCompanySelected', handleCompanySelection);
         };
     }, []);
 
@@ -287,6 +303,42 @@ const SUK = ({ user, showToast }) => {
         setSelectedCompany(company);
         setSearchTerm(company.nome_azienda);
         setIsDropdownOpen(false);
+    };
+
+    const handleCompanySelectionFromChat = async (companyName) => {
+        try {
+            // Find the company in the current companies list
+            let company = companies.find(c => c.nome_azienda === companyName);
+            
+            if (!company) {
+                // If not found in current list, search for it
+                const searchResults = await apiService.searchCompanies(companyName);
+                company = searchResults.find(c => c.nome_azienda === companyName);
+            }
+            
+            if (company) {
+                setSelectedCompany(company);
+                setSearchTerm(companyName);
+                setIsDropdownOpen(false);
+                
+                // Show a notification
+                if (window.showToast) {
+                    window.showToast(`Azienda "${companyName}" selezionata da SUK Chat`, 'success');
+                }
+            } else {
+                // If company not found, still set the search term
+                setSearchTerm(companyName);
+                setSelectedCompany(null);
+                
+                if (window.showToast) {
+                    window.showToast(`Azienda "${companyName}" non trovata nel database`, 'warning');
+                }
+            }
+        } catch (error) {
+            console.error('Error handling company selection from chat:', error);
+            setSearchTerm(companyName);
+            setSelectedCompany(null);
+        }
     };
 
     const handleSearchChange = (e) => {

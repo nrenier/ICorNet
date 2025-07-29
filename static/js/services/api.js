@@ -273,7 +273,33 @@ const apiService = {
                 end_timestamp: endTimestamp
             }
         });
-    }
+    },
+
+    // Get companies for reports
+    async getCompaniesForReports() {
+        try {
+            const response = await this.request('/api/companies', {
+                method: 'GET'
+            });
+            return response;
+        } catch (error) {
+            console.error('Error getting companies for reports:', error);
+            throw error;
+        }
+    },
+
+    // Search companies by name
+    async searchCompanies(searchTerm) {
+        try {
+            const response = await this.request(`/api/companies/search?term=${encodeURIComponent(searchTerm)}`, {
+                method: 'GET'
+            });
+            return response.companies || [];
+        } catch (error) {
+            console.error('Error searching companies:', error);
+            throw error;
+        }
+    },
 };
 
 // Make apiService globally available

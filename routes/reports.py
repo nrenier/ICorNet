@@ -203,11 +203,11 @@ def get_report_history():
         report_type = request.args.get('type')  # Optional filter by report type
 
         query = Report.query.filter_by(user_id=user_id)
-        
+
         # Add type filter if specified
         if report_type:
             query = query.filter_by(report_type=report_type)
-        
+
         reports = query.order_by(Report.created_at.desc()).all()
 
         reports_data = [report.to_dict() for report in reports]
@@ -297,24 +297,24 @@ def get_federterziario_company_relationships(company_name):
 def bulk_delete_reports():
     try:
         data = request.get_json()
-        
+
         if not data or not data.get('report_ids'):
             return jsonify({'error': 'Report IDs are required'}), 400
-            
+
         report_ids = data['report_ids']
         user_id = session['user_id']
-        
+
         # Verify all reports belong to the current user
         reports = Report.query.filter(
             Report.id.in_(report_ids),
             Report.user_id == user_id
         ).all()
-        
+
         if len(reports) != len(report_ids):
             return jsonify({'error': 'Some reports not found or access denied'}), 404
-        
+
         deleted_count = 0
-        
+
         for report in reports:
             # Delete physical file if exists
             if report.file_path and os.path.exists(report.file_path):
@@ -322,19 +322,60 @@ def bulk_delete_reports():
                     os.remove(report.file_path)
                 except Exception as e:
                     logging.warning(f"Failed to delete file {report.file_path}: {str(e)}")
-            
+
             # Delete from database
             db.session.delete(report)
             deleted_count += 1
-        
+
         db.session.commit()
-        
+
         return jsonify({
             'message': f'Successfully deleted {deleted_count} reports',
             'deleted_count': deleted_count
         }), 200
-        
+
     except Exception as e:
         logging.error(f"Bulk delete reports error: {str(e)}")
         db.session.rollback()
         return jsonify({'error': 'Failed to delete reports'}), 500
+
+@reports_bp.route('/api/companies', methods=['GET'])
+def get_companies():
+    """Get companies from Neo4j for SUK reports"""
+    try:
+        neo4j_service = current_app.config['neo4j_service']
+        companies = neo4j_service.get_companies_list()
+        return jsonify({
+            'success': True,
+            'companies': companies
+        })
+    except Exception as e:
+        logging.error(f"Error getting companies: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@reports_bp.route('/api/companies/search', methods=['GET'])
+def search_companies():
+    """Search companies by name"""
+    try:
+        neo4j_service = current_app.config['neo4j_service']  # Access neo4j_service through current_app
+        search_term = request.args.get('term', '')
+        if not search_term:
+            return jsonify({
+                'success': False,
+                'error': 'Search term is required'
+            }), 400
+
+        companies = neo4j_service.search_companies(search_term)
+        return jsonify({
+            'success': True,
+            'companies': companies
+        })
+    except Exception as e:
+        logging.error(f"Error searching companies: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

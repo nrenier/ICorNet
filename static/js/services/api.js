@@ -262,6 +262,17 @@ const apiService = {
         return await this.request('/suk-chat/clear-history', {
             method: 'DELETE'
         });
+    },
+
+    async deleteConversation(userId, startTimestamp, endTimestamp) {
+        return await this.request('/suk-chat/delete-conversation', {
+            method: 'DELETE',
+            body: {
+                user_id: userId,
+                start_timestamp: startTimestamp,
+                end_timestamp: endTimestamp
+            }
+        });
     }
 };
 

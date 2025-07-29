@@ -114,6 +114,36 @@ const SUKChat = () => {
         setShowHistory(false);
     };
 
+    const deleteConversation = async (conversation) => {
+        if (!confirm('Sei sicuro di voler eliminare questa conversazione?')) {
+            return;
+        }
+
+        try {
+            const userId = window.currentUser?.id || 'anonymous';
+            const startTimestamp = conversation.messages[0].timestamp;
+            const endTimestamp = conversation.messages[conversation.messages.length - 1].timestamp;
+
+            const response = await apiService.deleteConversation(userId, startTimestamp, endTimestamp);
+            
+            if (response.success) {
+                // Remove conversation from history
+                setChatHistory(prev => prev.filter(conv => conv.id !== conversation.id));
+                
+                // If the deleted conversation was selected, clear the chat
+                if (selectedConversation?.id === conversation.id) {
+                    setSelectedConversation(null);
+                    setMessages([]);
+                }
+                
+                console.log(`Conversazione eliminata: ${response.deleted_count} messaggi`);
+            }
+        } catch (error) {
+            console.error('Errore nell\'eliminazione della conversazione:', error);
+            alert('Errore nell\'eliminazione della conversazione');
+        }
+    };
+
     const sendMessage = async () => {
         if (!inputMessage.trim() || isLoading) return;
 
@@ -307,24 +337,39 @@ const SUKChat = () => {
                     ) : (
                         <div className="space-y-2">
                             {chatHistory.map((conversation) => (
-                                <button
-                                    key={conversation.id}
-                                    onClick={() => selectConversation(conversation)}
-                                    className={`w-full text-left p-3 rounded-lg transition-colors ${
-                                        selectedConversation?.id === conversation.id
-                                            ? 'bg-blue-100 text-blue-900 border border-blue-200'
-                                            : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
-                                    }`}
-                                >
-                                    <div className="font-medium text-sm mb-1 truncate">{conversation.title}</div>
-                                    <div className={`text-xs ${
-                                        selectedConversation?.id === conversation.id 
-                                            ? 'text-blue-600' 
-                                            : 'text-gray-500'
-                                    }`}>
-                                        {new Date(conversation.timestamp).toLocaleDateString('it-IT')}
-                                    </div>
-                                </button>
+                                <div key={conversation.id} className="relative group">
+                                    <button
+                                        onClick={() => selectConversation(conversation)}
+                                        className={`w-full text-left p-3 rounded-lg transition-colors ${
+                                            selectedConversation?.id === conversation.id
+                                                ? 'bg-blue-100 text-blue-900 border border-blue-200'
+                                                : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
+                                        }`}
+                                    >
+                                        <div className="font-medium text-sm mb-1 truncate pr-8">{conversation.title}</div>
+                                        <div className={`text-xs ${
+                                            selectedConversation?.id === conversation.id 
+                                                ? 'text-blue-600' 
+                                                : 'text-gray-500'
+                                        }`}>
+                                            {new Date(conversation.timestamp).toLocaleDateString('it-IT')}
+                                        </div>
+                                    </button>
+                                    
+                                    {/* Delete button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteConversation(conversation);
+                                        }}
+                                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 p-1"
+                                        title="Elimina conversazione"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
                             ))}
                         </div>
                     )}

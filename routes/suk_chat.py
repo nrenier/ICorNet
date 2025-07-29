@@ -315,3 +315,44 @@ def get_chat_history():
     except Exception as e:
         logging.error(f"Error retrieving chat history: {str(e)}")
         return jsonify({'error': 'Failed to retrieve chat history'}), 500
+
+
+@suk_chat_bp.route('/delete-conversation', methods=['DELETE'])
+def delete_conversation():
+    """Delete messages from a specific conversation timeframe"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'error': 'Invalid JSON data'}), 400
+
+        user_id = data.get('user_id') or 'anonymous'
+        start_timestamp = data.get('start_timestamp')
+        end_timestamp = data.get('end_timestamp')
+
+        if not start_timestamp or not end_timestamp:
+            return jsonify({'error': 'Start and end timestamps are required'}), 400
+
+        # Parse timestamps
+        from datetime import datetime
+        start_dt = datetime.fromisoformat(start_timestamp.replace('Z', '+00:00'))
+        end_dt = datetime.fromisoformat(end_timestamp.replace('Z', '+00:00'))
+
+        # Delete messages within the conversation timeframe
+        deleted_count = ChatMessage.query.filter(
+            ChatMessage.user_id == user_id,
+            ChatMessage.timestamp >= start_dt,
+            ChatMessage.timestamp <= end_dt
+        ).delete()
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'deleted_count': deleted_count,
+            'message': f'Deleted {deleted_count} messages from conversation'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error deleting conversation: {str(e)}")
+        return jsonify({'error': 'Failed to delete conversation'}), 500

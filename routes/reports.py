@@ -364,3 +364,48 @@ def search_companies():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@reports_bp.route('/startup-companies', methods=['GET'])
+@login_required
+def get_startup_companies_for_reports():
+    try:
+        neo4j_service = current_app.config['neo4j_service']
+        companies = neo4j_service.get_startup_companies_list()
+
+        return jsonify({'companies': companies}), 200
+
+    except Exception as e:
+        logging.error(f"Get STARTUP companies for reports error: {str(e)}")
+        return jsonify({'error': 'Failed to fetch STARTUP companies'}), 500
+
+
+@reports_bp.route('/startup-company-details/<company_name>', methods=['GET'])
+@login_required
+def get_startup_company_details(company_name):
+    try:
+        neo4j_service = current_app.config['neo4j_service']
+        company_details = neo4j_service.get_startup_company_details(company_name)
+
+        if not company_details:
+            return jsonify({'error': 'Company not found'}), 404
+
+        return jsonify({'company': company_details}), 200
+
+    except Exception as e:
+        logging.error(f"Get STARTUP company details error: {str(e)}")
+        return jsonify({'error': 'Failed to fetch company details'}), 500
+
+
+@reports_bp.route('/startup-relationships/<company_name>', methods=['GET'])
+@login_required
+def get_startup_company_relationships(company_name):
+    try:
+        neo4j_service = current_app.config['neo4j_service']
+        relationships = neo4j_service.get_startup_company_relationships(company_name)
+
+        return jsonify({'relationships': relationships}), 200
+
+    except Exception as e:
+        logging.error(f"Get STARTUP company relationships error: {str(e)}")
+        return jsonify({'error': 'Failed to fetch STARTUP company relationships'}), 500

@@ -287,6 +287,19 @@ const apiService = {
             throw error;
         }
     },
+
+    // STARTUP specific methods
+    async getStartupCompaniesForReports() {
+        return await this.request('/reports/startup-companies');
+    },
+
+    async getStartupCompanyDetails(companyName) {
+        return await this.request(`/reports/startup-company-details/${encodeURIComponent(companyName)}`);
+    },
+
+    async getStartupCompanyRelationships(companyName) {
+        return await this.request(`/reports/startup-relationships/${encodeURIComponent(companyName)}`);
+    },
 };
 
 // Make apiService globally available

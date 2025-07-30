@@ -401,3 +401,133 @@ class Neo4jService:
         except Exception as e:
             logging.error(f"Error getting FEDERTERZIARIO company relationships: {str(e)}")
             return {'nodes': [], 'edges': []}
+
+    def get_startup_companies_list(self):
+        """Get list of all STARTUP companies with their details"""
+        if not self.driver:
+            logging.warning("Neo4j driver not available, returning mock data")
+            return [
+                {"nome_azienda": "Startup Corp", "tipologia_attivita": ["Software development"]},
+                {"nome_azienda": "Tech Solutions", "tipologia_attivita": ["IoT solutions", "Automation"]},
+                {"nome_azienda": "Innovation Hub", "tipologia_attivita": ["Digital consulting"]},
+            ]
+
+        try:
+            with self.driver.session() as session:
+                result = session.run("""
+                    MATCH (n:STARTUP) 
+                    WHERE n.nome_azienda IS NOT NULL
+                    RETURN properties(n) as company_properties
+                    ORDER BY n.nome_azienda
+                """)
+                return [record["company_properties"] for record in result]
+        except Exception as e:
+            logging.error(f"Error getting STARTUP companies list: {str(e)}")
+            return []
+
+    def get_startup_company_details(self, company_name):
+        """Get detailed information for a specific STARTUP company"""
+        if not self.driver:
+            logging.warning("Neo4j driver not available")
+            return None
+
+        try:
+            with self.driver.session() as session:
+                result = session.run("""
+                    MATCH (n:STARTUP) 
+                    WHERE n.nome_azienda = $company_name
+                    RETURN properties(n) as company_properties
+                """, company_name=company_name)
+
+                record = result.single()
+                if record:
+                    return record["company_properties"]
+                return None
+        except Exception as e:
+            logging.error(f"Error getting STARTUP company details: {str(e)}")
+            return None
+
+    def get_startup_company_relationships(self, company_name):
+        """Get relationships for a specific STARTUP company"""
+        if not self.driver:
+            logging.warning("Neo4j driver not available, returning mock data")
+            return {
+                'nodes': [
+                    {'id': company_name, 'name': company_name, 'type': 'center'},
+                    {'id': 'Related Company 1', 'name': 'Related Company 1', 'type': 'related'},
+                    {'id': 'Related Company 2', 'name': 'Related Company 2', 'type': 'related'}
+                ],
+                'edges': [
+                    {
+                        'source': company_name,
+                        'target': 'Related Company 1',
+                        'weight': 5,
+                        'type': 'partnership',
+                        'properties': {'weight': 5, 'type': 'partnership', 'description': 'Strategic partnership'}
+                    },
+                    {
+                        'source': company_name,
+                        'target': 'Related Company 2',
+                        'weight': 4,
+                        'type': 'client',
+                        'properties': {'weight': 4, 'type': 'client', 'description': 'Client relationship'}
+                    }
+                ]
+            }
+
+        try:
+            with self.driver.session() as session:
+                result = session.run("""
+                    MATCH p=(n:STARTUP)-[r]->(m:STARTUP) 
+                    WHERE n.nome_azienda = $company_name AND r.weight >= 3 
+                    RETURN n.nome_azienda as source_name, 
+                           m.nome_azienda as target_name,
+                           properties(r) as relationship_properties,
+                           r.weight as weight,
+                           type(r) as type
+                """, company_name=company_name)
+
+                relationships = []
+                related_companies = set()
+
+                for record in result:
+                    source = record["source_name"]
+                    target = record["target_name"]
+                    weight = record["weight"]
+                    rel_props = record["relationship_properties"]
+                    rel_type = record["type"]
+
+                    # Aggiungi il tipo alle proprietà della relazione
+                    if rel_props is None:
+                        rel_props = {}
+                    rel_props['type'] = rel_type
+
+                    relationships.append({
+                        'source': source,
+                        'target': target,
+                        'weight': weight,
+                        'type': rel_type,
+                        'properties': rel_props
+                    })
+
+                    related_companies.add(source)
+                    related_companies.add(target)
+
+                # Create nodes
+                nodes = []
+                for company in related_companies:
+                    node_type = 'center' if company == company_name else 'related'
+                    nodes.append({
+                        'id': company,
+                        'name': company,
+                        'type': node_type
+                    })
+
+                return {
+                    'nodes': nodes,
+                    'edges': relationships
+                }
+
+        except Exception as e:
+            logging.error(f"Error getting STARTUP company relationships: {str(e)}")
+            return {'nodes': [], 'edges': []}

@@ -1,6 +1,50 @@
 
 const { useState, useEffect } = React;
 
+// Utility functions for mapping class codes to readable values
+const mapClasseAddetti = (code) => {
+    const mapping = {
+        'A': '0-4 addetti',
+        'B': '5-9 addetti',
+        'C': '10-19 addetti',
+        'D': '20-49 addetti',
+        'E': '50-249 addetti',
+        'F': 'Almeno 250 addetti'
+    };
+    return mapping[code] || code || 'Non disponibile';
+};
+
+const mapClasseCapitaleSociale = (code) => {
+    const mapping = {
+        '1': '1€',
+        '2': '1€ - 5 K€',
+        '3': '5 K€ - 10 K€',
+        '4': '10 K€ - 50 K€',
+        '5': '50 K€ - 100 K€',
+        '6': '100 K€ - 250 K€',
+        '7': '250 K€ - 500 K€',
+        '8': '500 K€ - 1 M€',
+        '9': '1 M€ - 2,5 M€',
+        '10': '2,5 M€ - 5 M€',
+        '11': 'Più di 5 M€'
+    };
+    return mapping[code] || code || 'Non disponibile';
+};
+
+const mapClasseValoreProduzione = (code) => {
+    const mapping = {
+        'A': '0€ - 100 K€',
+        'B': '100 K€ - 500 K€',
+        'C': '500 K€ - 1 M€',
+        'D': '1 M€ - 2 M€',
+        'E': '2 M€ - 5 M€',
+        'F': '5 M€ - 10 M€',
+        'G': '10 M€ - 50 M€',
+        'H': 'Più di 50 M€'
+    };
+    return mapping[code] || code || 'Non disponibile';
+};
+
 const CompanyRelationshipsGraph = ({ companyName, onRelationshipClick }) => {
     const [relationships, setRelationships] = useState({ nodes: [], edges: [] });
     const [loading, setLoading] = useState(false);
@@ -748,17 +792,17 @@ const STARTUP = ({ user, showToast }) => {
                                 )}
                                 {selectedCompany.classe_addetti && (
                                     <div>
-                                        <strong>Classe Addetti:</strong> {selectedCompany.classe_addetti}
+                                        <strong>Classe Addetti:</strong> {mapClasseAddetti(selectedCompany.classe_addetti)}
                                     </div>
                                 )}
                                 {selectedCompany.classe_capitale_sociale && (
                                     <div>
-                                        <strong>Classe Capitale Sociale:</strong> {selectedCompany.classe_capitale_sociale}
+                                        <strong>Classe Capitale Sociale:</strong> {mapClasseCapitaleSociale(selectedCompany.classe_capitale_sociale)}
                                     </div>
                                 )}
                                 {selectedCompany.classe_valore_produzione && (
                                     <div>
-                                        <strong>Classe Valore Produzione:</strong> {selectedCompany.classe_valore_produzione}
+                                        <strong>Classe Valore Produzione:</strong> {mapClasseValoreProduzione(selectedCompany.classe_valore_produzione)}
                                     </div>
                                 )}
                             </div>

@@ -473,7 +473,7 @@ const STARTUP = ({ user, showToast }) => {
                                     onChange={handleSearchChange}
                                     onFocus={() => setIsDropdownOpen(true)}
                                     className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Type to search companies..."
+                                    placeholder="Digita per cercare aziende..."
                                 />
                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                                     <i data-feather="search" className="w-5 h-5 text-gray-400"></i>
@@ -493,7 +493,7 @@ const STARTUP = ({ user, showToast }) => {
                                             </div>
                                             {company.tipologia_attivita && (
                                                 <div className="text-sm text-gray-500">
-                                                    Activities: {Array.isArray(company.tipologia_attivita) ? company.tipologia_attivita.join(', ') : company.tipologia_attivita}
+                                                    Attività: {Array.isArray(company.tipologia_attivita) ? company.tipologia_attivita.join(', ') : company.tipologia_attivita}
                                                 </div>
                                             )}
                                         </button>
@@ -504,7 +504,7 @@ const STARTUP = ({ user, showToast }) => {
 
                         {searchTerm && !selectedCompany && filteredCompanies.length === 0 && (
                             <p className="mt-2 text-sm text-gray-500">
-                                No companies found matching your search.
+                                Nessuna azienda trovata corrispondente alla ricerca.
                             </p>
                         )}
                     </div>
@@ -537,46 +537,46 @@ const STARTUP = ({ user, showToast }) => {
                     <div className="mt-6 space-y-6">
                         {/* General Information */}
                         <div className="bg-blue-50 rounded-lg p-6">
-                            <h3 className="text-lg font-semibold text-blue-900 mb-4">General Information</h3>
+                            <h3 className="text-lg font-semibold text-blue-900 mb-4">Informazioni Generali</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
                                 {selectedCompany.nome_azienda && (
                                     <div>
-                                        <strong>Company Name:</strong> {selectedCompany.nome_azienda}
+                                        <strong>Nome Azienda:</strong> {selectedCompany.nome_azienda}
                                     </div>
                                 )}
                                 {selectedCompany.ragione_sociale && (
                                     <div>
-                                        <strong>Legal Name:</strong> {selectedCompany.ragione_sociale}
+                                        <strong>Ragione Sociale:</strong> {selectedCompany.ragione_sociale}
                                     </div>
                                 )}
                                 {selectedCompany.partita_iva && (
                                     <div>
-                                        <strong>VAT Number:</strong> {selectedCompany.partita_iva}
+                                        <strong>Partita IVA:</strong> {selectedCompany.partita_iva}
                                     </div>
                                 )}
                                 {selectedCompany.codice_fiscale && (
                                     <div>
-                                        <strong>Tax Code:</strong> {selectedCompany.codice_fiscale}
+                                        <strong>Codice Fiscale:</strong> {selectedCompany.codice_fiscale}
                                     </div>
                                 )}
                                 {selectedCompany.natura_giuridica && (
                                     <div>
-                                        <strong>Legal Nature:</strong> {selectedCompany.natura_giuridica}
+                                        <strong>Natura Giuridica:</strong> {selectedCompany.natura_giuridica}
                                     </div>
                                 )}
                                 {selectedCompany.data_inizio_attivita && (
                                     <div>
-                                        <strong>Start Date:</strong> {selectedCompany.data_inizio_attivita}
+                                        <strong>Data Inizio Attività:</strong> {selectedCompany.data_inizio_attivita}
                                     </div>
                                 )}
                                 {selectedCompany.data_iscrizione_startup && (
                                     <div>
-                                        <strong>Startup Registration Date:</strong> {selectedCompany.data_iscrizione_startup}
+                                        <strong>Data Iscrizione Startup:</strong> {selectedCompany.data_iscrizione_startup}
                                     </div>
                                 )}
                                 {selectedCompany.sito_web && (
                                     <div>
-                                        <strong>Website:</strong> 
+                                        <strong>Sito Web:</strong> 
                                         <a href={selectedCompany.sito_web} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 ml-1">
                                             {selectedCompany.sito_web}
                                         </a>
@@ -585,7 +585,7 @@ const STARTUP = ({ user, showToast }) => {
                             </div>
                             {selectedCompany.descrizione && (
                                 <div className="mt-4">
-                                    <strong>Description:</strong>
+                                    <strong>Descrizione:</strong>
                                     <p className="mt-1 text-blue-700">{selectedCompany.descrizione}</p>
                                 </div>
                             )}
@@ -593,16 +593,16 @@ const STARTUP = ({ user, showToast }) => {
 
                         {/* Business Information */}
                         <div className="bg-green-50 rounded-lg p-6">
-                            <h3 className="text-lg font-semibold text-green-900 mb-4">Business Information</h3>
+                            <h3 className="text-lg font-semibold text-green-900 mb-4">Informazioni Commerciali</h3>
                             <div className="space-y-4 text-sm text-green-800">
                                 {selectedCompany.settore && (
                                     <div>
-                                        <strong>Sector:</strong> {selectedCompany.settore}
+                                        <strong>Settore:</strong> {selectedCompany.settore}
                                     </div>
                                 )}
                                 {selectedCompany.tipologia_attivita && (
                                     <div>
-                                        <strong>Business Activities:</strong>
+                                        <strong>Tipologia Attività:</strong>
                                         {Array.isArray(selectedCompany.tipologia_attivita) ? (
                                             <ul className="list-disc list-inside mt-1 space-y-1">
                                                 {selectedCompany.tipologia_attivita.map((attivita, index) => (
@@ -616,7 +616,7 @@ const STARTUP = ({ user, showToast }) => {
                                 )}
                                 {selectedCompany.tipo_mercato && (
                                     <div>
-                                        <strong>Market Type:</strong>
+                                        <strong>Tipo Mercato:</strong>
                                         {Array.isArray(selectedCompany.tipo_mercato) ? (
                                             <div className="flex flex-wrap gap-2 mt-1">
                                                 {selectedCompany.tipo_mercato.map((mercato, index) => (
@@ -632,12 +632,12 @@ const STARTUP = ({ user, showToast }) => {
                                 )}
                                 {selectedCompany.codice_ateco && (
                                     <div>
-                                        <strong>ATECO Code:</strong> {selectedCompany.codice_ateco}
+                                        <strong>Codice ATECO:</strong> {selectedCompany.codice_ateco}
                                     </div>
                                 )}
                                 {selectedCompany.descrizione_ateco && (
                                     <div>
-                                        <strong>ATECO Description:</strong> {selectedCompany.descrizione_ateco}
+                                        <strong>Descrizione ATECO:</strong> {selectedCompany.descrizione_ateco}
                                     </div>
                                 )}
                             </div>
@@ -645,21 +645,21 @@ const STARTUP = ({ user, showToast }) => {
 
                         {/* Location Information */}
                         <div className="bg-purple-50 rounded-lg p-6">
-                            <h3 className="text-lg font-semibold text-purple-900 mb-4">Location Information</h3>
+                            <h3 className="text-lg font-semibold text-purple-900 mb-4">Informazioni Geografiche</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-purple-800">
                                 {selectedCompany.regione && (
                                     <div>
-                                        <strong>Region:</strong> {selectedCompany.regione}
+                                        <strong>Regione:</strong> {selectedCompany.regione}
                                     </div>
                                 )}
                                 {selectedCompany.sigla_provincia && (
                                     <div>
-                                        <strong>Province:</strong> {selectedCompany.sigla_provincia}
+                                        <strong>Provincia:</strong> {selectedCompany.sigla_provincia}
                                     </div>
                                 )}
                                 {selectedCompany.comune && (
                                     <div>
-                                        <strong>Municipality:</strong> {selectedCompany.comune}
+                                        <strong>Comune:</strong> {selectedCompany.comune}
                                     </div>
                                 )}
                             </div>
@@ -668,9 +668,9 @@ const STARTUP = ({ user, showToast }) => {
                         {/* Products and Solutions */}
                         {selectedCompany.classificazione_prodotti && selectedCompany.classificazione_prodotti.length > 0 && (
                             <div className="bg-orange-50 rounded-lg p-6">
-                                <h3 className="text-lg font-semibold text-orange-900 mb-4">Products and Solutions</h3>
+                                <h3 className="text-lg font-semibold text-orange-900 mb-4">Prodotti e Soluzioni</h3>
                                 <div className="text-sm text-orange-800">
-                                    <strong>Product Classification:</strong>
+                                    <strong>Classificazione Prodotti:</strong>
                                     <ul className="list-disc list-inside mt-1 space-y-1">
                                         {selectedCompany.classificazione_prodotti.map((prodotto, index) => (
                                             <li key={index}>{prodotto}</li>
@@ -682,11 +682,11 @@ const STARTUP = ({ user, showToast }) => {
 
                         {/* Business Network */}
                         <div className="bg-indigo-50 rounded-lg p-6">
-                            <h3 className="text-lg font-semibold text-indigo-900 mb-4">Business Network</h3>
+                            <h3 className="text-lg font-semibold text-indigo-900 mb-4">Rete Commerciale</h3>
                             <div className="space-y-4 text-sm text-indigo-800">
                                 {selectedCompany.potenziali_clienti && selectedCompany.potenziali_clienti.length > 0 && (
                                     <div>
-                                        <strong>Potential Clients:</strong>
+                                        <strong>Potenziali Clienti:</strong>
                                         <ul className="list-disc list-inside mt-1 space-y-1">
                                             {selectedCompany.potenziali_clienti.map((cliente, index) => (
                                                 <li key={index}>{cliente}</li>
@@ -696,7 +696,7 @@ const STARTUP = ({ user, showToast }) => {
                                 )}
                                 {selectedCompany.potenziali_partner && selectedCompany.potenziali_partner.length > 0 && (
                                     <div>
-                                        <strong>Potential Partners:</strong>
+                                        <strong>Potenziali Partner:</strong>
                                         <ul className="list-disc list-inside mt-1 space-y-1">
                                             {selectedCompany.potenziali_partner.map((partner, index) => (
                                                 <li key={index}>{partner}</li>
@@ -706,7 +706,7 @@ const STARTUP = ({ user, showToast }) => {
                                 )}
                                 {selectedCompany.investitori && selectedCompany.investitori.length > 0 && (
                                     <div>
-                                        <strong>Investors:</strong>
+                                        <strong>Investitori:</strong>
                                         <ul className="list-disc list-inside mt-1 space-y-1">
                                             {selectedCompany.investitori.map((investitore, index) => (
                                                 <li key={index}>{investitore}</li>
@@ -719,46 +719,46 @@ const STARTUP = ({ user, showToast }) => {
 
                         {/* Company Characteristics */}
                         <div className="bg-yellow-50 rounded-lg p-6">
-                            <h3 className="text-lg font-semibold text-yellow-900 mb-4">Company Characteristics</h3>
+                            <h3 className="text-lg font-semibold text-yellow-900 mb-4">Caratteristiche Aziendali</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-800">
                                 {selectedCompany.prevalenza_giovanile && (
                                     <div>
-                                        <strong>Youth Prevalence:</strong> {selectedCompany.prevalenza_giovanile}
+                                        <strong>Prevalenza Giovanile:</strong> {selectedCompany.prevalenza_giovanile}
                                     </div>
                                 )}
                                 {selectedCompany.prevalenza_femminile && (
                                     <div>
-                                        <strong>Female Prevalence:</strong> {selectedCompany.prevalenza_femminile}
+                                        <strong>Prevalenza Femminile:</strong> {selectedCompany.prevalenza_femminile}
                                     </div>
                                 )}
                                 {selectedCompany.prevalenza_straniera && (
                                     <div>
-                                        <strong>Foreign Prevalence:</strong> {selectedCompany.prevalenza_straniera}
+                                        <strong>Prevalenza Straniera:</strong> {selectedCompany.prevalenza_straniera}
                                     </div>
                                 )}
                                 {selectedCompany.possiede_brevetti && (
                                     <div>
-                                        <strong>Has Patents:</strong> {selectedCompany.possiede_brevetti}
+                                        <strong>Possiede Brevetti:</strong> {selectedCompany.possiede_brevetti}
                                     </div>
                                 )}
                                 {selectedCompany.alto_valore_tecnologico && (
                                     <div>
-                                        <strong>High Technology Value:</strong> {selectedCompany.alto_valore_tecnologico}
+                                        <strong>Alto Valore Tecnologico:</strong> {selectedCompany.alto_valore_tecnologico}
                                     </div>
                                 )}
                                 {selectedCompany.classe_addetti && (
                                     <div>
-                                        <strong>Employee Class:</strong> {selectedCompany.classe_addetti}
+                                        <strong>Classe Addetti:</strong> {selectedCompany.classe_addetti}
                                     </div>
                                 )}
                                 {selectedCompany.classe_capitale_sociale && (
                                     <div>
-                                        <strong>Share Capital Class:</strong> {selectedCompany.classe_capitale_sociale}
+                                        <strong>Classe Capitale Sociale:</strong> {selectedCompany.classe_capitale_sociale}
                                     </div>
                                 )}
                                 {selectedCompany.classe_valore_produzione && (
                                     <div>
-                                        <strong>Production Value Class:</strong> {selectedCompany.classe_valore_produzione}
+                                        <strong>Classe Valore Produzione:</strong> {selectedCompany.classe_valore_produzione}
                                     </div>
                                 )}
                             </div>
@@ -767,7 +767,7 @@ const STARTUP = ({ user, showToast }) => {
                         {/* Sources */}
                         {selectedCompany.fonti && selectedCompany.fonti.length > 0 && (
                             <div className="bg-gray-50 rounded-lg p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Sources</h3>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Fonti</h3>
                                 <div className="space-y-2 text-sm text-gray-800">
                                     {selectedCompany.fonti.map((fonte, index) => (
                                         <div key={index} className="border-l-4 border-gray-300 pl-3">

@@ -48,6 +48,7 @@ const Sidebar = ({
         { id: "federterziario", name: "FEDERTERZIARIO Analysis", icon: "briefcase" },
         { id: "startup", name: "STARTUP Analysis", icon: "trending-up" },
         { id: "suk-chat", name: "SUK Chat", icon: "message-circle" },
+        { id: "startup-chat", name: "STARTUP Chat", icon: "message-square" },
     ];
 
     return (
@@ -339,6 +340,8 @@ const App = () => {
                 return <STARTUP user={user} showToast={showToast} />;
             case "suk-chat":
                 return <SUKChat user={user} showToast={showToast} />;
+            case "startup-chat":
+                return <STARTUPChat user={user} showToast={showToast} />;
             default:
                 return <Dashboard user={user} showToast={showToast} />;
         }

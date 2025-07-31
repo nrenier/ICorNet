@@ -348,8 +348,11 @@ def delete_conversation():
         end_dt = datetime.fromisoformat(end_timestamp.replace('Z', '+00:00'))
 
         # Delete messages within the conversation timeframe
+        # Convert user_id to string to match database storage format
+        user_id_str = str(user_id)
+        
         deleted_count = ChatMessage.query.filter(
-            ChatMessage.user_id == user_id,
+            ChatMessage.user_id == user_id_str,
             ChatMessage.chat_type == 'SUK',
             ChatMessage.timestamp >= start_dt,
             ChatMessage.timestamp <= end_dt

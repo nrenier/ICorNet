@@ -417,8 +417,11 @@ def delete_startup_conversation():
         logging.info(f"Deleting STARTUP conversation for user {user_id} between {start_dt} and {end_dt}")
 
         # Delete messages within the conversation timeframe
+        # Convert user_id to string to match database storage format
+        user_id_str = str(user_id)
+        
         deleted_count = ChatMessage.query.filter(
-            ChatMessage.user_id == user_id,
+            ChatMessage.user_id == user_id_str,
             ChatMessage.chat_type == 'STARTUP',
             ChatMessage.timestamp >= start_dt,
             ChatMessage.timestamp <= end_dt

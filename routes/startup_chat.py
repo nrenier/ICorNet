@@ -299,20 +299,27 @@ def send_startup_chat_message():
 @startup_chat_bp.route('/chat-history', methods=['GET'])
 def get_startup_chat_history():
     """Get STARTUP chat history for the current user"""
-    user_id = request.args.get('user_id') or 'anonymous'
-
     try:
-        chat_history = ChatMessage.query.filter_by(user_id=user_id).order_by(
-            ChatMessage.timestamp.asc()).all()
-        history = [{
-            'content': msg.content,
-            'message_type': msg.message_type,
-            'timestamp': msg.timestamp.isoformat()
-        } for msg in chat_history]
-        return jsonify({'history': history, 'success': True})
+        user_id = request.args.get('user_id', 'anonymous')
+
+        messages = ChatMessage.query.filter_by(
+            user_id=user_id, 
+            chat_type='STARTUP'
+        ).order_by(ChatMessage.timestamp.desc()).limit(50).all()
+
+        chat_history = []
+        for message in messages:
+            chat_history.append({
+                'content': message.content,
+                'message_type': message.message_type,
+                'timestamp': message.timestamp.isoformat() if message.timestamp else None
+            })
+
+        return jsonify({'chat_history': chat_history})
+
     except Exception as e:
-        logging.error(f"Error retrieving STARTUP chat history: {str(e)}")
-        return jsonify({'error': 'Failed to retrieve chat history'}), 500
+        logging.error(f"Error fetching STARTUP chat history: {str(e)}")
+        return jsonify({'error': 'Failed to fetch chat history'}), 500
 
 
 @startup_chat_bp.route('/delete-conversation', methods=['DELETE'])

@@ -137,6 +137,12 @@ def run_database_migrations():
                 WHERE report_type IS NULL
             """))
 
+            # Add chat_type column to chat_messages table if it doesn't exist
+            conn.execute(text("""
+                ALTER TABLE chat_messages 
+                ADD COLUMN IF NOT EXISTS chat_type VARCHAR(20) DEFAULT 'SUK'
+            """))
+
             # Create performance indexes
             conn.execute(text("""
                 CREATE INDEX IF NOT EXISTS idx_reports_user_id_type 
@@ -146,6 +152,11 @@ def run_database_migrations():
             conn.execute(text("""
                 CREATE INDEX IF NOT EXISTS idx_reports_created_at 
                 ON reports(created_at DESC)
+            """))
+
+            conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_chat_messages_chat_type 
+                ON chat_messages(chat_type)
             """))
 
             conn.commit()

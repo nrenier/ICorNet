@@ -351,6 +351,12 @@ const STARTUP = ({ user, showToast }) => {
             // Find the company in the current companies list
             let company = companies.find(c => c.nome_azienda === companyName);
             
+            if (!company) {
+                // If not found in current list, search for it
+                const searchResults = await apiService.searchCompanies(companyName);
+                company = searchResults.find(c => c.nome_azienda === companyName);
+            }
+            
             if (company) {
                 setSelectedCompany(company);
                 setSearchTerm(companyName);

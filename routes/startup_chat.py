@@ -45,10 +45,13 @@ def send_startup_chat_message():
             content=message,
             message_type='user',
             user_id=user_id,
+            chat_type='STARTUP',  # Make sure chat_type is set
             timestamp=datetime.utcnow()
         )
+        logging.info(f"Saving STARTUP user message: user_id={user_id}, chat_type=STARTUP")
         db.session.add(user_message)
         db.session.commit()
+        logging.info(f"User message saved with ID: {user_message.id}")
 
         # Send request to n8n webhook
         response = requests.post(webhook_url,
@@ -301,21 +304,30 @@ def get_startup_chat_history():
     """Get STARTUP chat history for the current user"""
     try:
         user_id = request.args.get('user_id', 'anonymous')
+        logging.info(f"Fetching STARTUP chat history for user_id: {user_id}")
 
         messages = ChatMessage.query.filter_by(
             user_id=user_id, 
             chat_type='STARTUP'
         ).order_by(ChatMessage.timestamp.desc()).limit(50).all()
 
+        logging.info(f"Found {len(messages)} STARTUP messages for user {user_id}")
+
         chat_history = []
         for message in messages:
-            chat_history.append({
+            message_data = {
                 'content': message.content,
                 'message_type': message.message_type,
                 'timestamp': message.timestamp.isoformat() if message.timestamp else None
-            })
+            }
+            chat_history.append(message_data)
+            logging.debug(f"Message: {message.message_type} - {message.content[:100]}...")
 
-        return jsonify({'history': chat_history, 'success': True})
+        logging.info(f"Returning {len(chat_history)} messages in history")
+        response_data = {'history': chat_history, 'success': True}
+        logging.debug(f"Response data structure: {type(response_data['history'])}, length: {len(response_data['history'])}")
+        
+        return jsonify(response_data)
 
     except Exception as e:
         logging.error(f"Error fetching STARTUP chat history: {str(e)}")

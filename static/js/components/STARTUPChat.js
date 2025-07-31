@@ -8,6 +8,8 @@ const STARTUPChat = ({ user }) => {
     const [chatHistory, setChatHistory] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
+    const [editingTitleId, setEditingTitleId] = useState(null);
+    const [editingTitleValue, setEditingTitleValue] = useState('');
     const [regions, setRegions] = useState([]);
     const [provinces, setProvinces] = useState([]);
     const [selectedRegion, setSelectedRegion] = useState('');
@@ -259,6 +261,45 @@ const STARTUPChat = ({ user }) => {
         }
     };
 
+    const startEditingTitle = (conversation) => {
+        setEditingTitleId(conversation.id);
+        setEditingTitleValue(conversation.title);
+    };
+
+    const cancelEditingTitle = () => {
+        setEditingTitleId(null);
+        setEditingTitleValue('');
+    };
+
+    const saveTitle = (conversationId) => {
+        if (!editingTitleValue.trim()) {
+            cancelEditingTitle();
+            return;
+        }
+
+        setChatHistory(prev => prev.map(conv => 
+            conv.id === conversationId 
+                ? { ...conv, title: editingTitleValue.trim() }
+                : conv
+        ));
+
+        // Update selected conversation if it's the one being edited
+        if (selectedConversation?.id === conversationId) {
+            setSelectedConversation(prev => ({ ...prev, title: editingTitleValue.trim() }));
+        }
+
+        setEditingTitleId(null);
+        setEditingTitleValue('');
+    };
+
+    const handleTitleKeyPress = (e, conversationId) => {
+        if (e.key === 'Enter') {
+            saveTitle(conversationId);
+        } else if (e.key === 'Escape') {
+            cancelEditingTitle();
+        }
+    };
+
     const sendMessage = async () => {
         if (!inputMessage.trim() || isLoading) return;
 
@@ -497,8 +538,24 @@ const STARTUPChat = ({ user }) => {
                                                 ? 'bg-blue-100 text-blue-900 border border-blue-200'
                                                 : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
                                         }`}
+                                        disabled={editingTitleId === conversation.id}
                                     >
-                                        <div className="font-medium text-sm mb-1 truncate pr-8">{conversation.title}</div>
+                                        <div className="font-medium text-sm mb-1 pr-16">
+                                            {editingTitleId === conversation.id ? (
+                                                <input
+                                                    type="text"
+                                                    value={editingTitleValue}
+                                                    onChange={(e) => setEditingTitleValue(e.target.value)}
+                                                    onKeyPress={(e) => handleTitleKeyPress(e, conversation.id)}
+                                                    onBlur={() => saveTitle(conversation.id)}
+                                                    className="w-full bg-white border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    autoFocus
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                            ) : (
+                                                <span className="truncate block">{conversation.title}</span>
+                                            )}
+                                        </div>
                                         <div className={`text-xs ${
                                             selectedConversation?.id === conversation.id 
                                                 ? 'text-blue-600' 
@@ -508,18 +565,64 @@ const STARTUPChat = ({ user }) => {
                                         </div>
                                     </button>
 
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            deleteConversation(conversation);
-                                        }}
-                                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 p-1"
-                                        title="Elimina conversazione"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
+                                    {/* Action buttons */}
+                                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
+                                        {editingTitleId === conversation.id ? (
+                                            <>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        saveTitle(conversation.id);
+                                                    }}
+                                                    className="text-green-500 hover:text-green-700 p-1"
+                                                    title="Salva titolo"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        cancelEditingTitle();
+                                                    }}
+                                                    className="text-gray-500 hover:text-gray-700 p-1"
+                                                    title="Annulla"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        startEditingTitle(conversation);
+                                                    }}
+                                                    className="text-blue-500 hover:text-blue-700 p-1"
+                                                    title="Modifica titolo"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        deleteConversation(conversation);
+                                                    }}
+                                                    className="text-red-500 hover:text-red-700 p-1"
+                                                    title="Elimina conversazione"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>

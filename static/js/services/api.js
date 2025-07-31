@@ -326,6 +326,19 @@ const apiService = {
         }
     },
 
+    // Search STARTUP companies by name
+    async searchStartupCompanies(searchTerm) {
+        try {
+            const response = await this.request(`/reports/startup-companies/search?term=${encodeURIComponent(searchTerm)}`, {
+                method: 'GET'
+            });
+            return response.companies || [];
+        } catch (error) {
+            console.error('Error searching STARTUP companies:', error);
+            throw error;
+        }
+    },
+
     // STARTUP specific methods
     async getStartupCompaniesForReports() {
         return await this.request('/reports/startup-companies');

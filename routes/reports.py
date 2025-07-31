@@ -380,6 +380,32 @@ def get_startup_companies_for_reports():
         return jsonify({'error': 'Failed to fetch STARTUP companies'}), 500
 
 
+@reports_bp.route('/startup-companies/search', methods=['GET'])
+@login_required
+def search_startup_companies():
+    """Search STARTUP companies by name"""
+    try:
+        neo4j_service = current_app.config['neo4j_service']
+        search_term = request.args.get('term', '')
+        if not search_term:
+            return jsonify({
+                'success': False,
+                'error': 'Search term is required'
+            }), 400
+
+        companies = neo4j_service.search_startup_companies(search_term)
+        return jsonify({
+            'success': True,
+            'companies': companies
+        })
+    except Exception as e:
+        logging.error(f"Error searching STARTUP companies: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @reports_bp.route('/startup-company-details/<company_name>', methods=['GET'])
 @login_required
 def get_startup_company_details(company_name):

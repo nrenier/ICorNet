@@ -425,6 +425,30 @@ class Neo4jService:
             logging.error(f"Error getting STARTUP companies list: {str(e)}")
             return []
 
+    def search_startup_companies(self, search_term):
+        """Search STARTUP companies by name"""
+        if not self.driver:
+            logging.warning("Neo4j driver not available, returning mock data")
+            return [
+                {"nome_azienda": "INVENTIO AI S.R.L.", "tipologia_attivita": ["AI Solutions"]},
+                {"nome_azienda": "Tech Startup", "tipologia_attivita": ["Software"]},
+            ]
+
+        try:
+            with self.driver.session() as session:
+                result = session.run("""
+                    MATCH (n:STARTUP) 
+                    WHERE n.nome_azienda IS NOT NULL 
+                    AND toLower(n.nome_azienda) CONTAINS toLower($search_term)
+                    RETURN properties(n) as company_properties
+                    ORDER BY n.nome_azienda
+                    LIMIT 50
+                """, search_term=search_term)
+                return [record["company_properties"] for record in result]
+        except Exception as e:
+            logging.error(f"Error searching STARTUP companies: {str(e)}")
+            return []
+
     def get_startup_company_details(self, company_name):
         """Get detailed information for a specific STARTUP company"""
         if not self.driver:
@@ -445,7 +469,7 @@ class Neo4jService:
                 return None
         except Exception as e:
             logging.error(f"Error getting STARTUP company details: {str(e)}")
-            return None
+            return Nonene
 
     def get_startup_company_relationships(self, company_name):
         """Get relationships for a specific STARTUP company"""

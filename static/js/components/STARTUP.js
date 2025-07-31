@@ -352,8 +352,8 @@ const STARTUP = ({ user, showToast }) => {
             let company = companies.find(c => c.nome_azienda === companyName);
             
             if (!company) {
-                // If not found in current list, search for it
-                const searchResults = await apiService.searchCompanies(companyName);
+                // If not found in current list, search for it in STARTUP companies
+                const searchResults = await apiService.searchStartupCompanies(companyName);
                 company = searchResults.find(c => c.nome_azienda === companyName);
             }
             

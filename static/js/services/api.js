@@ -275,6 +275,44 @@ const apiService = {
         });
     },
 
+    // STARTUP Chat methods
+    async sendStartupChatMessage(message, userId = null, region = '', province = '') {
+        return await this.request('/startup-chat/send-message', {
+            method: 'POST',
+            body: { 
+                message: message,
+                timestamp: new Date().toISOString(),
+                user_id: userId,
+                region: region,
+                province: province
+            },
+        });
+    },
+
+    async getStartupChatHistory(userId = null) {
+        const params = userId ? `?user_id=${encodeURIComponent(userId)}` : '';
+        return await this.request(`/startup-chat/chat-history${params}`);
+    },
+
+    async deleteStartupConversation(userId, startTimestamp, endTimestamp) {
+        return await this.request('/startup-chat/delete-conversation', {
+            method: 'DELETE',
+            body: {
+                user_id: userId,
+                start_timestamp: startTimestamp,
+                end_timestamp: endTimestamp
+            }
+        });
+    },
+
+    async getStartupRegions() {
+        return await this.request('/startup-chat/regions');
+    },
+
+    async getStartupProvinces(region) {
+        return await this.request(`/startup-chat/provinces?region=${encodeURIComponent(region)}`);
+    },
+
     // Search companies by name
     async searchCompanies(searchTerm) {
         try {

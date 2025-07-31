@@ -1,3 +1,4 @@
+
 from flask import Blueprint, request, jsonify, current_app
 import requests
 import logging
@@ -6,19 +7,21 @@ from datetime import datetime
 import json
 from models import db, ChatMessage
 
-suk_chat_bp = Blueprint('suk_chat', __name__)
+startup_chat_bp = Blueprint('startup_chat', __name__)
 
 
-@suk_chat_bp.route('/send-message', methods=['POST'])
-def send_chat_message():
-    """Send chat message to n8n webhook and return response"""
+@startup_chat_bp.route('/send-message', methods=['POST'])
+def send_startup_chat_message():
+    """Send STARTUP chat message to n8n webhook and return response"""
     try:
         data = request.json
         if not data:
             return jsonify({'error': 'Invalid JSON data'}), 400
 
         message = data.get('message', '').strip()
-        user_id = data.get('user_id') or 'anonymous'  # Get the user ID with fallback
+        user_id = data.get('user_id') or 'anonymous'
+        region = data.get('region', '')
+        province = data.get('province', '')
 
         if not message:
             return jsonify({'error': 'Message is required'}), 400
@@ -26,15 +29,16 @@ def send_chat_message():
         # Get n8n webhook URL from environment
         webhook_url = os.getenv('N8N_CHAT_WEBHOOK_URL')
         if not webhook_url:
-            return jsonify({'error':
-                            'N8N_CHAT_WEBHOOK_URL not configured'}), 500
+            return jsonify({'error': 'N8N_CHAT_WEBHOOK_URL not configured'}), 500
 
         # Prepare payload for n8n webhook
         payload = {
             'message': message,
             'timestamp': data.get('timestamp') if data else None,
             'user_id': user_id if data else None,
-            'type': 'SUK'
+            'type': 'STARTUP',
+            'region': region,
+            'province': province
         }
 
         # Save user message to database
@@ -85,10 +89,8 @@ def send_chat_message():
                         formatted_response = {
                             'prodotti_soluzioni_esistenti': prodotti_esistenti,
                             'potenziali_fornitori': fornitori,
-                            'timestamp':
-                            data_item.get('timestamp'),
-                            'success':
-                            True
+                            'timestamp': data_item.get('timestamp'),
+                            'success': True
                         }
 
                         # Save assistant response to database
@@ -118,10 +120,8 @@ def send_chat_message():
                         formatted_response = {
                             'prodotti_soluzioni_esistenti': prodotti_esistenti,
                             'potenziali_fornitori': fornitori,
-                            'timestamp':
-                            data_item.get('timestamp'),
-                            'success':
-                            True
+                            'timestamp': data_item.get('timestamp'),
+                            'success': True
                         }
 
                         # Save assistant response to database
@@ -150,10 +150,8 @@ def send_chat_message():
                     formatted_response = {
                         'prodotti_soluzioni_esistenti': prodotti_esistenti,
                         'potenziali_fornitori': fornitori,
-                        'timestamp':
-                        data_item.get('timestamp'),
-                        'success':
-                        True
+                        'timestamp': data_item.get('timestamp'),
+                        'success': True
                     }
 
                     # Save assistant response to database
@@ -190,10 +188,8 @@ def send_chat_message():
                         formatted_response = {
                             'prodotti_soluzioni_esistenti': prodotti_esistenti,
                             'potenziali_fornitori': fornitori,
-                            'timestamp':
-                            webhook_data.get('timestamp'),
-                            'success':
-                            True
+                            'timestamp': webhook_data.get('timestamp'),
+                            'success': True
                         }
 
                         # Save assistant response to database
@@ -223,10 +219,8 @@ def send_chat_message():
                         formatted_response = {
                             'prodotti_soluzioni_esistenti': prodotti_esistenti,
                             'potenziali_fornitori': fornitori,
-                            'timestamp':
-                            webhook_data.get('timestamp'),
-                            'success':
-                            True
+                            'timestamp': webhook_data.get('timestamp'),
+                            'success': True
                         }
 
                         # Save assistant response to database
@@ -256,10 +250,8 @@ def send_chat_message():
                     formatted_response = {
                         'prodotti_soluzioni_esistenti': prodotti_esistenti,
                         'potenziali_fornitori': fornitori,
-                        'timestamp':
-                        webhook_data.get('timestamp'),
-                        'success':
-                        True
+                        'timestamp': webhook_data.get('timestamp'),
+                        'success': True
                     }
 
                     # Save assistant response to database
@@ -295,13 +287,13 @@ def send_chat_message():
         logging.error(f"n8n webhook request failed: {str(e)}")
         return jsonify({'error': 'Failed to connect to chat service'}), 503
     except Exception as e:
-        logging.error(f"Unexpected error in chat endpoint: {str(e)}")
+        logging.error(f"Unexpected error in STARTUP chat endpoint: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
 
-@suk_chat_bp.route('/chat-history', methods=['GET'])
-def get_chat_history():
-    """Get chat history for the current user"""
+@startup_chat_bp.route('/chat-history', methods=['GET'])
+def get_startup_chat_history():
+    """Get STARTUP chat history for the current user"""
     user_id = request.args.get('user_id') or 'anonymous'
 
     try:
@@ -314,13 +306,13 @@ def get_chat_history():
         } for msg in chat_history]
         return jsonify({'history': history, 'success': True})
     except Exception as e:
-        logging.error(f"Error retrieving chat history: {str(e)}")
+        logging.error(f"Error retrieving STARTUP chat history: {str(e)}")
         return jsonify({'error': 'Failed to retrieve chat history'}), 500
 
 
-@suk_chat_bp.route('/delete-conversation', methods=['DELETE'])
-def delete_conversation():
-    """Delete messages from a specific conversation timeframe"""
+@startup_chat_bp.route('/delete-conversation', methods=['DELETE'])
+def delete_startup_conversation():
+    """Delete messages from a specific STARTUP conversation timeframe"""
     try:
         data = request.json
         if not data:
@@ -350,10 +342,84 @@ def delete_conversation():
         return jsonify({
             'success': True,
             'deleted_count': deleted_count,
-            'message': f'Deleted {deleted_count} messages from conversation'
+            'message': f'Deleted {deleted_count} messages from STARTUP conversation'
         })
 
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error deleting conversation: {str(e)}")
+        logging.error(f"Error deleting STARTUP conversation: {str(e)}")
         return jsonify({'error': 'Failed to delete conversation'}), 500
+
+
+@startup_chat_bp.route('/regions', methods=['GET'])
+def get_startup_regions():
+    """Get list of startup regions from Neo4j"""
+    try:
+        from services.neo4j_service import Neo4jService
+        neo4j_service = current_app.neo4j_service
+        
+        if not neo4j_service or not neo4j_service.driver:
+            # Return mock data if Neo4j is not available
+            return jsonify({
+                'success': True,
+                'regions': [
+                    {'REGIONE': 'Lombardia', 'COUNT': 45},
+                    {'REGIONE': 'Lazio', 'COUNT': 32},
+                    {'REGIONE': 'Veneto', 'COUNT': 28},
+                    {'REGIONE': 'Piemonte', 'COUNT': 24},
+                    {'REGIONE': 'Emilia-Romagna', 'COUNT': 21}
+                ]
+            })
+        
+        with neo4j_service.driver.session() as session:
+            result = session.run("""
+                MATCH (n:STARTUP) 
+                WHERE n.regione IS NOT NULL
+                RETURN n.regione as REGIONE, count(n) as COUNT 
+                ORDER BY REGIONE
+            """)
+            
+            regions = [record.data() for record in result]
+            return jsonify({'success': True, 'regions': regions})
+            
+    except Exception as e:
+        logging.error(f"Error getting startup regions: {str(e)}")
+        return jsonify({'error': 'Failed to get regions'}), 500
+
+
+@startup_chat_bp.route('/provinces', methods=['GET'])
+def get_startup_provinces():
+    """Get list of startup provinces for a specific region from Neo4j"""
+    try:
+        region = request.args.get('region')
+        if not region:
+            return jsonify({'error': 'Region parameter is required'}), 400
+        
+        from services.neo4j_service import Neo4jService
+        neo4j_service = current_app.neo4j_service
+        
+        if not neo4j_service or not neo4j_service.driver:
+            # Return mock data if Neo4j is not available
+            return jsonify({
+                'success': True,
+                'provinces': [
+                    {'PROVINCIA': 'MI', 'COUNT': 25},
+                    {'PROVINCIA': 'BG', 'COUNT': 12},
+                    {'PROVINCIA': 'BS', 'COUNT': 8}
+                ]
+            })
+        
+        with neo4j_service.driver.session() as session:
+            result = session.run("""
+                MATCH (n:STARTUP) 
+                WHERE n.regione = $region AND n.sigla_provincia IS NOT NULL
+                RETURN n.sigla_provincia as PROVINCIA, count(n) as COUNT 
+                ORDER BY PROVINCIA
+            """, region=region)
+            
+            provinces = [record.data() for record in result]
+            return jsonify({'success': True, 'provinces': provinces})
+            
+    except Exception as e:
+        logging.error(f"Error getting startup provinces: {str(e)}")
+        return jsonify({'error': 'Failed to get provinces'}), 500

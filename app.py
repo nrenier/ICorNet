@@ -20,6 +20,7 @@ from routes.auth import auth_bp
 from routes.dashboard import dashboard_bp
 from routes.reports import reports_bp
 from routes.suk_chat import suk_chat_bp
+from routes.startup_chat import startup_chat_bp
 
 def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='')
@@ -85,6 +86,7 @@ def create_app():
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(reports_bp, url_prefix='/api/reports')
     app.register_blueprint(suk_chat_bp, url_prefix='/api/suk-chat')
+    app.register_blueprint(startup_chat_bp, url_prefix='/api/startup-chat')
 
     @app.route('/')
     def index():
@@ -145,7 +147,7 @@ def run_database_migrations():
                 CREATE INDEX IF NOT EXISTS idx_reports_created_at 
                 ON reports(created_at DESC)
             """))
-            
+
             conn.commit()
 
         logging.info("Database migrations completed successfully")

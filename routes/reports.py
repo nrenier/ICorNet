@@ -435,3 +435,31 @@ def get_startup_company_relationships(company_name):
     except Exception as e:
         logging.error(f"Get STARTUP company relationships error: {str(e)}")
         return jsonify({'error': 'Failed to fetch STARTUP company relationships'}), 500
+
+
+@reports_bp.route('/update-tag/<int:report_id>', methods=['PUT'])
+@login_required
+def update_report_tag(report_id):
+    try:
+        data = request.get_json()
+        user_id = session['user_id']
+
+        if not data or 'tag' not in data:
+            return jsonify({'error': 'Tag is required'}), 400
+
+        report = Report.query.filter_by(id=report_id, user_id=user_id).first()
+        if not report:
+            return jsonify({'error': 'Report not found'}), 404
+
+        report.tag = data['tag'].strip() if data['tag'] else None
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Tag updated successfully',
+            'report': report.to_dict()
+        }), 200
+
+    except Exception as e:
+        logging.error(f"Update report tag error: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update tag'}), 500

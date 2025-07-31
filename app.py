@@ -143,6 +143,12 @@ def run_database_migrations():
                 ADD COLUMN IF NOT EXISTS chat_type VARCHAR(20) DEFAULT 'SUK'
             """))
 
+            # Add tag column to reports table if it doesn't exist
+            conn.execute(text("""
+                ALTER TABLE reports 
+                ADD COLUMN IF NOT EXISTS tag VARCHAR(100)
+            """))
+
             # Create performance indexes
             conn.execute(text("""
                 CREATE INDEX IF NOT EXISTS idx_reports_user_id_type 

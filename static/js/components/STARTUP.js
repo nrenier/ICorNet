@@ -263,6 +263,8 @@ const STARTUP = ({ user, showToast }) => {
     const [selectedReports, setSelectedReports] = useState([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deletingReports, setDeletingReports] = useState(false);
+    const [editingTag, setEditingTag] = useState(null);
+    const [tagValue, setTagValue] = useState('');
     const mountedRef = React.useRef(true);
 
     useEffect(() => {
@@ -525,6 +527,39 @@ const STARTUP = ({ user, showToast }) => {
             setShowDeleteModal(false);
         } finally {
             setDeletingReports(false);
+        }
+    };
+
+    const startEditingTag = (report) => {
+        setEditingTag(report.id);
+        setTagValue(report.tag || '');
+    };
+
+    const cancelEditingTag = () => {
+        setEditingTag(null);
+        setTagValue('');
+    };
+
+    const saveTag = async (reportId) => {
+        try {
+            await apiService.updateReportTag(reportId, tagValue);
+            
+            // Update local state
+            setReportHistory(prev => 
+                prev.map(report => 
+                    report.id === reportId 
+                        ? { ...report, tag: tagValue }
+                        : report
+                )
+            );
+
+            setEditingTag(null);
+            setTagValue('');
+            showToast('Tag updated successfully', 'success');
+
+        } catch (error) {
+            console.error('Error updating tag:', error);
+            showToast('Failed to update tag', 'error');
         }
     };
 
@@ -944,6 +979,9 @@ const STARTUP = ({ user, showToast }) => {
                                     Company
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tag
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Status
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -968,6 +1006,64 @@ const STARTUP = ({ user, showToast }) => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {report.company_name}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {editingTag === report.id ? (
+                                                <div className="flex items-center space-x-2">
+                                                    <input
+                                                        type="text"
+                                                        value={tagValue}
+                                                        onChange={(e) => setTagValue(e.target.value)}
+                                                        className="px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                        placeholder="Enter tag"
+                                                        onKeyPress={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                saveTag(report.id);
+                                                            } else if (e.key === 'Escape') {
+                                                                cancelEditingTag();
+                                                            }
+                                                        }}
+                                                        autoFocus
+                                                    />
+                                                    <button
+                                                        onClick={() => saveTag(report.id)}
+                                                        className="text-green-600 hover:text-green-800"
+                                                        title="Save tag"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </button>
+                                                    <button
+                                                        onClick={cancelEditingTag}
+                                                        className="text-red-600 hover:text-red-800"
+                                                        title="Cancel"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center space-x-2">
+                                                    {report.tag ? (
+                                                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                                                            {report.tag}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-gray-400 text-xs">No tag</span>
+                                                    )}
+                                                    <button
+                                                        onClick={() => startEditingTag(report)}
+                                                        className="text-gray-400 hover:text-gray-600"
+                                                        title="Edit tag"
+                                                    >
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
@@ -1033,7 +1129,7 @@ const STARTUP = ({ user, showToast }) => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-8 text-center text-sm text-gray-500">
+                                    <td colSpan="6" className="px-6 py-8 text-center text-sm text-gray-500">
                                         <div className="flex flex-col items-center">
                                             <svg className="w-8 h-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />

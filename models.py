@@ -45,6 +45,7 @@ class Report(db.Model):
     file_name = db.Column(db.String(255))
     file_path = db.Column(db.String(500))
     workflow_id = db.Column(db.String(100))
+    tag = db.Column(db.String(100))  # Tag field for report categorization
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -58,6 +59,7 @@ class Report(db.Model):
             'file_name': self.file_name,
             'file_path': self.file_path,
             'workflow_id': self.workflow_id,
+            'tag': self.tag,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

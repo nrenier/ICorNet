@@ -375,6 +375,14 @@ const apiService = {
     async getStartupCompanyRelationships(companyName) {
         return await this.request(`/reports/startup-relationships/${encodeURIComponent(companyName)}`);
     },
+
+    // Update report tag
+    async updateReportTag(reportId, tag) {
+        return await this.request(`/reports/update-tag/${reportId}`, {
+            method: 'PUT',
+            body: { tag: tag }
+        });
+    },
 };
 
 // Make apiService globally available

@@ -120,39 +120,67 @@ const STARTUPChat = ({ user }) => {
             return [];
         }
 
+        // Count message types for debugging
+        const userMessages = history.filter(msg => msg.message_type === 'user');
+        const assistantMessages = history.filter(msg => msg.message_type === 'assistant');
+        console.log(`DEBUG: Found ${userMessages.length} user messages and ${assistantMessages.length} assistant messages`);
+
         const conversations = [];
         let currentConversation = null;
 
-        history.forEach((msg, index) => {
-            console.log(`Processing message ${index}:`, msg);
-            console.log(`Message type: ${msg.message_type}, Content length: ${msg.content?.length || 0}`);
-            
-            if (msg.message_type === 'user') {
-                if (currentConversation) {
-                    console.log('Pushing current conversation:', currentConversation);
-                    conversations.push(currentConversation);
-                }
-                
-                const title = msg.content.substring(0, 50) + (msg.content.length > 50 ? '...' : '');
-                console.log('Creating new conversation with title:', title);
-                
-                currentConversation = {
-                    id: `conv_${index}_${Date.now()}`,
-                    title: title,
+        // If we only have assistant messages, create artificial conversations
+        if (userMessages.length === 0 && assistantMessages.length > 0) {
+            console.log('DEBUG: Only assistant messages found, creating artificial conversations');
+            assistantMessages.forEach((msg, index) => {
+                const conversation = {
+                    id: `conv_artificial_${index}_${Date.now()}`,
+                    title: `Conversazione ${index + 1}`,
                     timestamp: msg.timestamp,
-                    messages: [msg]
+                    messages: [
+                        {
+                            content: 'Conversazione ripristinata dalla cronologia',
+                            message_type: 'user',
+                            timestamp: msg.timestamp
+                        },
+                        msg
+                    ]
                 };
-            } else if (currentConversation && msg.message_type === 'assistant') {
-                console.log('Adding assistant message to current conversation');
-                currentConversation.messages.push(msg);
-            } else {
-                console.log('Skipping message - no current conversation or unknown type:', msg.message_type);
-            }
-        });
+                conversations.push(conversation);
+                console.log('Created artificial conversation:', conversation);
+            });
+        } else {
+            // Normal grouping logic
+            history.forEach((msg, index) => {
+                console.log(`Processing message ${index}:`, msg);
+                console.log(`Message type: ${msg.message_type}, Content length: ${msg.content?.length || 0}`);
+                
+                if (msg.message_type === 'user') {
+                    if (currentConversation) {
+                        console.log('Pushing current conversation:', currentConversation);
+                        conversations.push(currentConversation);
+                    }
+                    
+                    const title = msg.content.substring(0, 50) + (msg.content.length > 50 ? '...' : '');
+                    console.log('Creating new conversation with title:', title);
+                    
+                    currentConversation = {
+                        id: `conv_${index}_${Date.now()}`,
+                        title: title,
+                        timestamp: msg.timestamp,
+                        messages: [msg]
+                    };
+                } else if (currentConversation && msg.message_type === 'assistant') {
+                    console.log('Adding assistant message to current conversation');
+                    currentConversation.messages.push(msg);
+                } else {
+                    console.log('Skipping message - no current conversation or unknown type:', msg.message_type);
+                }
+            });
 
-        if (currentConversation) {
-            console.log('Pushing final conversation:', currentConversation);
-            conversations.push(currentConversation);
+            if (currentConversation) {
+                console.log('Pushing final conversation:', currentConversation);
+                conversations.push(currentConversation);
+            }
         }
 
         console.log('Total conversations created:', conversations.length);

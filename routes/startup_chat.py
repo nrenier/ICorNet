@@ -103,8 +103,16 @@ def send_startup_chat_message():
                             chat_type='STARTUP',
                             timestamp=datetime.utcnow()
                         )
+                        logging.info(f"Saving STARTUP assistant message: user_id={user_id}, chat_type=STARTUP")
                         db.session.add(assistant_message)
-                        db.session.commit()
+
+                        try:
+                            db.session.commit()
+                            logging.info(f"Assistant message saved successfully with ID: {assistant_message.id}")
+                        except Exception as commit_error:
+                            logging.error(f"Error committing assistant message: {str(commit_error)}")
+                            db.session.rollback()
+                            raise
 
                     except (json.JSONDecodeError, TypeError):
                         # Sort and limit results for fallback case
@@ -135,8 +143,16 @@ def send_startup_chat_message():
                             chat_type='STARTUP',
                             timestamp=datetime.utcnow()
                         )
+                        logging.info(f"Saving STARTUP assistant message: user_id={user_id}, chat_type=STARTUP")
                         db.session.add(assistant_message)
-                        db.session.commit()
+
+                        try:
+                            db.session.commit()
+                            logging.info(f"Assistant message saved successfully with ID: {assistant_message.id}")
+                        except Exception as commit_error:
+                            logging.error(f"Error committing assistant message: {str(commit_error)}")
+                            db.session.rollback()
+                            raise
                 else:
                     # Sort and limit results for direct case
                     prodotti_esistenti = data_item.get('prodotti_soluzioni_esistenti', [])
@@ -166,8 +182,16 @@ def send_startup_chat_message():
                         chat_type='STARTUP',
                         timestamp=datetime.utcnow()
                     )
+                    logging.info(f"Saving STARTUP assistant message: user_id={user_id}, chat_type=STARTUP")
                     db.session.add(assistant_message)
-                    db.session.commit()
+
+                    try:
+                        db.session.commit()
+                        logging.info(f"Assistant message saved successfully with ID: {assistant_message.id}")
+                    except Exception as commit_error:
+                        logging.error(f"Error committing assistant message: {str(commit_error)}")
+                        db.session.rollback()
+                        raise
             elif isinstance(webhook_data, dict):
                 # Handle nested output structure if present
                 if 'output' in webhook_data:
@@ -205,8 +229,16 @@ def send_startup_chat_message():
                             chat_type='STARTUP',
                             timestamp=datetime.utcnow()
                         )
+                        logging.info(f"Saving STARTUP assistant message: user_id={user_id}, chat_type=STARTUP")
                         db.session.add(assistant_message)
-                        db.session.commit()
+
+                        try:
+                            db.session.commit()
+                            logging.info(f"Assistant message saved successfully with ID: {assistant_message.id}")
+                        except Exception as commit_error:
+                            logging.error(f"Error committing assistant message: {str(commit_error)}")
+                            db.session.rollback()
+                            raise
 
                     except (json.JSONDecodeError, TypeError):
                         # Sort and limit results for dict fallback
@@ -237,8 +269,16 @@ def send_startup_chat_message():
                             chat_type='STARTUP',
                             timestamp=datetime.utcnow()
                         )
+                        logging.info(f"Saving STARTUP assistant message: user_id={user_id}, chat_type=STARTUP")
                         db.session.add(assistant_message)
-                        db.session.commit()
+
+                        try:
+                            db.session.commit()
+                            logging.info(f"Assistant message saved successfully with ID: {assistant_message.id}")
+                        except Exception as commit_error:
+                            logging.error(f"Error committing assistant message: {str(commit_error)}")
+                            db.session.rollback()
+                            raise
                 else:
                     # Sort and limit results for dict direct response
                     prodotti_esistenti = webhook_data.get('prodotti_soluzioni_esistenti', [])
@@ -269,8 +309,16 @@ def send_startup_chat_message():
                         chat_type='STARTUP',
                         timestamp=datetime.utcnow()
                     )
+                    logging.info(f"Saving STARTUP assistant message: user_id={user_id}, chat_type=STARTUP")
                     db.session.add(assistant_message)
-                    db.session.commit()
+
+                    try:
+                        db.session.commit()
+                        logging.info(f"Assistant message saved successfully with ID: {assistant_message.id}")
+                    except Exception as commit_error:
+                        logging.error(f"Error committing assistant message: {str(commit_error)}")
+                        db.session.rollback()
+                        raise
             else:
                 # Fallback for unexpected data structure
                 formatted_response = {
@@ -326,7 +374,7 @@ def get_startup_chat_history():
         logging.info(f"Returning {len(chat_history)} messages in history")
         response_data = {'history': chat_history, 'success': True}
         logging.debug(f"Response data structure: {type(response_data['history'])}, length: {len(response_data['history'])}")
-        
+
         return jsonify(response_data)
 
     except Exception as e:

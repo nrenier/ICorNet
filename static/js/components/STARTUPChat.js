@@ -205,8 +205,21 @@ const STARTUPChat = ({ user }) => {
                           window.currentUser?.user_id || 
                           localStorage.getItem('currentUserId') || 
                           'anonymous';
+            
+            if (!conversation.messages || conversation.messages.length === 0) {
+                alert('Conversazione non valida: nessun messaggio trovato');
+                return;
+            }
+
             const startTimestamp = conversation.messages[0].timestamp;
             const endTimestamp = conversation.messages[conversation.messages.length - 1].timestamp;
+
+            console.log('Deleting STARTUP conversation:', {
+                userId,
+                startTimestamp,
+                endTimestamp,
+                messagesCount: conversation.messages.length
+            });
 
             const response = await apiService.deleteStartupConversation(userId, startTimestamp, endTimestamp);
 
@@ -217,10 +230,14 @@ const STARTUPChat = ({ user }) => {
                     setSelectedConversation(null);
                     setMessages([]);
                 }
+
+                console.log(`Conversazione STARTUP eliminata: ${response.deleted_count} messaggi`);
+            } else {
+                throw new Error(response.error || 'Eliminazione fallita');
             }
         } catch (error) {
             console.error('Errore nell\'eliminazione della conversazione STARTUP:', error);
-            alert('Errore nell\'eliminazione della conversazione');
+            alert(`Errore nell'eliminazione della conversazione: ${error.message}`);
         }
     };
 

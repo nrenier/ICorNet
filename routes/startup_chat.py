@@ -397,10 +397,24 @@ def delete_startup_conversation():
         if not start_timestamp or not end_timestamp:
             return jsonify({'error': 'Start and end timestamps are required'}), 400
 
-        # Parse timestamps
+        # Parse timestamps with better error handling
         from datetime import datetime
-        start_dt = datetime.fromisoformat(start_timestamp.replace('Z', '+00:00'))
-        end_dt = datetime.fromisoformat(end_timestamp.replace('Z', '+00:00'))
+        try:
+            # Handle different timestamp formats
+            if start_timestamp.endswith('Z'):
+                start_dt = datetime.fromisoformat(start_timestamp.replace('Z', '+00:00'))
+            else:
+                start_dt = datetime.fromisoformat(start_timestamp)
+            
+            if end_timestamp.endswith('Z'):
+                end_dt = datetime.fromisoformat(end_timestamp.replace('Z', '+00:00'))
+            else:
+                end_dt = datetime.fromisoformat(end_timestamp)
+        except ValueError as ve:
+            logging.error(f"Invalid timestamp format: {str(ve)}")
+            return jsonify({'error': 'Invalid timestamp format'}), 400
+
+        logging.info(f"Deleting STARTUP conversation for user {user_id} between {start_dt} and {end_dt}")
 
         # Delete messages within the conversation timeframe
         deleted_count = ChatMessage.query.filter(
@@ -412,6 +426,8 @@ def delete_startup_conversation():
 
         db.session.commit()
 
+        logging.info(f"Successfully deleted {deleted_count} STARTUP messages")
+
         return jsonify({
             'success': True,
             'deleted_count': deleted_count,
@@ -421,7 +437,9 @@ def delete_startup_conversation():
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error deleting STARTUP conversation: {str(e)}")
-        return jsonify({'error': 'Failed to delete conversation'}), 500
+        import traceback
+        logging.error(f"Traceback: {traceback.format_exc()}")
+        return jsonify({'error': f'Failed to delete conversation: {str(e)}'}), 500
 
 
 @startup_chat_bp.route('/regions', methods=['GET'])

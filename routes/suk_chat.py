@@ -75,7 +75,7 @@ def send_chat_message():
                             prodotti_esistenti = sorted(prodotti_esistenti, 
                                                       key=lambda x: float(x.get('ranking', 0)), 
                                                       reverse=True)[:10]
-                        
+
                         fornitori = output_data.get('potenziali_fornitori', [])
                         if fornitori:
                             # Sort by ranking descending (higher ranking first)
@@ -97,6 +97,7 @@ def send_chat_message():
                             content=json.dumps(formatted_response),
                             message_type='assistant',
                             user_id=user_id,
+                            chat_type='SUK',
                             timestamp=datetime.utcnow()
                         )
                         db.session.add(assistant_message)
@@ -109,7 +110,7 @@ def send_chat_message():
                             prodotti_esistenti = sorted(prodotti_esistenti, 
                                                       key=lambda x: float(x.get('ranking', 0)), 
                                                       reverse=True)[:10]
-                        
+
                         fornitori = data_item.get('potenziali_fornitori', [])
                         if fornitori:
                             fornitori = sorted(fornitori, 
@@ -130,6 +131,7 @@ def send_chat_message():
                             content=json.dumps(formatted_response),
                             message_type='assistant',
                             user_id=user_id,
+                            chat_type='SUK',
                             timestamp=datetime.utcnow()
                         )
                         db.session.add(assistant_message)
@@ -141,7 +143,7 @@ def send_chat_message():
                         prodotti_esistenti = sorted(prodotti_esistenti, 
                                                   key=lambda x: float(x.get('ranking', 0)), 
                                                   reverse=True)[:10]
-                    
+
                     fornitori = data_item.get('potenziali_fornitori', [])
                     if fornitori:
                         fornitori = sorted(fornitori, 
@@ -162,6 +164,7 @@ def send_chat_message():
                         content=json.dumps(formatted_response),
                         message_type='assistant',
                         user_id=user_id,
+                        chat_type='SUK',
                         timestamp=datetime.utcnow()
                     )
                     db.session.add(assistant_message)
@@ -181,7 +184,7 @@ def send_chat_message():
                             prodotti_esistenti = sorted(prodotti_esistenti, 
                                                       key=lambda x: float(x.get('ranking', 0)), 
                                                       reverse=True)[:10]
-                        
+
                         fornitori = output_data.get('potenziali_fornitori', [])
                         if fornitori:
                             fornitori = sorted(fornitori, 
@@ -202,6 +205,7 @@ def send_chat_message():
                             content=json.dumps(formatted_response),
                             message_type='assistant',
                             user_id=user_id,
+                            chat_type='SUK',
                             timestamp=datetime.utcnow()
                         )
                         db.session.add(assistant_message)
@@ -214,7 +218,7 @@ def send_chat_message():
                             prodotti_esistenti = sorted(prodotti_esistenti, 
                                                       key=lambda x: float(x.get('ranking', 0)), 
                                                       reverse=True)[:10]
-                        
+
                         fornitori = webhook_data.get('potenziali_fornitori', [])
                         if fornitori:
                             fornitori = sorted(fornitori, 
@@ -235,6 +239,7 @@ def send_chat_message():
                             content=json.dumps(formatted_response),
                             message_type='assistant',
                             user_id=user_id,
+                            chat_type='SUK',
                             timestamp=datetime.utcnow()
                         )
                         db.session.add(assistant_message)
@@ -246,7 +251,7 @@ def send_chat_message():
                         prodotti_esistenti = sorted(prodotti_esistenti, 
                                                   key=lambda x: float(x.get('ranking', 0)), 
                                                   reverse=True)[:10]
-                    
+
                     fornitori = webhook_data.get('potenziali_fornitori', [])
                     if fornitori:
                         fornitori = sorted(fornitori, 
@@ -268,6 +273,7 @@ def send_chat_message():
                         content=json.dumps(formatted_response),
                         message_type='assistant',
                         user_id=user_id,
+                        chat_type='SUK',
                         timestamp=datetime.utcnow()
                     )
                     db.session.add(assistant_message)

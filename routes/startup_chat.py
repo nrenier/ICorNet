@@ -345,6 +345,7 @@ def delete_startup_conversation():
         # Delete messages within the conversation timeframe
         deleted_count = ChatMessage.query.filter(
             ChatMessage.user_id == user_id,
+            ChatMessage.chat_type == 'STARTUP',
             ChatMessage.timestamp >= start_dt,
             ChatMessage.timestamp <= end_dt
         ).delete()

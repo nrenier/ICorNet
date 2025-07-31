@@ -275,6 +275,18 @@ const apiService = {
         });
     },
 
+    async updateConversationTitle(userId, startTimestamp, endTimestamp, title) {
+        return await this.request('/suk-chat/update-conversation-title', {
+            method: 'PUT',
+            body: {
+                user_id: userId,
+                start_timestamp: startTimestamp,
+                end_timestamp: endTimestamp,
+                title: title
+            }
+        });
+    },
+
     // STARTUP Chat methods
     async sendStartupChatMessage(message, userId = null, region = '', province = '') {
         return await this.request('/startup-chat/send-message', {
@@ -301,6 +313,18 @@ const apiService = {
                 user_id: userId,
                 start_timestamp: startTimestamp,
                 end_timestamp: endTimestamp
+            }
+        });
+    },
+
+    async updateStartupConversationTitle(userId, startTimestamp, endTimestamp, title) {
+        return await this.request('/startup-chat/update-conversation-title', {
+            method: 'PUT',
+            body: {
+                user_id: userId,
+                start_timestamp: startTimestamp,
+                end_timestamp: endTimestamp,
+                title: title
             }
         });
     },

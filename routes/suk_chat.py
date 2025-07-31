@@ -327,6 +327,67 @@ def get_chat_history():
         return jsonify({'error': 'Failed to retrieve chat history'}), 500
 
 
+@suk_chat_bp.route('/update-conversation-title', methods=['PUT'])
+def update_conversation_title():
+    """Update conversation title in database"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'error': 'Invalid JSON data'}), 400
+
+        user_id = data.get('user_id') or 'anonymous'
+        start_timestamp = data.get('start_timestamp')
+        end_timestamp = data.get('end_timestamp')
+        new_title = data.get('title', '').strip()
+
+        if not start_timestamp or not end_timestamp or not new_title:
+            return jsonify({'error': 'Start timestamp, end timestamp, and title are required'}), 400
+
+        # Parse timestamps
+        from datetime import datetime
+        start_dt = datetime.fromisoformat(start_timestamp.replace('Z', '+00:00'))
+        end_dt = datetime.fromisoformat(end_timestamp.replace('Z', '+00:00'))
+
+        # Update the first user message in the conversation timeframe with custom title
+        user_id_str = str(user_id)
+        
+        # Find the first user message in the conversation
+        first_message = ChatMessage.query.filter(
+            ChatMessage.user_id == user_id_str,
+            ChatMessage.chat_type == 'SUK',
+            ChatMessage.message_type == 'user',
+            ChatMessage.timestamp >= start_dt,
+            ChatMessage.timestamp <= end_dt
+        ).order_by(ChatMessage.timestamp.asc()).first()
+
+        if first_message:
+            # Store the custom title in the content as metadata
+            original_content = first_message.content
+            if not original_content.startswith('CUSTOM_TITLE:'):
+                first_message.content = f"CUSTOM_TITLE:{new_title}|{original_content}"
+            else:
+                # Replace existing custom title
+                parts = original_content.split('|', 1)
+                if len(parts) > 1:
+                    first_message.content = f"CUSTOM_TITLE:{new_title}|{parts[1]}"
+                else:
+                    first_message.content = f"CUSTOM_TITLE:{new_title}|{original_content}"
+            
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Conversation title updated successfully'
+            })
+        else:
+            return jsonify({'error': 'Conversation not found'}), 404
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error updating conversation title: {str(e)}")
+        return jsonify({'error': 'Failed to update conversation title'}), 500
+
+
 @suk_chat_bp.route('/delete-conversation', methods=['DELETE'])
 def delete_conversation():
     """Delete messages from a specific conversation timeframe"""

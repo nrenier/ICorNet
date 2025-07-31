@@ -146,13 +146,26 @@ const STARTUPChat = ({ user }) => {
                         conversations.push(currentConversation);
                     }
                     
-                    const title = msg.content.substring(0, 50) + (msg.content.length > 50 ? '...' : '');
+                    // Check if message has custom title
+                    let title = msg.content.substring(0, 50) + (msg.content.length > 50 ? '...' : '');
+                    let actualContent = msg.content;
+                    
+                    if (msg.content.startsWith('CUSTOM_TITLE:')) {
+                        const parts = msg.content.split('|', 2);
+                        if (parts.length > 1) {
+                            title = parts[0].replace('CUSTOM_TITLE:', '');
+                            actualContent = parts[1];
+                        }
+                    }
                     
                     currentConversation = {
                         id: `conv_${index}_${Date.now()}`,
                         title: title,
                         timestamp: msg.timestamp,
-                        messages: [msg]
+                        messages: [{
+                            ...msg,
+                            content: actualContent
+                        }]
                     };
                 } else if (currentConversation && msg.message_type === 'assistant') {
                     currentConversation.messages.push(msg);
@@ -271,25 +284,52 @@ const STARTUPChat = ({ user }) => {
         setEditingTitleValue('');
     };
 
-    const saveTitle = (conversationId) => {
+    const saveTitle = async (conversationId) => {
         if (!editingTitleValue.trim()) {
             cancelEditingTitle();
             return;
         }
 
-        setChatHistory(prev => prev.map(conv => 
-            conv.id === conversationId 
-                ? { ...conv, title: editingTitleValue.trim() }
-                : conv
-        ));
-
-        // Update selected conversation if it's the one being edited
-        if (selectedConversation?.id === conversationId) {
-            setSelectedConversation(prev => ({ ...prev, title: editingTitleValue.trim() }));
+        const conversation = chatHistory.find(conv => conv.id === conversationId);
+        if (!conversation || !conversation.messages || conversation.messages.length === 0) {
+            cancelEditingTitle();
+            return;
         }
 
-        setEditingTitleId(null);
-        setEditingTitleValue('');
+        try {
+            const userId = user?.id || 
+                          user?.user_id || 
+                          window.currentUser?.id || 
+                          window.currentUser?.user_id || 
+                          localStorage.getItem('currentUserId') || 
+                          'anonymous';
+            
+            const sortedMessages = [...conversation.messages].sort((a, b) => 
+                new Date(a.timestamp) - new Date(b.timestamp)
+            );
+            const startTimestamp = sortedMessages[0].timestamp;
+            const endTimestamp = sortedMessages[sortedMessages.length - 1].timestamp;
+
+            await apiService.updateStartupConversationTitle(userId, startTimestamp, endTimestamp, editingTitleValue.trim());
+
+            setChatHistory(prev => prev.map(conv => 
+                conv.id === conversationId 
+                    ? { ...conv, title: editingTitleValue.trim() }
+                    : conv
+            ));
+
+            // Update selected conversation if it's the one being edited
+            if (selectedConversation?.id === conversationId) {
+                setSelectedConversation(prev => ({ ...prev, title: editingTitleValue.trim() }));
+            }
+
+            setEditingTitleId(null);
+            setEditingTitleValue('');
+        } catch (error) {
+            console.error('Error updating STARTUP conversation title:', error);
+            alert('Errore nel salvare il titolo della conversazione STARTUP');
+            cancelEditingTitle();
+        }
     };
 
     const handleTitleKeyPress = (e, conversationId) => {

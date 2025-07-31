@@ -42,6 +42,7 @@ def send_chat_message():
             content=message,
             message_type='user',
             user_id=user_id,
+            chat_type='SUK',
             timestamp=datetime.utcnow()
         )
         db.session.add(user_message)
@@ -305,8 +306,10 @@ def get_chat_history():
     user_id = request.args.get('user_id') or 'anonymous'
 
     try:
-        chat_history = ChatMessage.query.filter_by(user_id=user_id).order_by(
-            ChatMessage.timestamp.asc()).all()
+        chat_history = ChatMessage.query.filter_by(
+            user_id=user_id, 
+            chat_type='SUK'
+        ).order_by(ChatMessage.timestamp.asc()).all()
         history = [{
             'content': msg.content,
             'message_type': msg.message_type,

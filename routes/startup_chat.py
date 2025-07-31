@@ -1,4 +1,3 @@
-
 from flask import Blueprint, request, jsonify, current_app
 import requests
 import logging
@@ -78,7 +77,7 @@ def send_startup_chat_message():
                             prodotti_esistenti = sorted(prodotti_esistenti, 
                                                       key=lambda x: float(x.get('ranking', 0)), 
                                                       reverse=True)[:10]
-                        
+
                         fornitori = output_data.get('potenziali_fornitori', [])
                         if fornitori:
                             # Sort by ranking descending (higher ranking first)
@@ -98,6 +97,7 @@ def send_startup_chat_message():
                             content=json.dumps(formatted_response),
                             message_type='assistant',
                             user_id=user_id,
+                            chat_type='STARTUP',
                             timestamp=datetime.utcnow()
                         )
                         db.session.add(assistant_message)
@@ -110,7 +110,7 @@ def send_startup_chat_message():
                             prodotti_esistenti = sorted(prodotti_esistenti, 
                                                       key=lambda x: float(x.get('ranking', 0)), 
                                                       reverse=True)[:10]
-                        
+
                         fornitori = data_item.get('potenziali_fornitori', [])
                         if fornitori:
                             fornitori = sorted(fornitori, 
@@ -129,6 +129,7 @@ def send_startup_chat_message():
                             content=json.dumps(formatted_response),
                             message_type='assistant',
                             user_id=user_id,
+                            chat_type='STARTUP',
                             timestamp=datetime.utcnow()
                         )
                         db.session.add(assistant_message)
@@ -140,7 +141,7 @@ def send_startup_chat_message():
                         prodotti_esistenti = sorted(prodotti_esistenti, 
                                                   key=lambda x: float(x.get('ranking', 0)), 
                                                   reverse=True)[:10]
-                    
+
                     fornitori = data_item.get('potenziali_fornitori', [])
                     if fornitori:
                         fornitori = sorted(fornitori, 
@@ -159,6 +160,7 @@ def send_startup_chat_message():
                         content=json.dumps(formatted_response),
                         message_type='assistant',
                         user_id=user_id,
+                        chat_type='STARTUP',
                         timestamp=datetime.utcnow()
                     )
                     db.session.add(assistant_message)
@@ -178,7 +180,7 @@ def send_startup_chat_message():
                             prodotti_esistenti = sorted(prodotti_esistenti, 
                                                       key=lambda x: float(x.get('ranking', 0)), 
                                                       reverse=True)[:10]
-                        
+
                         fornitori = output_data.get('potenziali_fornitori', [])
                         if fornitori:
                             fornitori = sorted(fornitori, 
@@ -197,6 +199,7 @@ def send_startup_chat_message():
                             content=json.dumps(formatted_response),
                             message_type='assistant',
                             user_id=user_id,
+                            chat_type='STARTUP',
                             timestamp=datetime.utcnow()
                         )
                         db.session.add(assistant_message)
@@ -209,7 +212,7 @@ def send_startup_chat_message():
                             prodotti_esistenti = sorted(prodotti_esistenti, 
                                                       key=lambda x: float(x.get('ranking', 0)), 
                                                       reverse=True)[:10]
-                        
+
                         fornitori = webhook_data.get('potenziali_fornitori', [])
                         if fornitori:
                             fornitori = sorted(fornitori, 
@@ -228,6 +231,7 @@ def send_startup_chat_message():
                             content=json.dumps(formatted_response),
                             message_type='assistant',
                             user_id=user_id,
+                            chat_type='STARTUP',
                             timestamp=datetime.utcnow()
                         )
                         db.session.add(assistant_message)
@@ -239,7 +243,7 @@ def send_startup_chat_message():
                         prodotti_esistenti = sorted(prodotti_esistenti, 
                                                   key=lambda x: float(x.get('ranking', 0)), 
                                                   reverse=True)[:10]
-                    
+
                     fornitori = webhook_data.get('potenziali_fornitori', [])
                     if fornitori:
                         fornitori = sorted(fornitori, 
@@ -259,6 +263,7 @@ def send_startup_chat_message():
                         content=json.dumps(formatted_response),
                         message_type='assistant',
                         user_id=user_id,
+                        chat_type='STARTUP',
                         timestamp=datetime.utcnow()
                     )
                     db.session.add(assistant_message)
@@ -357,7 +362,7 @@ def get_startup_regions():
     try:
         from services.neo4j_service import Neo4jService
         neo4j_service = current_app.neo4j_service
-        
+
         if not neo4j_service or not neo4j_service.driver:
             # Return mock data if Neo4j is not available
             return jsonify({
@@ -370,7 +375,7 @@ def get_startup_regions():
                     {'REGIONE': 'Emilia-Romagna', 'COUNT': 21}
                 ]
             })
-        
+
         with neo4j_service.driver.session() as session:
             result = session.run("""
                 MATCH (n:STARTUP) 
@@ -378,10 +383,10 @@ def get_startup_regions():
                 RETURN n.regione as REGIONE, count(n) as COUNT 
                 ORDER BY REGIONE
             """)
-            
+
             regions = [record.data() for record in result]
             return jsonify({'success': True, 'regions': regions})
-            
+
     except Exception as e:
         logging.error(f"Error getting startup regions: {str(e)}")
         return jsonify({'error': 'Failed to get regions'}), 500
@@ -394,10 +399,10 @@ def get_startup_provinces():
         region = request.args.get('region')
         if not region:
             return jsonify({'error': 'Region parameter is required'}), 400
-        
+
         from services.neo4j_service import Neo4jService
         neo4j_service = current_app.neo4j_service
-        
+
         if not neo4j_service or not neo4j_service.driver:
             # Return mock data if Neo4j is not available
             return jsonify({
@@ -408,7 +413,7 @@ def get_startup_provinces():
                     {'PROVINCIA': 'BS', 'COUNT': 8}
                 ]
             })
-        
+
         with neo4j_service.driver.session() as session:
             result = session.run("""
                 MATCH (n:STARTUP) 
@@ -416,10 +421,10 @@ def get_startup_provinces():
                 RETURN n.sigla_provincia as PROVINCIA, count(n) as COUNT 
                 ORDER BY PROVINCIA
             """, region=region)
-            
+
             provinces = [record.data() for record in result]
             return jsonify({'success': True, 'provinces': provinces})
-            
+
     except Exception as e:
         logging.error(f"Error getting startup provinces: {str(e)}")
         return jsonify({'error': 'Failed to get provinces'}), 500

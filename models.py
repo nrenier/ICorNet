@@ -75,9 +75,10 @@ class ChatMessage(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     message_type = db.Column(db.String(20), nullable=False)  # 'user' or 'assistant'
-    user_id = db.Column(db.String(100), nullable=False)  # Support string IDs and anonymous users
+    user_id = db.Column(db.String(100), nullable=False, default='anonymous')
+    chat_type = db.Column(db.String(20), nullable=False, default='SUK')  # 'SUK' or 'STARTUP'
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     # Note: Removed foreign key relationship to support anonymous users
 

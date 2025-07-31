@@ -1,8 +1,6 @@
-
-
 const { useState, useEffect, useRef } = React;
 
-const STARTUPChat = () => {
+const STARTUPChat = ({ user }) => {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -73,14 +71,19 @@ const STARTUPChat = () => {
 
     const loadChatHistory = async () => {
         try {
-            const userId = window.currentUser?.id || 'anonymous';
+            const userId = user?.id || 
+                          user?.user_id || 
+                          window.currentUser?.id || 
+                          window.currentUser?.user_id || 
+                          localStorage.getItem('currentUserId') || 
+                          'anonymous';
             console.log('Loading STARTUP chat history for user:', userId);
             const response = await apiService.getStartupChatHistory(userId);
             console.log('STARTUP Chat history response:', response);
             if (response.success && response.history) {
                 const conversations = groupMessagesIntoConversations(response.history);
                 setChatHistory(conversations);
-                
+
                 if (conversations.length > 0 && !selectedConversation) {
                     setSelectedConversation(conversations[0]);
                     setMessages(transformMessages(conversations[0].messages));
@@ -94,7 +97,7 @@ const STARTUPChat = () => {
     const groupMessagesIntoConversations = (history) => {
         const conversations = [];
         let currentConversation = null;
-        
+
         history.forEach((msg, index) => {
             if (msg.message_type === 'user') {
                 if (currentConversation) {
@@ -110,18 +113,18 @@ const STARTUPChat = () => {
                 currentConversation.messages.push(msg);
             }
         });
-        
+
         if (currentConversation) {
             conversations.push(currentConversation);
         }
-        
+
         return conversations.reverse();
     };
 
     const transformMessages = (conversationMessages) => {
         return conversationMessages.map(msg => {
             let content = msg.content;
-            
+
             if (msg.message_type === 'assistant' && typeof content === 'string') {
                 try {
                     content = JSON.parse(content);
@@ -129,7 +132,7 @@ const STARTUPChat = () => {
                     console.error('Failed to parse assistant message content:', e);
                 }
             }
-            
+
             return {
                 id: `${msg.timestamp}-${Math.random()}`,
                 type: msg.message_type,
@@ -157,20 +160,25 @@ const STARTUPChat = () => {
         }
 
         try {
-            const userId = window.currentUser?.id || 'anonymous';
+            const userId = user?.id || 
+                          user?.user_id || 
+                          window.currentUser?.id || 
+                          window.currentUser?.user_id || 
+                          localStorage.getItem('currentUserId') || 
+                          'anonymous';
             const startTimestamp = conversation.messages[0].timestamp;
             const endTimestamp = conversation.messages[conversation.messages.length - 1].timestamp;
 
             const response = await apiService.deleteStartupConversation(userId, startTimestamp, endTimestamp);
-            
+
             if (response.success) {
                 setChatHistory(prev => prev.filter(conv => conv.id !== conversation.id));
-                
+
                 if (selectedConversation?.id === conversation.id) {
                     setSelectedConversation(null);
                     setMessages([]);
                 }
-                
+
                 console.log(`Conversazione STARTUP eliminata: ${response.deleted_count} messaggi`);
             }
         } catch (error) {
@@ -195,7 +203,12 @@ const STARTUPChat = () => {
         setError(null);
 
         try {
-            const userId = window.currentUser?.id || 'anonymous';
+            const userId = user?.id || 
+                          user?.user_id || 
+                          window.currentUser?.id || 
+                          window.currentUser?.user_id || 
+                          localStorage.getItem('currentUserId') || 
+                          'anonymous';
             const response = await apiService.sendStartupChatMessage(
                 userMessage.content, 
                 userId,
@@ -211,7 +224,7 @@ const STARTUPChat = () => {
                     timestamp: response.timestamp || new Date().toISOString()
                 };
                 setMessages(prev => [...prev, assistantMessage]);
-                
+
                 setTimeout(() => {
                     loadChatHistory();
                 }, 1000);
@@ -243,11 +256,11 @@ const STARTUPChat = () => {
 
     const handleCompanyClick = (companyName) => {
         sessionStorage.setItem('selectedCompanyForSTARTUP', companyName);
-        
+
         window.dispatchEvent(new CustomEvent('startupCompanySelected', { 
             detail: { companyName } 
         }));
-        
+
         if (window.switchToTab) {
             window.switchToTab('startup');
         }
@@ -418,7 +431,7 @@ const STARTUPChat = () => {
                                             {new Date(conversation.timestamp).toLocaleDateString('it-IT')}
                                         </div>
                                     </button>
-                                    
+
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -622,4 +635,3 @@ const STARTUPChat = () => {
 };
 
 window.STARTUPChat = STARTUPChat;
-

@@ -315,7 +315,7 @@ def get_startup_chat_history():
                 'timestamp': message.timestamp.isoformat() if message.timestamp else None
             })
 
-        return jsonify({'chat_history': chat_history})
+        return jsonify({'history': chat_history, 'success': True})
 
     except Exception as e:
         logging.error(f"Error fetching STARTUP chat history: {str(e)}")

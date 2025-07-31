@@ -103,8 +103,13 @@ const STARTUPChat = ({ user }) => {
             return [];
         }
 
-        const userMessages = history.filter(msg => msg.message_type === 'user');
-        const assistantMessages = history.filter(msg => msg.message_type === 'assistant');
+        // Sort all messages by timestamp first
+        const sortedHistory = [...history].sort((a, b) => 
+            new Date(a.timestamp) - new Date(b.timestamp)
+        );
+
+        const userMessages = sortedHistory.filter(msg => msg.message_type === 'user');
+        const assistantMessages = sortedHistory.filter(msg => msg.message_type === 'assistant');
 
         const conversations = [];
         let currentConversation = null;
@@ -129,9 +134,13 @@ const STARTUPChat = ({ user }) => {
             });
         } else {
             // Normal grouping logic
-            history.forEach((msg, index) => {
+            sortedHistory.forEach((msg, index) => {
                 if (msg.message_type === 'user') {
                     if (currentConversation) {
+                        // Sort messages in the current conversation before pushing
+                        currentConversation.messages.sort((a, b) => 
+                            new Date(a.timestamp) - new Date(b.timestamp)
+                        );
                         conversations.push(currentConversation);
                     }
                     
@@ -149,6 +158,10 @@ const STARTUPChat = ({ user }) => {
             });
 
             if (currentConversation) {
+                // Sort messages in the final conversation
+                currentConversation.messages.sort((a, b) => 
+                    new Date(a.timestamp) - new Date(b.timestamp)
+                );
                 conversations.push(currentConversation);
             }
         }
@@ -211,8 +224,13 @@ const STARTUPChat = ({ user }) => {
                 return;
             }
 
-            const startTimestamp = conversation.messages[0].timestamp;
-            const endTimestamp = conversation.messages[conversation.messages.length - 1].timestamp;
+            // Sort messages by timestamp to ensure correct order
+            const sortedMessages = [...conversation.messages].sort((a, b) => 
+                new Date(a.timestamp) - new Date(b.timestamp)
+            );
+
+            const startTimestamp = sortedMessages[0].timestamp;
+            const endTimestamp = sortedMessages[sortedMessages.length - 1].timestamp;
 
             console.log('Deleting STARTUP conversation:', {
                 userId,

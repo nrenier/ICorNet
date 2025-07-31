@@ -268,8 +268,24 @@ const STARTUP = ({ user, showToast }) => {
     useEffect(() => {
         loadData();
 
+        // Listen for company selection from STARTUP Chat
+        const handleCompanySelectionFromChat = (event) => {
+            const { companyName } = event.detail;
+            handleCompanySelectionFromChatInternal(companyName);
+        };
+
+        window.addEventListener('startupCompanySelected', handleCompanySelectionFromChat);
+
+        // Check if there's a stored company selection from STARTUP Chat
+        const storedCompany = sessionStorage.getItem('selectedCompanyForSTARTUP');
+        if (storedCompany) {
+            handleCompanySelectionFromChatInternal(storedCompany);
+            sessionStorage.removeItem('selectedCompanyForSTARTUP');
+        }
+
         return () => {
             mountedRef.current = false;
+            window.removeEventListener('startupCompanySelected', handleCompanySelectionFromChat);
         };
     }, []);
 
@@ -328,6 +344,36 @@ const STARTUP = ({ user, showToast }) => {
         setSelectedCompany(company);
         setSearchTerm(company.nome_azienda);
         setIsDropdownOpen(false);
+    };
+
+    const handleCompanySelectionFromChatInternal = async (companyName) => {
+        try {
+            // Find the company in the current companies list
+            let company = companies.find(c => c.nome_azienda === companyName);
+            
+            if (company) {
+                setSelectedCompany(company);
+                setSearchTerm(companyName);
+                setIsDropdownOpen(false);
+                
+                // Show a notification
+                if (showToast) {
+                    showToast(`Azienda "${companyName}" selezionata da STARTUP Chat`, 'success');
+                }
+            } else {
+                // If company not found, still set the search term
+                setSearchTerm(companyName);
+                setSelectedCompany(null);
+                
+                if (showToast) {
+                    showToast(`Azienda "${companyName}" non trovata nel database`, 'warning');
+                }
+            }
+        } catch (error) {
+            console.error('Error handling company selection from chat:', error);
+            setSearchTerm(companyName);
+            setSelectedCompany(null);
+        }
     };
 
     const handleSearchChange = (e) => {

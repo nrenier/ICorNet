@@ -77,30 +77,17 @@ const STARTUPChat = ({ user }) => {
                           window.currentUser?.user_id || 
                           localStorage.getItem('currentUserId') || 
                           'anonymous';
-            console.log('Loading STARTUP chat history for user:', userId);
+            
             const response = await apiService.getStartupChatHistory(userId);
-            console.log('STARTUP Chat history response:', response);
-            console.log('Response.history type:', typeof response.history);
-            console.log('Response.history is array:', Array.isArray(response.history));
-            console.log('Response.history length:', response.history?.length);
             
             if (response.success && response.history) {
-                console.log('Processing history data...');
-                console.log('Raw history data:', JSON.stringify(response.history, null, 2));
-                
                 const conversations = groupMessagesIntoConversations(response.history);
-                console.log('Grouped conversations:', conversations);
-                console.log('Number of conversations:', conversations.length);
-                
                 setChatHistory(conversations);
 
                 if (conversations.length > 0 && !selectedConversation) {
-                    console.log('Setting first conversation as selected');
                     setSelectedConversation(conversations[0]);
                     setMessages(transformMessages(conversations[0].messages));
                 }
-            } else {
-                console.log('No valid history data found');
             }
         } catch (error) {
             console.error('Failed to load STARTUP chat history:', error);
@@ -108,29 +95,22 @@ const STARTUPChat = ({ user }) => {
     };
 
     const groupMessagesIntoConversations = (history) => {
-        console.log('groupMessagesIntoConversations called with:', history);
-        
         if (!history || !Array.isArray(history)) {
-            console.log('History is not a valid array');
             return [];
         }
         
         if (history.length === 0) {
-            console.log('History array is empty');
             return [];
         }
 
-        // Count message types for debugging
         const userMessages = history.filter(msg => msg.message_type === 'user');
         const assistantMessages = history.filter(msg => msg.message_type === 'assistant');
-        console.log(`DEBUG: Found ${userMessages.length} user messages and ${assistantMessages.length} assistant messages`);
 
         const conversations = [];
         let currentConversation = null;
 
         // If we only have assistant messages, create artificial conversations
         if (userMessages.length === 0 && assistantMessages.length > 0) {
-            console.log('DEBUG: Only assistant messages found, creating artificial conversations');
             assistantMessages.forEach((msg, index) => {
                 const conversation = {
                     id: `conv_artificial_${index}_${Date.now()}`,
@@ -146,22 +126,16 @@ const STARTUPChat = ({ user }) => {
                     ]
                 };
                 conversations.push(conversation);
-                console.log('Created artificial conversation:', conversation);
             });
         } else {
             // Normal grouping logic
             history.forEach((msg, index) => {
-                console.log(`Processing message ${index}:`, msg);
-                console.log(`Message type: ${msg.message_type}, Content length: ${msg.content?.length || 0}`);
-                
                 if (msg.message_type === 'user') {
                     if (currentConversation) {
-                        console.log('Pushing current conversation:', currentConversation);
                         conversations.push(currentConversation);
                     }
                     
                     const title = msg.content.substring(0, 50) + (msg.content.length > 50 ? '...' : '');
-                    console.log('Creating new conversation with title:', title);
                     
                     currentConversation = {
                         id: `conv_${index}_${Date.now()}`,
@@ -170,55 +144,40 @@ const STARTUPChat = ({ user }) => {
                         messages: [msg]
                     };
                 } else if (currentConversation && msg.message_type === 'assistant') {
-                    console.log('Adding assistant message to current conversation');
                     currentConversation.messages.push(msg);
-                } else {
-                    console.log('Skipping message - no current conversation or unknown type:', msg.message_type);
                 }
             });
 
             if (currentConversation) {
-                console.log('Pushing final conversation:', currentConversation);
                 conversations.push(currentConversation);
             }
         }
-
-        console.log('Total conversations created:', conversations.length);
-        console.log('Final conversations:', conversations);
         
         return conversations.reverse();
     };
 
     const transformMessages = (conversationMessages) => {
-        console.log('transformMessages called with:', conversationMessages);
-        
         if (!conversationMessages || !Array.isArray(conversationMessages)) {
-            console.log('Invalid conversation messages');
             return [];
         }
         
         return conversationMessages.map((msg, index) => {
-            console.log(`Transforming message ${index}:`, msg);
             let content = msg.content;
 
             if (msg.message_type === 'assistant' && typeof content === 'string') {
                 try {
                     content = JSON.parse(content);
-                    console.log('Parsed assistant content:', content);
                 } catch (e) {
                     console.error('Failed to parse assistant message content:', e);
                 }
             }
 
-            const transformedMessage = {
+            return {
                 id: `${msg.timestamp}-${Math.random()}`,
                 type: msg.message_type,
                 content: content,
                 timestamp: msg.timestamp
             };
-            
-            console.log('Transformed message:', transformedMessage);
-            return transformedMessage;
         });
     };
 
@@ -258,8 +217,6 @@ const STARTUPChat = ({ user }) => {
                     setSelectedConversation(null);
                     setMessages([]);
                 }
-
-                console.log(`Conversazione STARTUP eliminata: ${response.deleted_count} messaggi`);
             }
         } catch (error) {
             console.error('Errore nell\'eliminazione della conversazione STARTUP:', error);
@@ -335,12 +292,15 @@ const STARTUPChat = ({ user }) => {
     };
 
     const handleCompanyClick = (companyName) => {
+        // Store the company name for the STARTUP component to pick up
         sessionStorage.setItem('selectedCompanyForSTARTUP', companyName);
 
+        // Dispatch custom event
         window.dispatchEvent(new CustomEvent('startupCompanySelected', { 
             detail: { companyName } 
         }));
 
+        // Switch to startup tab
         if (window.switchToTab) {
             window.switchToTab('startup');
         }

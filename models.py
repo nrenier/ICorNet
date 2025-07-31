@@ -40,10 +40,11 @@ class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     company_name = db.Column(db.String(255), nullable=False)
-    workflow_id = db.Column(db.String(100))
+    report_type = db.Column(db.String(50), default='suk')  # 'suk' or 'federterziario'
     status = db.Column(db.String(50), default='pending')
     file_name = db.Column(db.String(255))
     file_path = db.Column(db.String(500))
+    workflow_id = db.Column(db.String(100))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -52,10 +53,11 @@ class Report(db.Model):
             'id': self.id,
             'user_id': self.user_id,
             'company_name': self.company_name,
-            'workflow_id': self.workflow_id,
+            'report_type': self.report_type,
             'status': self.status,
             'file_name': self.file_name,
             'file_path': self.file_path,
+            'workflow_id': self.workflow_id,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
@@ -73,9 +75,10 @@ class ChatMessage(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     message_type = db.Column(db.String(20), nullable=False)  # 'user' or 'assistant'
-    user_id = db.Column(db.String(100), nullable=False)  # Support string IDs and anonymous users
+    user_id = db.Column(db.String(100), nullable=False, default='anonymous')
+    chat_type = db.Column(db.String(20), nullable=False, default='SUK')  # 'SUK' or 'STARTUP'
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     # Note: Removed foreign key relationship to support anonymous users
 

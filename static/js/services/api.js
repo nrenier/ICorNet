@@ -75,10 +75,13 @@ const apiService = {
     },
 
     // Reports methods
-    async generateReport(companyName) {
+    async generateReport(companyName, type = 'suk') {
         return await this.request('/reports/generate', {
             method: 'POST',
-            body: { company_name: companyName },
+            body: { 
+                company_name: companyName,
+                type: type
+            },
         });
     },
 
@@ -142,16 +145,64 @@ const apiService = {
         return { success: true };
     },
 
-    async getReportHistory() {
-        return await this.request('/reports/history');
+    async getReportHistory(reportType = null) {
+        const url = reportType ? `/reports/history?type=${encodeURIComponent(reportType)}` : '/reports/history';
+        return await this.request(url);
     },
 
     async getCompaniesForReports() {
-        return await this.request('/reports/companies');
+        const response = await fetch('/api/reports/companies', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch companies for reports');
+        }
+
+        return await response.json();
+    },
+
+    // Get FEDERTERZIARIO companies for reports
+    async getFederterziarioCompaniesForReports() {
+        const response = await fetch('/api/reports/federterziario-companies', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch FEDERTERZIARIO companies for reports');
+        }
+
+        return await response.json();
+    },
+
+    // Get FEDERTERZIARIO company details
+    async getFederterziarioCompanyDetails(companyName) {
+        const response = await fetch(`/api/reports/federterziario-company-details/${encodeURIComponent(companyName)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch FEDERTERZIARIO company details');
+        }
+
+        return await response.json();
     },
 
     async getCompanyRelationships(companyName) {
         return await this.request(`/reports/relationships/${encodeURIComponent(companyName)}`);
+    },
+
+    async getFederterziarioCompanyRelationships(companyName) {
+        return await this.request(`/reports/federterziario-relationships/${encodeURIComponent(companyName)}`);
     },
 
     // Health check
@@ -211,7 +262,119 @@ const apiService = {
         return await this.request('/suk-chat/clear-history', {
             method: 'DELETE'
         });
-    }
+    },
+
+    async deleteConversation(userId, startTimestamp, endTimestamp) {
+        return await this.request('/suk-chat/delete-conversation', {
+            method: 'DELETE',
+            body: {
+                user_id: userId,
+                start_timestamp: startTimestamp,
+                end_timestamp: endTimestamp
+            }
+        });
+    },
+
+    async updateConversationTitle(userId, startTimestamp, endTimestamp, title) {
+        return await this.request('/suk-chat/update-conversation-title', {
+            method: 'PUT',
+            body: {
+                user_id: userId,
+                start_timestamp: startTimestamp,
+                end_timestamp: endTimestamp,
+                title: title
+            }
+        });
+    },
+
+    // STARTUP Chat methods
+    async sendStartupChatMessage(message, userId = null, region = '', province = '') {
+        return await this.request('/startup-chat/send-message', {
+            method: 'POST',
+            body: { 
+                message: message,
+                timestamp: new Date().toISOString(),
+                user_id: userId,
+                region: region,
+                province: province
+            },
+        });
+    },
+
+    async getStartupChatHistory(userId = null) {
+        const params = userId ? `?user_id=${encodeURIComponent(userId)}` : '';
+        return await this.request(`/startup-chat/chat-history${params}`);
+    },
+
+    async deleteStartupConversation(userId, startTimestamp, endTimestamp) {
+        return await this.request('/startup-chat/delete-conversation', {
+            method: 'DELETE',
+            body: {
+                user_id: userId,
+                start_timestamp: startTimestamp,
+                end_timestamp: endTimestamp
+            }
+        });
+    },
+
+    async updateStartupConversationTitle(userId, startTimestamp, endTimestamp, title) {
+        return await this.request('/startup-chat/update-conversation-title', {
+            method: 'PUT',
+            body: {
+                user_id: userId,
+                start_timestamp: startTimestamp,
+                end_timestamp: endTimestamp,
+                title: title
+            }
+        });
+    },
+
+    async getStartupRegions() {
+        return await this.request('/startup-chat/regions');
+    },
+
+    async getStartupProvinces(region) {
+        return await this.request(`/startup-chat/provinces?region=${encodeURIComponent(region)}`);
+    },
+
+    // Search companies by name
+    async searchCompanies(searchTerm) {
+        try {
+            const response = await this.request(`/reports/companies/search?term=${encodeURIComponent(searchTerm)}`, {
+                method: 'GET'
+            });
+            return response.companies || [];
+        } catch (error) {
+            console.error('Error searching companies:', error);
+            throw error;
+        }
+    },
+
+    // Search STARTUP companies by name
+    async searchStartupCompanies(searchTerm) {
+        try {
+            const response = await this.request(`/reports/startup-companies/search?term=${encodeURIComponent(searchTerm)}`, {
+                method: 'GET'
+            });
+            return response.companies || [];
+        } catch (error) {
+            console.error('Error searching STARTUP companies:', error);
+            throw error;
+        }
+    },
+
+    // STARTUP specific methods
+    async getStartupCompaniesForReports() {
+        return await this.request('/reports/startup-companies');
+    },
+
+    async getStartupCompanyDetails(companyName) {
+        return await this.request(`/reports/startup-company-details/${encodeURIComponent(companyName)}`);
+    },
+
+    async getStartupCompanyRelationships(companyName) {
+        return await this.request(`/reports/startup-relationships/${encodeURIComponent(companyName)}`);
+    },
 };
 
 // Make apiService globally available

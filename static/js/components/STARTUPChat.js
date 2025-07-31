@@ -1,7 +1,6 @@
-
 const { useState, useEffect, useRef } = React;
 
-const SUKChat = () => {
+const STARTUPChat = ({ user }) => {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -11,6 +10,12 @@ const SUKChat = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [editingTitleId, setEditingTitleId] = useState(null);
     const [editingTitleValue, setEditingTitleValue] = useState('');
+    const [regions, setRegions] = useState([]);
+    const [provinces, setProvinces] = useState([]);
+    const [selectedRegion, setSelectedRegion] = useState('');
+    const [selectedProvince, setSelectedProvince] = useState('');
+    const [loadingRegions, setLoadingRegions] = useState(false);
+    const [loadingProvinces, setLoadingProvinces] = useState(false);
     const messagesEndRef = useRef(null);
 
     // Scroll to bottom when new messages are added
@@ -22,95 +27,179 @@ const SUKChat = () => {
         scrollToBottom();
     }, [messages]);
 
-    // Load chat history on component mount
+    // Load chat history and regions on component mount
     useEffect(() => {
         loadChatHistory();
+        loadRegions();
     }, []);
 
-    // Remove feather icons initialization to prevent DOM conflicts
+    // Load provinces when region changes
+    useEffect(() => {
+        if (selectedRegion) {
+            loadProvinces(selectedRegion);
+        } else {
+            setProvinces([]);
+            setSelectedProvince('');
+        }
+    }, [selectedRegion]);
+
+    const loadRegions = async () => {
+        try {
+            setLoadingRegions(true);
+            const response = await apiService.getStartupRegions();
+            if (response.success && response.regions) {
+                setRegions(response.regions);
+            }
+        } catch (error) {
+            console.error('Failed to load regions:', error);
+        } finally {
+            setLoadingRegions(false);
+        }
+    };
+
+    const loadProvinces = async (region) => {
+        try {
+            setLoadingProvinces(true);
+            const response = await apiService.getStartupProvinces(region);
+            if (response.success && response.provinces) {
+                setProvinces(response.provinces);
+            }
+        } catch (error) {
+            console.error('Failed to load provinces:', error);
+        } finally {
+            setLoadingProvinces(false);
+        }
+    };
 
     const loadChatHistory = async () => {
         try {
-            const userId = window.currentUser?.id || 'anonymous';
-            console.log('Loading chat history for user:', userId);
-            const response = await apiService.getChatHistory(userId);
-            console.log('Chat history response:', response);
+            const userId = user?.id || 
+                          user?.user_id || 
+                          window.currentUser?.id || 
+                          window.currentUser?.user_id || 
+                          localStorage.getItem('currentUserId') || 
+                          'anonymous';
+            
+            const response = await apiService.getStartupChatHistory(userId);
+            
             if (response.success && response.history) {
-                // Group messages by conversation (simplified: group consecutive messages)
                 const conversations = groupMessagesIntoConversations(response.history);
                 setChatHistory(conversations);
-                
-                // If no conversation is selected, show the latest one
+
                 if (conversations.length > 0 && !selectedConversation) {
                     setSelectedConversation(conversations[0]);
                     setMessages(transformMessages(conversations[0].messages));
                 }
             }
         } catch (error) {
-            console.error('Failed to load chat history:', error);
+            console.error('Failed to load STARTUP chat history:', error);
         }
     };
 
     const groupMessagesIntoConversations = (history) => {
-        const conversations = [];
-        let currentConversation = null;
-        
-        history.forEach((msg, index) => {
-            if (msg.message_type === 'user') {
-                // Start a new conversation with user message
-                if (currentConversation) {
-                    conversations.push(currentConversation);
-                }
-
-                // Check if message has custom title
-                let title = msg.content.substring(0, 50) + (msg.content.length > 50 ? '...' : '');
-                let actualContent = msg.content;
-                
-                if (msg.content.startsWith('CUSTOM_TITLE:')) {
-                    const parts = msg.content.split('|', 2);
-                    if (parts.length > 1) {
-                        title = parts[0].replace('CUSTOM_TITLE:', '');
-                        actualContent = parts[1];
-                    }
-                }
-
-                currentConversation = {
-                    id: `conv_${index}`,
-                    title: title,
-                    timestamp: msg.timestamp,
-                    messages: [{
-                        ...msg,
-                        content: actualContent
-                    }]
-                };
-            } else if (currentConversation) {
-                // Add assistant message to current conversation
-                currentConversation.messages.push(msg);
-            }
-        });
-        
-        // Add the last conversation
-        if (currentConversation) {
-            conversations.push(currentConversation);
+        if (!history || !Array.isArray(history)) {
+            return [];
         }
         
-        return conversations.reverse(); // Latest first
+        if (history.length === 0) {
+            return [];
+        }
+
+        // Sort all messages by timestamp first
+        const sortedHistory = [...history].sort((a, b) => 
+            new Date(a.timestamp) - new Date(b.timestamp)
+        );
+
+        const userMessages = sortedHistory.filter(msg => msg.message_type === 'user');
+        const assistantMessages = sortedHistory.filter(msg => msg.message_type === 'assistant');
+
+        const conversations = [];
+        let currentConversation = null;
+
+        // If we only have assistant messages, create artificial conversations
+        if (userMessages.length === 0 && assistantMessages.length > 0) {
+            assistantMessages.forEach((msg, index) => {
+                const conversation = {
+                    id: `conv_artificial_${index}_${Date.now()}`,
+                    title: `Conversazione ${index + 1}`,
+                    timestamp: msg.timestamp,
+                    messages: [
+                        {
+                            content: 'Conversazione ripristinata dalla cronologia',
+                            message_type: 'user',
+                            timestamp: msg.timestamp
+                        },
+                        msg
+                    ]
+                };
+                conversations.push(conversation);
+            });
+        } else {
+            // Normal grouping logic
+            sortedHistory.forEach((msg, index) => {
+                if (msg.message_type === 'user') {
+                    if (currentConversation) {
+                        // Sort messages in the current conversation before pushing
+                        currentConversation.messages.sort((a, b) => 
+                            new Date(a.timestamp) - new Date(b.timestamp)
+                        );
+                        conversations.push(currentConversation);
+                    }
+                    
+                    // Check if message has custom title
+                    let title = msg.content.substring(0, 50) + (msg.content.length > 50 ? '...' : '');
+                    let actualContent = msg.content;
+                    
+                    if (msg.content.startsWith('CUSTOM_TITLE:')) {
+                        const parts = msg.content.split('|', 2);
+                        if (parts.length > 1) {
+                            title = parts[0].replace('CUSTOM_TITLE:', '');
+                            actualContent = parts[1];
+                        }
+                    }
+                    
+                    currentConversation = {
+                        id: `conv_${index}_${Date.now()}`,
+                        title: title,
+                        timestamp: msg.timestamp,
+                        messages: [{
+                            ...msg,
+                            content: actualContent
+                        }]
+                    };
+                } else if (currentConversation && msg.message_type === 'assistant') {
+                    currentConversation.messages.push(msg);
+                }
+            });
+
+            if (currentConversation) {
+                // Sort messages in the final conversation
+                currentConversation.messages.sort((a, b) => 
+                    new Date(a.timestamp) - new Date(b.timestamp)
+                );
+                conversations.push(currentConversation);
+            }
+        }
+        
+        return conversations.reverse();
     };
 
     const transformMessages = (conversationMessages) => {
-        return conversationMessages.map(msg => {
+        if (!conversationMessages || !Array.isArray(conversationMessages)) {
+            return [];
+        }
+        
+        return conversationMessages.map((msg, index) => {
             let content = msg.content;
-            
-            // For assistant messages, parse JSON if it's a string
+
             if (msg.message_type === 'assistant' && typeof content === 'string') {
                 try {
                     content = JSON.parse(content);
                 } catch (e) {
                     console.error('Failed to parse assistant message content:', e);
-                    // Keep original content if parsing fails
                 }
             }
-            
+
             return {
                 id: `${msg.timestamp}-${Math.random()}`,
                 type: msg.message_type,
@@ -123,7 +212,7 @@ const SUKChat = () => {
     const selectConversation = (conversation) => {
         setSelectedConversation(conversation);
         setMessages(transformMessages(conversation.messages));
-        setShowHistory(false); // Hide history on mobile after selection
+        setShowHistory(false);
     };
 
     const startNewConversation = () => {
@@ -138,27 +227,50 @@ const SUKChat = () => {
         }
 
         try {
-            const userId = window.currentUser?.id || 'anonymous';
-            const startTimestamp = conversation.messages[0].timestamp;
-            const endTimestamp = conversation.messages[conversation.messages.length - 1].timestamp;
-
-            const response = await apiService.deleteConversation(userId, startTimestamp, endTimestamp);
+            const userId = user?.id || 
+                          user?.user_id || 
+                          window.currentUser?.id || 
+                          window.currentUser?.user_id || 
+                          localStorage.getItem('currentUserId') || 
+                          'anonymous';
             
+            if (!conversation.messages || conversation.messages.length === 0) {
+                alert('Conversazione non valida: nessun messaggio trovato');
+                return;
+            }
+
+            // Sort messages by timestamp to ensure correct order
+            const sortedMessages = [...conversation.messages].sort((a, b) => 
+                new Date(a.timestamp) - new Date(b.timestamp)
+            );
+
+            const startTimestamp = sortedMessages[0].timestamp;
+            const endTimestamp = sortedMessages[sortedMessages.length - 1].timestamp;
+
+            console.log('Deleting STARTUP conversation:', {
+                userId,
+                startTimestamp,
+                endTimestamp,
+                messagesCount: conversation.messages.length
+            });
+
+            const response = await apiService.deleteStartupConversation(userId, startTimestamp, endTimestamp);
+
             if (response.success) {
-                // Remove conversation from history
                 setChatHistory(prev => prev.filter(conv => conv.id !== conversation.id));
-                
-                // If the deleted conversation was selected, clear the chat
+
                 if (selectedConversation?.id === conversation.id) {
                     setSelectedConversation(null);
                     setMessages([]);
                 }
-                
-                console.log(`Conversazione eliminata: ${response.deleted_count} messaggi`);
+
+                console.log(`Conversazione STARTUP eliminata: ${response.deleted_count} messaggi`);
+            } else {
+                throw new Error(response.error || 'Eliminazione fallita');
             }
         } catch (error) {
-            console.error('Errore nell\'eliminazione della conversazione:', error);
-            alert('Errore nell\'eliminazione della conversazione');
+            console.error('Errore nell\'eliminazione della conversazione STARTUP:', error);
+            alert(`Errore nell'eliminazione della conversazione: ${error.message}`);
         }
     };
 
@@ -185,14 +297,20 @@ const SUKChat = () => {
         }
 
         try {
-            const userId = window.currentUser?.id || 'anonymous';
+            const userId = user?.id || 
+                          user?.user_id || 
+                          window.currentUser?.id || 
+                          window.currentUser?.user_id || 
+                          localStorage.getItem('currentUserId') || 
+                          'anonymous';
+            
             const sortedMessages = [...conversation.messages].sort((a, b) => 
                 new Date(a.timestamp) - new Date(b.timestamp)
             );
             const startTimestamp = sortedMessages[0].timestamp;
             const endTimestamp = sortedMessages[sortedMessages.length - 1].timestamp;
 
-            await apiService.updateConversationTitle(userId, startTimestamp, endTimestamp, editingTitleValue.trim());
+            await apiService.updateStartupConversationTitle(userId, startTimestamp, endTimestamp, editingTitleValue.trim());
 
             setChatHistory(prev => prev.map(conv => 
                 conv.id === conversationId 
@@ -208,8 +326,8 @@ const SUKChat = () => {
             setEditingTitleId(null);
             setEditingTitleValue('');
         } catch (error) {
-            console.error('Error updating conversation title:', error);
-            alert('Errore nel salvare il titolo della conversazione');
+            console.error('Error updating STARTUP conversation title:', error);
+            alert('Errore nel salvare il titolo della conversazione STARTUP');
             cancelEditingTitle();
         }
     };
@@ -232,21 +350,26 @@ const SUKChat = () => {
             timestamp: new Date().toISOString()
         };
 
-        // Add user message to chat
         setMessages(prev => [...prev, userMessage]);
         setInputMessage('');
         setIsLoading(true);
         setError(null);
 
         try {
-            const userId = window.currentUser?.id || 'anonymous';
-            const response = await apiService.sendChatMessage(
+            const userId = user?.id || 
+                          user?.user_id || 
+                          window.currentUser?.id || 
+                          window.currentUser?.user_id || 
+                          localStorage.getItem('currentUserId') || 
+                          'anonymous';
+            const response = await apiService.sendStartupChatMessage(
                 userMessage.content, 
-                userId
+                userId,
+                selectedRegion,
+                selectedProvince
             );
 
             if (response && (response.prodotti_soluzioni_esistenti || response.potenziali_fornitori)) {
-                // Add assistant response to chat
                 const assistantMessage = {
                     id: Date.now() + 1,
                     type: 'assistant',
@@ -254,8 +377,7 @@ const SUKChat = () => {
                     timestamp: response.timestamp || new Date().toISOString()
                 };
                 setMessages(prev => [...prev, assistantMessage]);
-                
-                // Reload history to include new messages
+
                 setTimeout(() => {
                     loadChatHistory();
                 }, 1000);
@@ -263,14 +385,13 @@ const SUKChat = () => {
                 throw new Error(response.error || 'Failed to send message');
             }
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.error('Error sending STARTUP message:', error);
             setError(error.message || 'Failed to send message');
 
-            // Add error message to chat
             const errorMessage = {
                 id: Date.now() + 1,
                 type: 'error',
-                content: 'Sorry, I encountered an error processing your message. Please try again.',
+                content: 'Mi dispiace, ho riscontrato un errore nell\'elaborazione del tuo messaggio. Riprova.',
                 timestamp: new Date().toISOString()
             };
             setMessages(prev => [...prev, errorMessage]);
@@ -287,23 +408,23 @@ const SUKChat = () => {
     };
 
     const handleCompanyClick = (companyName) => {
-        // Store the selected company in sessionStorage for the SUK Analysis page
-        sessionStorage.setItem('selectedCompanyForSUK', companyName);
-        
-        // Trigger custom event to notify other components
-        window.dispatchEvent(new CustomEvent('sukCompanySelected', { 
+        // Store the company name for the STARTUP component to pick up
+        sessionStorage.setItem('selectedCompanyForSTARTUP', companyName);
+
+        // Dispatch custom event
+        window.dispatchEvent(new CustomEvent('startupCompanySelected', { 
             detail: { companyName } 
         }));
-        
-        // Switch to SUK Analysis tab
+
+        // Switch to startup tab
         if (window.switchToTab) {
-            window.switchToTab('suk');
+            window.switchToTab('startup');
         }
     };
 
     const formatAssistantResponse = (data) => {
         if (!data.prodotti_soluzioni_esistenti && !data.potenziali_fornitori) {
-            return <div className="text-gray-600">No data available</div>;
+            return <div className="text-gray-600">Nessun dato disponibile</div>;
         }
 
         return (
@@ -329,7 +450,7 @@ const SUKChat = () => {
                                         <button
                                             onClick={() => handleCompanyClick(item.nome_azienda)}
                                             className="font-medium text-blue-600 hover:text-blue-800 hover:underline flex-1 text-left transition-colors cursor-pointer"
-                                            title="Clicca per aprire in SUK Analysis"
+                                            title="Clicca per aprire in STARTUP Analysis"
                                         >
                                             {item.nome_azienda}
                                             <svg className="w-3 h-3 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -378,7 +499,7 @@ const SUKChat = () => {
                                         <button
                                             onClick={() => handleCompanyClick(fornitore.nome_azienda)}
                                             className="font-medium text-green-600 hover:text-green-800 hover:underline flex-1 text-left transition-colors cursor-pointer"
-                                            title="Clicca per aprire in SUK Analysis"
+                                            title="Clicca per aprire in STARTUP Analysis"
                                         >
                                             {fornitore.nome_azienda}
                                             <svg className="w-3 h-3 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -415,7 +536,7 @@ const SUKChat = () => {
                 {/* Sidebar Header */}
                 <div className="p-4 border-b border-gray-300">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Chat History</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">STARTUP Chat History</h3>
                         <button
                             onClick={() => setShowHistory(false)}
                             className="md:hidden text-gray-500 hover:text-gray-700"
@@ -444,6 +565,7 @@ const SUKChat = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
                             <p className="text-sm">Nessuna conversazione</p>
+                            <p className="text-xs mt-2">Debug: Controlla la console</p>
                         </div>
                     ) : (
                         <div className="space-y-2">
@@ -482,7 +604,7 @@ const SUKChat = () => {
                                             {new Date(conversation.timestamp).toLocaleDateString('it-IT')}
                                         </div>
                                     </button>
-                                    
+
                                     {/* Action buttons */}
                                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
                                         {editingTitleId === conversation.id ? (
@@ -552,7 +674,7 @@ const SUKChat = () => {
             <div className="flex-1 flex flex-col">
                 {/* Chat Header */}
                 <div className="bg-white border-b border-gray-200 p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center">
                             <button
                                 onClick={() => setShowHistory(!showHistory)}
@@ -567,12 +689,12 @@ const SUKChat = () => {
                                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                     </svg>
-                                    SUK Chat
+                                    STARTUP Chat
                                 </h2>
                                 <p className="text-sm text-gray-600 mt-1">
                                     {selectedConversation 
                                         ? `Conversazione: ${selectedConversation.title}`
-                                        : 'Chiedimi informazioni su prodotti, soluzioni e fornitori'
+                                        : 'Chiedimi informazioni su startup, prodotti e soluzioni'
                                     }
                                 </p>
                             </div>
@@ -583,9 +705,53 @@ const SUKChat = () => {
                             title="Aggiorna cronologia"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0V9a8.002 8.002 0 0115.356 2M15 15v5h-.582M3.682 13A8.001 8.001 0 0019.418 15m0 0V15a8.002 8.002 0 00-15.356-2" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0V9a8.002 8.002 0 0015.356 2M15 15v5h-.582M3.682 13A8.001 8.001 0 0019.418 15m0 0V15a8.002 8.002 0 00-15.356-2" />
                             </svg>
                         </button>
+                    </div>
+
+                    {/* Geographic Filters */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Filtra per Regione
+                            </label>
+                            <select
+                                value={selectedRegion}
+                                onChange={(e) => {
+                                    setSelectedRegion(e.target.value);
+                                    setSelectedProvince('');
+                                }}
+                                disabled={loadingRegions}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                            >
+                                <option value="">Tutte le regioni</option>
+                                {regions.map((region, index) => (
+                                    <option key={index} value={region.REGIONE}>
+                                        {region.REGIONE} ({region.COUNT})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Filtra per Provincia
+                            </label>
+                            <select
+                                value={selectedProvince}
+                                onChange={(e) => setSelectedProvince(e.target.value)}
+                                disabled={!selectedRegion || loadingProvinces}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                            >
+                                <option value="">Tutte le province</option>
+                                {provinces.map((province, index) => (
+                                    <option key={index} value={province.PROVINCIA}>
+                                        {province.PROVINCIA} ({province.COUNT})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -597,6 +763,11 @@ const SUKChat = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
                             <p>Inizia una nuova conversazione o seleziona una dalla cronologia</p>
+                            {(selectedRegion || selectedProvince) && (
+                                <p className="text-sm mt-2">
+                                    Filtri attivi: {selectedRegion && `Regione: ${selectedRegion}`} {selectedProvince && `, Provincia: ${selectedProvince}`}
+                                </p>
+                            )}
                         </div>
                     )}
 
@@ -682,4 +853,4 @@ const SUKChat = () => {
     );
 };
 
-window.SUKChat = SUKChat;
+window.STARTUPChat = STARTUPChat;

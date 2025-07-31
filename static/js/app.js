@@ -44,8 +44,11 @@ const Sidebar = ({
 }) => {
     const menuItems = [
         { id: "dashboard", name: "Dashboard", icon: "home" },
-        { id: "suk", name: "SUK Analysis", icon: "bar-chart-2" },
+        { id: "suk", name: "SUK Analysis", icon: "briefcase" },
         { id: "suk-chat", name: "SUK Chat", icon: "message-circle" },
+        { id: "federterziario", name: "FEDERTERZIARIO Analysis", icon: "briefcase" },
+        { id: "startup", name: "STARTUP Analysis", icon: "briefcase" },
+        { id: "startup-chat", name: "STARTUP Chat", icon: "message-circle" },
     ];
 
     return (
@@ -288,6 +291,14 @@ const App = () => {
         }, 100);
     };
 
+    // Make navigation function globally available
+    useEffect(() => {
+        window.appNavigate = handleNavigate;
+        return () => {
+            delete window.appNavigate;
+        };
+    }, []);
+
     // Show loading spinner
     if (loading) {
         return (
@@ -323,8 +334,14 @@ const App = () => {
                 return <Dashboard user={user} showToast={showToast} />;
             case "suk":
                 return <SUK user={user} showToast={showToast} />;
+            case "federterziario":
+                return <FEDERTERZIARIO user={user} showToast={showToast} />;
+            case "startup":
+                return <STARTUP user={user} showToast={showToast} />;
             case "suk-chat":
                 return <SUKChat user={user} showToast={showToast} />;
+            case "startup-chat":
+                return <STARTUPChat user={user} showToast={showToast} />;
             default:
                 return <Dashboard user={user} showToast={showToast} />;
         }
@@ -359,6 +376,19 @@ const App = () => {
         </div>
     );
 };
+
+// Global function for switching tabs - used by other components
+const switchToTab = (tabName) => {
+    // Get the current App instance and trigger navigation
+    if (window.appNavigate) {
+        window.appNavigate(tabName);
+    } else {
+        console.warn('App navigation not available');
+    }
+};
+
+// Make switchToTab available globally for other components
+window.switchToTab = switchToTab;
 
 // Render the app using React 18 createRoot API
 const { createRoot } = ReactDOM;

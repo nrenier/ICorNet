@@ -44,11 +44,11 @@ const Sidebar = ({
 }) => {
     const menuItems = [
         { id: "dashboard", name: "Dashboard", icon: "home" },
-        { id: "suk", name: "SUK Analysis", icon: "bar-chart-2" },
-        { id: "federterziario", name: "FEDERTERZIARIO Analysis", icon: "briefcase" },
-        { id: "startup", name: "STARTUP Analysis", icon: "trending-up" },
+        { id: "suk", name: "SUK Analysis", icon: "briefcase" },
         { id: "suk-chat", name: "SUK Chat", icon: "message-circle" },
-        { id: "startup-chat", name: "STARTUP Chat", icon: "message-square" },
+        { id: "federterziario", name: "FEDERTERZIARIO Analysis", icon: "briefcase" },
+        { id: "startup", name: "STARTUP Analysis", icon: "briefcase" },
+        { id: "startup-chat", name: "STARTUP Chat", icon: "message-circle" },
     ];
 
     return (

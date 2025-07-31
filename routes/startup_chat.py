@@ -367,8 +367,7 @@ def delete_startup_conversation():
 def get_startup_regions():
     """Get list of startup regions from Neo4j"""
     try:
-        from services.neo4j_service import Neo4jService
-        neo4j_service = current_app.neo4j_service
+        neo4j_service = current_app.config['neo4j_service']
 
         if not neo4j_service or not neo4j_service.driver:
             # Return mock data if Neo4j is not available
@@ -407,8 +406,7 @@ def get_startup_provinces():
         if not region:
             return jsonify({'error': 'Region parameter is required'}), 400
 
-        from services.neo4j_service import Neo4jService
-        neo4j_service = current_app.neo4j_service
+        neo4j_service = current_app.config['neo4j_service']
 
         if not neo4j_service or not neo4j_service.driver:
             # Return mock data if Neo4j is not available
